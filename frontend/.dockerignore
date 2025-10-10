@@ -1,0 +1,22 @@
+# Ignora node_modules (sempre bom evitar subir dependências locais)
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Ignora arquivos de ambiente
+.env
+.env.*
+
+# Ignora logs
+*.log
+
+# Ignora testes e configs locais
+coverage
+*.test.js
+jest.config.js
+
+# Ignora arquivos do sistema e do editor
+.DS_Store
+.vscode
+.idea
+*.swp
