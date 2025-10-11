@@ -14,12 +14,12 @@ A documentação busca:
 
 ## Organização dos Documentos
 
-| Caminho                                                                                                                                                  | Conteúdo Principal                                                                               |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Caminho                                                                       | Conteúdo Principal                                                                               |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | [`/architecture`](./architecture)                                             | Descrição geral da arquitetura e seus componentes.                                               |
 | [`/architecture/diagrams`](./architecture/diagrams)                           | Diagramas C4 (Context, Container e Component).                                                   |
 | [`/architecture/layers-description.md`](./architecture/layers-description.md) | Explicação detalhada das camadas do backend (Presentation, Application, Domain, Infrastructure). |
-| [`/architecture/quality-attributes.md`](./architecture/quality-attributes.md) | Atributos de qualidade considerados.                                 |
+| [`/architecture/quality-attributes.md`](./architecture/quality-attributes.md) | Atributos de qualidade considerados.                                                             |
 | [`/adr`](./adr)                                                               | *Architecture Decision Records (ADRs)* – decisões técnicas documentadas e justificadas.          |
 | [`/tech-stack.md`](./tech-stack.md)                                           | Tecnologias e frameworks utilizados no sistema.                                                  |
 
@@ -35,6 +35,30 @@ Backend (Django)
 ├── Domain Layer (Entities / Business Rules)
 └── Infrastructure Layer (ORM, APIs externas)
 ```
+
+## Tipos de Usuário
+
+Esta seção descreve os **perfis de usuário** e seus acessos ao sistema, servindo como referência para entender **fluxos, permissões e casos de uso**.
+
+### Usuário Visitante
+
+* **Descrição:** Acessa apenas a landing page e funcionalidades de cadastro/login.
+* **Exemplos de ações:** Visualizar informações institucionais; criar conta ou fazer login.
+
+### Usuário Cliente
+
+* **Descrição:** Acessa funcionalidades principais do sistema.
+* **Exemplos de ações:** Visualizar mapa de ecopontos; acompanhar carteira de pontos; resgatar benefícios; acessar mural de posts educativos.
+
+### Usuário Administrador
+
+* **Descrição:** Responsável pela manutenção do sistema.
+* **Exemplos de ações:** CRUD de posts; gerenciar empresas parceiras; cadastrar e gerenciar benefícios.
+
+### Usuário Ecoponto
+
+* **Descrição:** Contribuidor que registra descartes feitos pelos clientes.
+* **Exemplos de ações:** Cadastrar descartes; gerar cupom correspondente para entrega ao cliente.
 
 ## Stack
 
