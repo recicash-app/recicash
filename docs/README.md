@@ -16,12 +16,12 @@ A documentação busca:
 
 | Caminho                                                                                                                                                  | Conteúdo Principal                                                                               |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| [`/architecture`](https://github.com/recicash-app/recicash/tree/docs/initial-architecture/docs/architecture)                                             | Descrição geral da arquitetura e seus componentes.                                               |
-| [`/architecture/layers-description.md`](https://github.com/recicash-app/recicash/blob/docs/initial-architecture/docs/architecture/layers-description.md) | Explicação detalhada das camadas do backend (Presentation, Application, Domain, Infrastructure). |
-| [`/architecture/diagrams`](https://github.com/recicash-app/recicash/tree/docs/initial-architecture/docs/architecture/diagrams)                           | Diagramas C4 (Context, Container e Component).                                                   |
-| [`/architecture/quality-attributes.md`](https://github.com/recicash-app/recicash/blob/docs/initial-architecture/docs/architecture/quality-attributes.md) | Atributos de qualidade considerados.                                 |
-| [`/adr`](https://github.com/recicash-app/recicash/tree/docs/initial-architecture/docs/adr)                                                               | *Architecture Decision Records (ADRs)* – decisões técnicas documentadas e justificadas.          |
-| [`/tech-stack.md`](https://github.com/recicash-app/recicash/blob/docs/initial-architecture/docs/architecture/tech-stack.md)                              | Tecnologias e frameworks utilizados no sistema.                                                  |
+| [`/architecture`](./architecture)                                             | Descrição geral da arquitetura e seus componentes.                                               |
+| [`/architecture/diagrams`](./architecture/diagrams)                           | Diagramas C4 (Context, Container e Component).                                                   |
+| [`/architecture/layers-description.md`](./architecture/layers-description.md) | Explicação detalhada das camadas do backend (Presentation, Application, Domain, Infrastructure). |
+| [`/architecture/quality-attributes.md`](./architecture/quality-attributes.md) | Atributos de qualidade considerados.                                 |
+| [`/adr`](./adr)                                                               | *Architecture Decision Records (ADRs)* – decisões técnicas documentadas e justificadas.          |
+| [`/tech-stack.md`](./tech-stack.md)                                           | Tecnologias e frameworks utilizados no sistema.                                                  |
 
 ## Visão Geral da Arquitetura
 
