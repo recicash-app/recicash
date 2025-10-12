@@ -57,18 +57,16 @@ class Usuario(models.Model):
         verbose_name_plural = 'Usuarios'
     
     def __str__(self):
-        return self.nome
+        return self.email
 
 
 class Senha(models.Model):
-    id_usuario = models.ForeignKey(
+    id_usuario = models.OneToOneField(
         Usuario,
         primary_key=True,
-        on_delete=models.SET_NULL,
-        null=False,
-        blank=False,
+        on_delete=models.CASCADE,
         db_column='ID_USUARIO',
-        related_name='usuario'
+        related_name='senha_usuario'
     )
     senha = models.CharField(max_length=30)
 
@@ -79,14 +77,12 @@ class Senha(models.Model):
 
 
 class Carteira(models.Model):
-    id_usuario = models.ForeignKey(
+    id_usuario = models.OneToOneField(
         Usuario,
         primary_key=True,
-        on_delete=models.SET_NULL,
-        null=False,
-        blank=False,
+        on_delete=models.CASCADE,
         db_column='ID_USUARIO',
-        related_name='usuario'
+        related_name='carteira_usuario'
     )
     pontos = models.IntegerField()
 
@@ -118,15 +114,15 @@ class Reciclagem(models.Model):
     id_usuario = models.ForeignKey(
         Usuario,
         on_delete=models.SET_NULL,
-        null=False,
+        null=True,
         blank=False,
         db_column='ID_USUARIO',
-        related_name='usuario'
+        related_name='reciclagem_usuario'
     )
     id_ecoponto = models.ForeignKey(
         Ecoponto,
         on_delete=models.SET_NULL,
-        null=False,
+        null=True,
         blank=False,
         db_column='ID_ECOPONTO',
         related_name='ecoponto'
@@ -134,15 +130,15 @@ class Reciclagem(models.Model):
     id_valor_reciclagem = models.ForeignKey(
         ValorReciclagem,
         on_delete=models.SET_NULL,
-        null=False,
+        null=True,
         blank=False,
         db_column='ID_VALOR_RECICLAGEM',
-        related_name='valor da reciclagem'
+        related_name='valor_reciclagem'
     )
-    valor_pontos = models.IntegerField(max_length=100)
+    valor_pontos = models.IntegerField()
     peso = models.FloatField(max_length=300)
     data = models.DateTimeField()
-    hash_validacao = models.CharField()
+    hash_validacao = models.CharField(max_length=255)
 
     class Meta:
         db_table = 'RECICLAGEM'
@@ -172,10 +168,10 @@ class Cupom(models.Model):
     id_empresa_parceira = models.ForeignKey(
         EmpresaParceira,
         on_delete=models.SET_NULL,
-        null=False,
+        null=True,
         blank=False,
         db_column='ID_EMPRESA_PARCEIRA',
-        related_name='empresa parceira'
+        related_name='empresa_parceira'
     )
 
     TIPOS_DE_CUPOM = [
@@ -184,14 +180,15 @@ class Cupom(models.Model):
         ('BRINDE', 'Brinde')
     ]
 
-    tipo_de_cupom = models.CharField(choices=TIPOS_DE_CUPOM,
+    tipo_de_cupom = models.CharField(max_length=255,
+                                     choices=TIPOS_DE_CUPOM,
                                      default='DESCONTO_PORCENTAGEM',
                                      db_column='TIPO_DE_CUPOM'
                                 )
     
     valor = models.IntegerField()
-    custo_pontos = models.IntegerField(max_length=100)
-    hash_validacao = models.CharField()
+    custo_pontos = models.IntegerField()
+    hash_validacao = models.CharField(max_length=255)
     data_inicio = models.DateTimeField()
     data_validade = models.DateTimeField()
 
@@ -207,20 +204,20 @@ class TransacoesCupom(models.Model):
     id_usuario = models.ForeignKey(
         Usuario,
         on_delete=models.SET_NULL,
-        null=False,
+        null=True,
         blank=False,
         db_column='ID_USUARIO',
-        related_name='usuario'
+        related_name='transacoes_cupom_usuario'
     )
     id_cupom = models.ForeignKey(
         Cupom,
         on_delete=models.SET_NULL,
-        null=False,
+        null=True,
         blank=False,
-        db_column='ID_USUARIO',
-        related_name='usuario'
+        db_column='ID_CUPOM',
+        related_name='cupom_usuario'
     )
-    valor_pontos = models.IntegerField(max_length=100)
+    valor_pontos = models.IntegerField()
     data = models.DateTimeField()
 
     class Meta:
@@ -234,14 +231,14 @@ class PostBlog(models.Model):
     id_autor = models.ForeignKey(
         Usuario,
         on_delete=models.SET_NULL,
-        null=False,
+        null=True,
         blank=False,
         db_column='ID_AUTOR',
-        related_name='usuario autor do post'
+        related_name='usuario_autor'
     )
-    titulo = models.CharField()
-    texto = models.CharField()
-    imagens = models.CharField()
+    titulo = models.CharField(max_length=200)
+    texto = models.TextField()
+    imagens = models.TextField()
     data_criacao = models.DateTimeField(editable=False)
     data_ultima_edicao = models.DateTimeField()
 
