@@ -17,3 +17,31 @@ Para executar o projeto, certifique-se de ter o Docker e o Docker Compose instal
 ```bash
 make docker-build
 ```
+## Aplicando Migrações do Banco de Dados
+Este passo traduz os Models Python (definidos em backend/src/apps/entities/models.py) para tabelas reais no banco de dados MySQL.
+
+### Criando arquivos de migração
+Gera os arquivos .py na pasta migrations/ do aplicativo entities.
+
+```bash
+docker-compose exec backend python manage.py makemigrations entities
+```
+
+### Aplicando as Migrações
+Aplica as alterações ao banco de dados, criando todas as tabelas e relacionamentos definidos nos Models.
+
+```bash
+docker-compose exec backend python manage.py migrate
+```
+
+## População de Dados Iniciais
+Este passo insere os registros iniciais no banco de dados
+
+### Executar o comando de população
+O comando populate_initial_data é definido no aplicativo entities e é executado diretamente:
+
+```bash
+docker-compose exec backend python manage.py populate_initial_data
+```
+
+Se o comando for bem-sucedido, você verá logs formatados no console, indicando a criação dos registros.
