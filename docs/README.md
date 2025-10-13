@@ -65,7 +65,7 @@ Esta seção descreve os **perfis de usuário** e seus acessos ao sistema, servi
 | Categoria          | Tecnologias e Ferramentas                              |
 | ------------------ | ------------------------------------------------------ |
 | **Backend**        | Python, Django, Django REST Framework                  |
-| **Banco de Dados** | MySQL (com suporte a dados geoespaciais via GeoDjango) |
+| **Banco de Dados** | PostgreSQL (suporte a dados geoespaciais via PostGIS)  |
 | **Frontend**       | React, Material UI, Axios                              |
 | **Ambiente**       | Docker, Docker Compose                                 |
 | **Prototipação**   | Figma                                                  |

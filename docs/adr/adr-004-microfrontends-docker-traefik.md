@@ -72,6 +72,7 @@ recicash-frontend/
 
 * **Build:** Vite / Node.js
 * **Orquestração:** Docker Compose + Traefik
+* **Gerenciamento de pacotes:** pnpm ou yarn workspaces (monorepo)
 * **Design System:** biblioteca compartilhada `libs/ui`
 * **Autenticação:** cookies com domínio comum (`.docker.localhost`)
 * **Monitoramento:** painel do Traefik (porta 8080)
