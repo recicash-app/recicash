@@ -2,7 +2,7 @@
 
 **Título:** Avaliação do uso de GeoDjango e MySQL Spatial para manipulação de dados geoespaciais </br>
 **Data:** 09/10/2025 </br>
-**Status:** Em análise </br>
+**Status:** Rejeitado </br>
 **Autor:** Equipe de Arquitetura Recicash </br>
 
 ## Contexto

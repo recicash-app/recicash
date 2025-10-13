@@ -116,4 +116,4 @@ class GoogleMapsClient:
 - **Isolamento de responsabilidades**
 - **Alta testabilidade**
 - **Fácil manutenção e evolução futura**
-- **Camadas independentes e substituíveis (ex: trocar MySQL por Postgres)**
+- **Camadas independentes e substituíveis**

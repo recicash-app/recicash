@@ -6,7 +6,7 @@
 | ------------------------------- | ---------------------------------------------------------------------------------------- |
 | **Python + Django**             | Framework robusto, com autenticação, ORM e administração nativos.                        |
 | **Django REST Framework (DRF)** | Facilita a criação de APIs RESTful, com serialização e controle de permissões.           |
-| **Requests / GeoDjango**        | Integração com a Google Maps API e manipulação de dados geoespaciais.                    |
+| **GeoDjango**        | Integração com o banco de dados espacial (PostGIS) e manipulação de dados geográficos.             |
 
 ## Frontend
 
@@ -21,8 +21,8 @@
 
 | Tecnologia                    | Motivo                                                                                   |
 | ----------------------------- | ---------------------------------------------------------------------------------------- |
-| **MySQL**                     | Banco relacional robusto, com compatibilidade total com o Django ORM.                    |
-| **GeoDjango / MySQL Spatial** | Suporte nativo a tipos de dados geográficos (para localização de ecopontos).             |
+| **PostgreSQL**                     | Banco de dados relacional robusto e escalável, com excelente integração ao Django ORM.                    |
+| **PostGIS (Extensão do PostgreSQL)** | Suporte avançado a tipos e consultas espaciais, ideal para funcionalidades de geolocalização (ecopontos, distâncias, coordenadas). |
 
 ## Ambiente de Desenvolvimento
 

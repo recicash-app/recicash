@@ -30,9 +30,7 @@ Este documento descreve os atributos de qualidade definidos para o sistema **Rec
 
 - Cache local de resultados da API Google Maps.
 - Monitoramento de métricas (tempo de resposta, uso de CPU e memória).
-
-> [!NOTE]
-> Estamos estudando a possibilidade de utilizar índices geoespaciais no banco de dados (MySQL Spatial / GeoDjango) para otimizar buscas de localização.
+- Utilização de índices geoespaciais (PostGIS) para otimizar consultas de localização e distância.
 
 ## 4. Usabilidade e Learnability
 
