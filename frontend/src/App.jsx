@@ -1,8 +1,15 @@
+import { Routes, Route } from 'react-router-dom';
+import { Box } from '@mui/material';
+
+import Test from './Test';
+
 function App() {
   return (
-    <div>
-      <h1>Recicash Frontend está funcionando!</h1>
-    </div>
+    <Box sx={{ mt: 4, pb: 4, px: 3, maxWidth: '100vw' }}>
+      <Routes>
+        <Route path="/test" element={<Test />} />
+      </Routes>
+    </Box>
   );
 }
 
