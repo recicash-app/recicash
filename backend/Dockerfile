@@ -7,10 +7,10 @@ WORKDIR /app/src
 # Atualiza e instala dependências do sistema para mysqlclient
 RUN apt-get update && apt-get install -y \
     build-essential \
-    default-libmysqlclient-dev \
     pkg-config \
+    binutils libproj-dev gdal-bin libgdal-dev gcc python3-dev \
     && rm -rf /var/lib/apt/lists/*
-
+    
 # Copia arquivos de dependências
 COPY requirements.txt ./
 
