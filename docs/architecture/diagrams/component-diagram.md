@@ -1,6 +1,7 @@
 # Recicash - Backend Component Diagram
 
 ```mermaid
+%%{init: {"theme":"base", "themeVariables":{"background":"#ffffff"}}}%%
 C4Component
 
     Container_Boundary(backend, "Django Backend") {

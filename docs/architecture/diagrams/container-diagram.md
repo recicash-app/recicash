@@ -1,6 +1,7 @@
 # Recicash – Container Diagram
 
 ```mermaid
+%%{init: {"theme":"base", "themeVariables":{"background":"#ffffff"}}}%%
 C4Container
 
     Person(cliente, "Cliente", "Usuário final")
@@ -8,7 +9,7 @@ C4Container
     System_Boundary(RecicashSystem, "Recicash") {
         Container(frontend, "Frontend Web", "React", "Interface para cliente, administrador e ecoponto.")
         Container(backend, "Backend API", "Django", "Gerencia lógica, regras de negócio e integrações externas.")
-        ContainerDb(database, "Database", "MySQL", "Armazena informações persistentes.")
+        ContainerDb(database, "Database", "PostgreSQL", "Armazena informações persistentes.")
     }
 
     Container_Ext(google, "Google Maps API", "Serviço externo de mapas e rotas.")
