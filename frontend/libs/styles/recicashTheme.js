@@ -116,7 +116,7 @@ const recicashTheme = createTheme({
 
       // Custom Recicash variants
       variants: [
-        // Primário (dark green)
+        // Primary (dark green)
         {
           props: { variant: "recicashPrimary" },
           style: {
@@ -133,7 +133,7 @@ const recicashTheme = createTheme({
           },
         },
 
-        // Secundary (light green)
+        // Secondary (light green)
         {
           props: { variant: "recicashSecondary" },
           style: {

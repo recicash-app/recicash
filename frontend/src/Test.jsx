@@ -3,6 +3,12 @@ import { LoremIpsum } from 'react-lorem-ipsum';
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { Edit, Save } from "@mui/icons-material";
 
+import shape1 from "./assets/icon-recycle.svg";
+import shape2 from "./assets/shape-top-left.svg";
+import shape3 from "./assets/shape-top-right.svg";
+import shape4 from "./assets/shape-bottom-right.svg";
+import shape5 from "./assets/pattern-plus-green-white.svg";
+
 import LeafBox from '../libs/ui/LeafBox';
 import CardBox from '../libs/ui/CardBox';
 import TitleBlock from "../libs/ui/TitleBlock";
@@ -42,7 +48,6 @@ function EditableContainer({ blocks }) {
 
       EDITOR ESPECIAL
 
-      {/* Renderiza blocos dinamicamente */}
       <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
         <Box sx={{ width: '60%', display: 'flex', flexDirection: 'column', gap: 1 }}>
           <TitleBlock
@@ -67,16 +72,16 @@ function EditableContainer({ blocks }) {
   );
 }
 
-function TestBasic() {
+function TestBasis() {
   const articleBlocks = [
     { type: "title", content: "Do Lixo ao Luxo: Materiais Reciclados que Viraram Tendência" },
-    { type: "image", content: "/assets/recycle-bin.jpg" },
+    { type: "image" },
     { type: "text", content: "O papel é um dos materiais mais fáceis de reciclar..." },
   ];
 
   return (
     <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {/* TÍTULOS */}
+      {/* TITLES */}
       <Box>
         <Typography variant="h2" sx={{ p: 1, maxWidth: '756px' }}>
           Recicash: Descarte consciente que gera benefícios!
@@ -95,7 +100,7 @@ function TestBasic() {
         </Typography>
       </Box>
 
-      {/* TEXTO */}
+      {/* BODY */}
       <Box>
         <Typography variant="body1" component="div" sx={{ textWrap: 'wrap' }}>
           <LoremIpsum p={1} />
@@ -106,7 +111,7 @@ function TestBasic() {
         </Typography>
       </Box>
 
-      {/* BOTÕES */}
+      {/* BUTTONS */}
       <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
         <Button variant="recicashPrimary">Primário</Button>
         <Button variant="recicashSecondary">Secundário</Button>
@@ -120,9 +125,19 @@ function TestBasic() {
       </Box>
 
       {/* CONTAINERS */}
-      <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}} >
+      <Box sx={{ position: "relative", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }} >        
         <CardBox />
-        <LeafBox sx={{ width: '75%' }}>
+        <CardBox focused />
+
+        <LeafBox sx={{ gridRow: "2", gridColumn: "1" }}>
+          <Box
+            component="img"
+            src={shape1}
+            alt="recycle icon"
+            sx={{ width: "80%" }}
+          />
+        </LeafBox>
+        <LeafBox sx={{ gridRow: "2 / 4", gridColumn: "2 / 4" }}>
             <LoremIpsum p={2} />
         </LeafBox>
       </Box>
@@ -131,8 +146,16 @@ function TestBasic() {
       <Box>
         <EditableContainer blocks={articleBlocks} />
       </Box>
+
+      {/* DECORATIONS */}
+      <Box sx={{ position: "relative", height: "80vh", border: "1px solid black" }}>
+        <img src={shape2} alt="" style={{ position: "absolute", top: 0, left: 0, width: "20%" }} />
+        <img src={shape3} alt="" style={{ position: "absolute", top: 0, right: 0, width: "15%" }} />
+        <img src={shape4} alt="" style={{ position: "absolute", bottom: 0, right: 0, width: "20%" }} />
+        <img src={shape5} alt="" style={{ position: "absolute", bottom: "40%", right: "20%", width: "10%" }} />
+      </Box>
     </Box>
   );
 }
 
-export default TestBasic;
+export default TestBasis;
