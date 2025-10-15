@@ -7,13 +7,29 @@ O Recicash é uma plataforma que promove a conscientização ambiental e incenti
 
 - **Backend:** Desenvolvido em Python com o Framework Django.
 - **Frontend:** Construído com React JSX, garantindo uma interface dinâmica e responsiva.
-- **Banco de Dados:** MySQL, utilizado para armazenamento eficiente de dados relacionais.
+- **Banco de Dados:** PostgreSQL, utilizado para armazenamento eficiente de dados relacionais.
 - **Containerização:** Docker e Docker Compose para padronização e isolamento do ambiente.
 - **API:** Integração com Google Maps API para exibição de mapas e localização de ecopontos.
 
-## Como Rodar o Projeto
-Para executar o projeto, certifique-se de ter o Docker e o Docker Compose instalados. Em seguida, utilize o comando abaixo no terminal:
 
+
+## Como Rodar o Projeto
+
+#### Configuração do Ambiente
+
+Antes de rodar o projeto, é necessário preencher o arquivo `.env` com as variáveis de ambiente. Utilize o arquivo `.env.example` como referência, copiando e preenchendo os valores necessários. Além disso, certifique-se de ter o Docker e o Docker Compose instalados. 
+
+1. Para construir as imagens e subir os containers, faça:
 ```bash
-make docker-build
+make docker-up
+```
+
+2. Para derrubar todos os containers, faça:
+```bash
+make docker-down
+```
+
+3. Para acessar o container do banco de dados local, faça:
+```bash
+make access-data-base
 ```

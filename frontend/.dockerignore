@@ -1,21 +1,21 @@
-# Ignora node_modules (sempre bom evitar subir dependências locais)
+# Ignore node_modules (always avoid sending local dependencies)
 node_modules
 npm-debug.log
 yarn-error.log
 
-# Ignora arquivos de ambiente
+# Ignore environment files
 .env
 .env.*
 
-# Ignora logs
+# Ignore logs
 *.log
 
-# Ignora testes e configs locais
+# Ignore tests and local configs
 coverage
 *.test.js
 jest.config.js
 
-# Ignora arquivos do sistema e do editor
+# Ignore system and editor files
 .DS_Store
 .vscode
 .idea

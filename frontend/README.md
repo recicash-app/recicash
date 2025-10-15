@@ -22,7 +22,7 @@ npm run dev
 O servidor estará disponível no endereço:
 
 ```
-http://127.0.0.1:5173/
+http://127.0.0.1:3000/
 ```
 
 > **Nota:** O frontend pode ser executado de forma isolada dentro de um container Docker, juntamente com o backend e o banco de dados. Para isso, utilize os comandos definidos no `docker-compose.yml`. Os comandos acima são recomendados apenas se você deseja rodar o frontend diretamente na sua máquina, fora do ambiente de containers.
