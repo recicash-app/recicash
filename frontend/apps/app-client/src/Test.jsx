@@ -3,17 +3,16 @@ import { LoremIpsum } from 'react-lorem-ipsum';
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { Edit, Save } from "@mui/icons-material";
 
-import shape1 from "./assets/icon-recycle.svg";
-import shape2 from "./assets/shape-top-left.svg";
-import shape3 from "./assets/shape-top-right.svg";
-import shape4 from "./assets/shape-bottom-right.svg";
-import shape5 from "./assets/pattern-plus-green-white.svg";
+import shape1 from "@shared/assets/shape-top-left.svg";
+import shape2 from "@shared/assets/shape-top-right.svg";
+import shape3 from "@shared/assets/shape-bottom-right.svg";
+import shape4 from "@shared/assets/pattern-plus-green-white.svg";
 
-import LeafBox from '../shared/ui/LeafBox';
-import CardBox from '../shared/ui/CardBox';
-import TitleBlock from "../shared/ui/TitleBlock";
-import TextBlock from "../shared/ui/TextBlock";
-import ImageBlock from "../shared/ui/ImageBlock";
+import LeafBox from '@shared/ui/LeafBox';
+import CardBox from '@shared/ui/CardBox';
+import TitleBlock from "@shared/ui/TitleBlock";
+import TextBlock from "@shared/ui/TextBlock";
+import ImageBlock from "@shared/ui/ImageBlock";
 
 function EditableContainer({ blocks }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -132,9 +131,9 @@ function TestBasis() {
         <LeafBox sx={{ gridRow: "2", gridColumn: "1" }}>
           <Box
             component="img"
-            src={shape1}
+            src="/icon-recycle.svg"
             alt="recycle icon"
-            sx={{ width: "80%" }}
+            sx={{ width: "80%", userSelect: "none", pointerEvent: "none" }}
           />
         </LeafBox>
         <LeafBox sx={{ gridRow: "2 / 4", gridColumn: "2 / 4" }}>
@@ -149,10 +148,10 @@ function TestBasis() {
 
       {/* DECORATIONS */}
       <Box sx={{ position: "relative", height: "80vh", border: "1px solid black" }}>
-        <img src={shape2} alt="" style={{ position: "absolute", top: 0, left: 0, width: "20%" }} />
-        <img src={shape3} alt="" style={{ position: "absolute", top: 0, right: 0, width: "15%" }} />
-        <img src={shape4} alt="" style={{ position: "absolute", bottom: 0, right: 0, width: "20%" }} />
-        <img src={shape5} alt="" style={{ position: "absolute", bottom: "40%", right: "20%", width: "10%" }} />
+        <img src={shape1} alt="" style={{ position: "absolute", top: 0, left: 0, width: "20%" }} />
+        <img src={shape2} alt="" style={{ position: "absolute", top: 0, right: 0, width: "15%" }} />
+        <img src={shape3} alt="" style={{ position: "absolute", bottom: 0, right: 0, width: "20%" }} />
+        <img src={shape4} alt="" style={{ position: "absolute", bottom: "40%", right: "20%", width: "10%" }} />
       </Box>
     </Box>
   );

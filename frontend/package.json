@@ -1,12 +1,13 @@
 {
-  "name": "frontend",
+  "name": "recicash-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host --port 3000",
     "build": "vite build",
-    "lint": "eslint .",
+    "lint": "eslint 'apps/**/*.{js,jsx}'",
+    "lint:fix": "eslint 'apps/**/*.{js,jsx}' --fix",
     "preview": "vite preview"
   },
   "dependencies": {
