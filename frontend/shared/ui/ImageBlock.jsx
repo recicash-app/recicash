@@ -1,16 +1,32 @@
-import { Box } from "@mui/material";
+import { useState } from "react";
+import { Box, IconButton } from "@mui/material";
+import { Upload, Delete, Link as LinkIcon } from "@mui/icons-material";
 import { getDashedInputProps } from "../styles/dashedInputProps";
 
 function ImageBlock({ content, isEditing, onChange }) {
+  const [linkValue, setLinkValue] = useState("");
+
   const handleUpload = (e) => {
     const file = e.target.files[0];
     if (file) onChange(URL.createObjectURL(file));
+  };
+
+  const handleLinkSubmit = () => {
+    if (linkValue) {
+      onChange(linkValue);
+      setLinkValue("");
+    }
+  };
+
+  const handleDelete = () => {
+    onChange("");
   };
 
   return (
     <Box
       sx={{
         ...getDashedInputProps(isEditing).style,
+        padding: 0,
         position: "relative",
 				minWidth: 120,             
         minHeight: 180,
@@ -20,6 +36,7 @@ function ImageBlock({ content, isEditing, onChange }) {
         overflow: "hidden",
 			}}
     >
+      {/* IMAGE */}
       {content ? (
         <img
           src={content}
@@ -31,18 +48,33 @@ function ImageBlock({ content, isEditing, onChange }) {
           Nenhuma imagem
         </Box>
       )}
+
+      {/* TOOLBAR */}
       {isEditing && (
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleUpload}
-          style={{
+        <Box
+          sx={{
             position: "absolute",
-            inset: 0,
-            opacity: 0,
-            cursor: "pointer",
+            top: 8, right: 8,
+            display: "flex",
+            gap: 1, p: 0.5,
           }}
-        />
+        >
+          <IconButton size="small" sx={{ color: 'text.primary' }}>
+            <LinkIcon fontSize="small" />
+          </IconButton>
+          <IconButton component="label" size="small" sx={{ color: 'text.primary' }}>
+            <Upload fontSize="small" />
+            <input
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleUpload}
+            />
+          </IconButton>
+          <IconButton size="small" onClick={handleDelete} sx={{ color: 'text.primary' }}>
+            <Delete fontSize="small" />
+          </IconButton>
+        </Box>
       )}
     </Box>
   );
