@@ -2,7 +2,7 @@
 
 **Título:** Adoção de arquitetura modular de microfrontends orquestrada com Docker e Traefik </br>
 **Data:** 12/10/2025 </br>
-**Status:** Em análise </br>
+**Status:** Aceito </br>
 **Autor:** Equipe de Arquitetura Recicash </br>
 
 ## Contexto

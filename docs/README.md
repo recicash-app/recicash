@@ -25,16 +25,40 @@ A documentação busca:
 
 ## Visão Geral da Arquitetura
 
-O **Recicash** segue o estilo **arquitetônico em camadas**, priorizando **manutenibilidade, testabilidade e segurança**.
-As comunicações externas, como chamadas à **Google Maps API**, são tratadas exclusivamente pelo backend.
+O **Recicash** adota uma arquitetura **em camadas no backend** e **modular no frontend**, visando **manutenibilidade**, **testabilidade**, **segurança** e **escalabilidade**.
+
+As comunicações externas (como chamadas à **Google Maps API**) são tratadas exclusivamente pelo **backend**, garantindo proteção de chaves e centralização das integrações.
+
+### Backend
+
+O backend é baseado em **Django**, estruturado em camadas conforme o padrão **arquitetura em camadas (layered architecture)** definido na ADR 002.
 
 ```text
 Backend (Django)
 ├── Presentation Layer (Views / Controllers)
 ├── Application Layer (Services / Use Cases)
 ├── Domain Layer (Entities / Business Rules)
-└── Infrastructure Layer (ORM, APIs externas)
+└── Infrastructure Layer (ORM, APIs externas, PostGIS)
 ```
+
+### Frontend
+
+O frontend segue uma **abordagem modular inspirada em microfrontends** (ADR 004), separando os diferentes contextos de uso do sistema — **Cliente**, **Ecoponto** e **Administrativo** — em aplicações independentes, mas que compartilham bibliotecas comuns para manter consistência visual e lógica.
+
+```text
+Frontend (React)
+├── apps/
+│   ├── cliente/
+│   ├── ecoponto/
+│   └── admin/
+└── shared/
+    ├── ui/        (componentes visuais reutilizáveis)
+    ├── hooks/     (lógica compartilhada)
+    ├── utils/     (funções auxiliares)
+    └── styles/    (tokens, temas, variáveis, CSS global)
+```
+
+Essa estrutura permite **desenvolvimento paralelo** entre equipes, **implantação independente** dos módulos e **reuso** de componentes compartilhados, mantendo uma **identidade visual e funcional unificada**.
 
 ## Tipos de Usuário
 
