@@ -9,11 +9,11 @@ import shape3 from "./assets/shape-top-right.svg";
 import shape4 from "./assets/shape-bottom-right.svg";
 import shape5 from "./assets/pattern-plus-green-white.svg";
 
-import LeafBox from '../libs/ui/LeafBox';
-import CardBox from '../libs/ui/CardBox';
-import TitleBlock from "../libs/ui/TitleBlock";
-import TextBlock from "../libs/ui/TextBlock";
-import ImageBlock from "../libs/ui/ImageBlock";
+import LeafBox from '../shared/ui/LeafBox';
+import CardBox from '../shared/ui/CardBox';
+import TitleBlock from "../shared/ui/TitleBlock";
+import TextBlock from "../shared/ui/TextBlock";
+import ImageBlock from "../shared/ui/ImageBlock";
 
 function EditableContainer({ blocks }) {
   const [isEditing, setIsEditing] = useState(false);
