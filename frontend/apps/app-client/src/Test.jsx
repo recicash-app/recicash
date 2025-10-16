@@ -13,6 +13,7 @@ import CardBox from '@shared/ui/CardBox';
 import TitleBlock from "@shared/ui/TitleBlock";
 import TextBlock from "@shared/ui/TextBlock";
 import ImageBlock from "@shared/ui/ImageBlock";
+import FullScreenOverlay from "@shared/ui/FullScreenOverlay";
 
 function EditableContainer({ blocks }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -72,6 +73,8 @@ function EditableContainer({ blocks }) {
 }
 
 function TestBasis() {
+  const [overlayOpen, setOverlayOpen] = useState(false);
+
   const articleBlocks = [
     { type: "title", content: "Do Lixo ao Luxo: Materiais Reciclados que Viraram Tendência" },
     { type: "image" },
@@ -127,6 +130,7 @@ function TestBasis() {
       <Box sx={{ position: "relative", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }} >        
         <CardBox />
         <CardBox focused />
+        <CardBox focused onClick={() => setOverlayOpen(true)} />
 
         <LeafBox sx={{ gridRow: "2", gridColumn: "1" }}>
           <Box
@@ -153,6 +157,9 @@ function TestBasis() {
         <img src={shape3} alt="" style={{ position: "absolute", bottom: 0, right: 0, width: "20%" }} />
         <img src={shape4} alt="" style={{ position: "absolute", bottom: "40%", right: "20%", width: "10%" }} />
       </Box>
+
+      {/* OVERLAY */}
+      <FullScreenOverlay open={overlayOpen} onClose={() => setOverlayOpen(false)} />
     </Box>
   );
 }
