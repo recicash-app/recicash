@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from apps.entities.models import Usuario, Carteira, Senha
+from apps.entities.models import User, Wallet, Password
 import logging
 
 # Logging basic configuration
@@ -8,38 +8,38 @@ logger = logging.getLogger(__name__)
 def create_data():
     logger.info("Starting initial data creation")
     try:
-        usuario, created = Usuario.objects.get_or_create(
-            id_usuario='user_001',
+        user, created = User.objects.get_or_create(
+            user_id='user_001',
             defaults={
-                'nome': 'Jose Alves',
+                'name': 'Jose Alves',
                 'email': 'jose@recicash.com',
                 'cpf': '123.456.789-00',
-                'cep': '01001-000',
-                'nivel_de_acesso': 'U'
+                'zip_code': '01001-000',
+                'access_level': 'U'
             }
         )
         if created:
-            logger.info(f"User '{usuario.nome}' created.")
+            logger.info(f"User '{user.nome}' created.")
         
     except Exception as e:
         logger.error(f"Error creating User: {e}")
         return
     
     try:
-        Carteira.objects.get_or_create(
-            id_usuario=usuario,
+        Wallet.objects.get_or_create(
+            user_id=user,
             defaults={'pontos': 500}
         )
-        Senha.objects.get_or_create(
-            id_usuario=usuario,
+        Password.objects.get_or_create(
+            user_id=user,
             # Still in production.
             # Passwords must be stored in hashes
-            defaults={'senha': 'senha_hash_segura'}
+            defaults={'password': 'safe_hash_password'}
         )
-        logger.info("Carteira and Senha created for user")
+        logger.info("Wallet and Password created for user")
     
     except Exception as e:
-        logger.error(f"Error creating Carteira/Senha: {e}")
+        logger.error(f"Error creating Wallet/Password: {e}")
 
     logger.info("Initial data created successfully!")
 
