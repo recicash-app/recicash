@@ -1,246 +1,246 @@
 from django.db import models
 
-class Ecoponto(models.Model):
-    id_ecoponto = models.CharField(primary_key=True, max_length=100) # PK de Ecoponto
-    id_usuario  = models.ForeignKey( # FK que referencia um Usuario representante do Ecoponto
-        'Usuario',
+class RecyclingPoint(models.Model):
+    recycling_point_id = models.CharField(primary_key=True, max_length=100) # PK de Ecoponto
+    user_id  = models.ForeignKey( # FK that references to a Recycling Point representative User
+        'User',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        db_column='ID_USUARIO',
-        related_name='usuario_representante'
+        db_column='USER_ID',
+        related_name='representative_user'
     )
-    nome = models.CharField(max_length=100, unique=True) # Nome do Ecoponto
+    name = models.CharField(max_length=100, unique=True)
     cnpj = models.CharField(max_length=20, unique=True) 
-    cep  = models.CharField(max_length=10)
+    zip_code  = models.CharField(max_length=10)
 
     class Meta:
-        db_table = 'ECOPONTO'
-        verbose_name = 'Ecoponto'
-        verbose_name_plural = 'Ecopontos'
+        db_table = 'RECYCLING_POINT'
+        verbose_name = 'Recycling point'
+        verbose_name_plural = 'Recycling points'
     
     def __str__(self):
-        return self.id_ecoponto
+        return self.recycling_point_id
 
-class Usuario(models.Model):
-    id_usuario = models.CharField(primary_key=True, max_length=100) # PK de Usuario
-    id_ecoponto_fav = models.ForeignKey( # FK que referencia um Ecoponto como favorito do Usuario
-        Ecoponto,
+
+class User(models.Model):
+    user_id = models.CharField(primary_key=True, max_length=100) # PK de Usuario
+    fav_recycling_point_id = models.ForeignKey( # FK that references to favorite Recycling Point 
+        RecyclingPoint,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        db_column='ID_ECOPONTO_FAV',
-        related_name='ecopontos_favoritos'
+        db_column='FAV_RECYCLING_POINT_ID',
+        related_name='favorite_recycling_point'
     )
 
-    nome  = models.CharField(max_length=255)
+    name  = models.CharField(max_length=255)
     email = models.EmailField(max_length=255, unique=True)
     cpf   = models.CharField(max_length=14, unique=True)
-    cep   = models.CharField(max_length=10)
+    zip_code = models.CharField(max_length=10)
     
-    # Niveis de acesso à plataforma
-    NIVEIS = [
-        ('U', 'Usuario Comum'), # Apenas registra reciclagens, acumula pontos, resgata cupons e participa do blog
-        ('A', 'Administrador'), # Adiciona cupons e faz posts ao blog
-        ('G', 'Gerente Ecoponto') # Registra reciclagens para o Ecoponto
+    # Platform access levels
+    ACCESS_LEVELS = [
+        ('U', 'Regular User'), # Only register recyclings and accumulate points 
+        ('A', 'Administrator'), # Add coupons and create posts
+        ('G', 'Recycling Point Manager') # Register recycling for a recycling point
     ]
 
-    nivel_de_acesso = models.CharField(max_length=1,
-                                        choices=NIVEIS,
+    access_level = models.CharField(max_length=1,
+                                        choices=ACCESS_LEVELS,
                                         default='C',
-                                        db_column='NIVEL_DE_ACESSO'
+                                        db_column='ACCESS_LEVEL'
     )
 
     class Meta:
-        db_table = 'USUARIO'
-        verbose_name = 'Usuario'
-        verbose_name_plural = 'Usuarios'
+        db_table = 'USER'
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
     
     def __str__(self):
         return self.email
 
 
-class Senha(models.Model):
-    id_usuario = models.OneToOneField(
-        Usuario,
+class Password(models.Model):
+    user_id = models.OneToOneField(
+        User,
         primary_key=True,
         on_delete=models.CASCADE,
-        db_column='ID_USUARIO',
-        related_name='senha_usuario'
+        db_column='USER_ID',
+        related_name='user_password'
     )
-    senha = models.CharField(max_length=30)
+    password = models.CharField(max_length=30)
 
     class Meta:
-        db_table = 'SENHA'
-        verbose_name = 'Senha do usuario'
-        verbose_name_plural = 'Senhas dos usuarios'
+        db_table = 'PASSWORD'
+        verbose_name = 'User password'
+        verbose_name_plural = 'User passwords'
 
 
-class Carteira(models.Model):
-    id_usuario = models.OneToOneField(
-        Usuario,
+class Wallet(models.Model):
+    user_id = models.OneToOneField(
+        User,
         primary_key=True,
         on_delete=models.CASCADE,
-        db_column='ID_USUARIO',
-        related_name='carteira_usuario'
+        db_column='USER_ID',
+        related_name='WALLET_USER'
     )
-    pontos = models.IntegerField()
+    points = models.IntegerField()
 
     class Meta:
-        db_table = 'CARTEIRA'
-        verbose_name = 'Carteira do usuario'
-        verbose_name_plural = 'Carteiras dos usuarios'
+        db_table = 'WALLET'
+        verbose_name = 'User wallet'
+        verbose_name_plural = 'Users wallet'
     
     def __str__(self):
-        return self.id_usuario
+        return self.user_id
 
 
-class ValorReciclagem(models.Model):
-    id_valor_reciclagem = models.CharField(primary_key=True, max_length=100)
-    valor_pontos = models.FloatField()
-    data = models.DateTimeField()
+class RecyclingValue(models.Model):
+    recycling_value_id = models.CharField(primary_key=True, max_length=100)
+    points_value = models.FloatField()
+    date = models.DateTimeField()
 
     class Meta:
-        db_table = 'VALOR_RECICLAGEM'
-        verbose_name = 'Valor da Reciclagem'
-        verbose_name_plural = 'Valores da Reciclagem'
+        db_table = 'RECYCLING_VALUE'
+        verbose_name = 'Recycling value'
+        verbose_name_plural = 'Recycling values'
     
     def __str__(self):
         return self.id_valor_reciclagem
     
 
-class Reciclagem(models.Model):
-    id_reciclagem = models.CharField(primary_key=True, max_length=100)
-    id_usuario = models.ForeignKey(
-        Usuario,
+class Recycling(models.Model):
+    recycling_id = models.CharField(primary_key=True, max_length=100)
+    user_id = models.ForeignKey(
+        User,
         on_delete=models.SET_NULL,
         null=True,
         blank=False,
-        db_column='ID_USUARIO',
-        related_name='reciclagem_usuario'
+        db_column='user_id',
+        related_name='user_recycling'
     )
-    id_ecoponto = models.ForeignKey(
-        Ecoponto,
+    recycling_point_id = models.ForeignKey(
+        RecyclingPoint,
         on_delete=models.SET_NULL,
         null=True,
         blank=False,
-        db_column='ID_ECOPONTO',
-        related_name='ecoponto'
+        db_column='RECYCLING_POINT_ID',
+        related_name='recycling_point'
     )
-    id_valor_reciclagem = models.ForeignKey(
-        ValorReciclagem,
+    recycling_value_id = models.ForeignKey(
+        RecyclingValue,
         on_delete=models.SET_NULL,
         null=True,
         blank=False,
-        db_column='ID_VALOR_RECICLAGEM',
-        related_name='valor_reciclagem'
+        db_column='RECYCLING_VALUE_ID',
+        related_name='recycling_value'
     )
-    valor_pontos = models.IntegerField()
-    peso = models.FloatField(max_length=300)
-    data = models.DateTimeField()
-    hash_validacao = models.CharField(max_length=255)
+    points_value = models.IntegerField()
+    weight = models.FloatField(max_length=300)
+    date = models.DateTimeField()
+    validation_hash = models.CharField(max_length=255)
 
     class Meta:
-        db_table = 'RECICLAGEM'
-        verbose_name = 'reciclagem'
-        verbose_name_plural = 'reciclagens'
+        db_table = 'RECYCLING'
+        verbose_name = 'Recycling'
+        verbose_name_plural = 'Recyclings'
     
     def __str__(self):
         return self.id_reciclagem
 
 
-class EmpresaParceira(models.Model):
-    id_empresa = models.CharField(primary_key=True, max_length=100)
+class PartnerCompany(models.Model):
+    company_id = models.CharField(primary_key=True, max_length=100)
     cnpj = models.CharField(unique=True, max_length=20)
-    nome = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
 
     class Meta:
-        db_table = 'EMPRESA_PARCEIRA'
-        verbose_name = 'empresa parceira'
-        verbose_name_plural = 'empresas parceiras'
+        db_table = 'PARTNER_COMPANY'
+        verbose_name = 'Partner company'
+        verbose_name_plural = 'Partner companies'
     
     def __str__(self):
         return self.cnpj
     
 
-class Cupom(models.Model):
-    id_cupom = models.CharField(primary_key=True, max_length=100)
-    id_empresa_parceira = models.ForeignKey(
-        EmpresaParceira,
+class Coupon(models.Model):
+    coupon_id = models.CharField(primary_key=True, max_length=100)
+    partner_company_id = models.ForeignKey(
+        PartnerCompany,
         on_delete=models.SET_NULL,
         null=True,
         blank=False,
-        db_column='ID_EMPRESA_PARCEIRA',
-        related_name='empresa_parceira'
+        db_column='PARTNER_COMPANY_ID',
+        related_name='partner_company'
     )
 
-    TIPOS_DE_CUPOM = [
-        ('DESCONTO_PORCENTAGEM', 'Porcentagem de Desconto'),
-        ('DESCONTO_DIRETO', 'Desconto em dinheiro'),
-        ('BRINDE', 'Brinde')
+    COUPON_TYPES = [
+        ('PERCENTAGE_DISCOUNT', 'Discount Percentage'),
+        ('DIRECT_DISCOUNT', 'Discount in Cash'),
+        ('GIFT', 'Gift')
     ]
 
-    tipo_de_cupom = models.CharField(max_length=255,
-                                     choices=TIPOS_DE_CUPOM,
-                                     default='DESCONTO_PORCENTAGEM',
-                                     db_column='TIPO_DE_CUPOM'
+    coupon_type = models.CharField(max_length=255,
+                                     choices=COUPON_TYPES,
+                                     default='PERCENTAGE_DISCOUNT',
+                                     db_column='COUPON_TYPE'
                                 )
     
-    valor = models.IntegerField()
-    custo_pontos = models.IntegerField()
-    hash_validacao = models.CharField(max_length=255)
-    data_inicio = models.DateTimeField()
-    data_validade = models.DateTimeField()
+    value = models.IntegerField()
+    points_cost = models.IntegerField()
+    validation_hash = models.CharField(max_length=255)
+    start_date = models.DateTimeField()
+    expiring_date = models.DateTimeField()
 
     class Meta:
-        db_table = 'CUPOM'
-        verbose_name = 'cupom'
-        verbose_name_plural = 'cupons'
+        db_table = 'COUPON'
+        verbose_name = 'coupon'
+        verbose_name_plural = 'coupons'
 
 
-
-class TransacoesCupom(models.Model):
-    id_transacao = models.CharField(primary_key=True, max_length=100)
-    id_usuario = models.ForeignKey(
-        Usuario,
+class CouponsTransations(models.Model):
+    transation_id = models.CharField(primary_key=True, max_length=100)
+    user_id = models.ForeignKey(
+        User,
         on_delete=models.SET_NULL,
         null=True,
         blank=False,
-        db_column='ID_USUARIO',
-        related_name='transacoes_cupom_usuario'
+        db_column='user_id',
+        related_name='user_coupon_transation'
     )
-    id_cupom = models.ForeignKey(
-        Cupom,
+    coupon_id = models.ForeignKey(
+        Coupon,
         on_delete=models.SET_NULL,
         null=True,
         blank=False,
-        db_column='ID_CUPOM',
-        related_name='cupom_usuario'
+        db_column='COUPON_ID',
+        related_name='user_coupon'
     )
-    valor_pontos = models.IntegerField()
-    data = models.DateTimeField()
+    points_value = models.IntegerField()
+    date = models.DateTimeField()
 
     class Meta:
-        db_table = 'TRANSACOES_CUPOM'
-        verbose_name = 'transação de cupom'
-        verbose_name_plural = 'transações de cupons'
+        db_table = 'COUPONS_TRANSATIONS'
+        verbose_name = 'coupon transation'
+        verbose_name_plural = 'coupon transations'
 
 
 class PostBlog(models.Model):
-    id_post = models.CharField(max_length=100)
-    id_autor = models.ForeignKey(
-        Usuario,
+    post_id = models.CharField(max_length=100)
+    author_id = models.ForeignKey(
+        User,
         on_delete=models.SET_NULL,
         null=True,
         blank=False,
-        db_column='ID_AUTOR',
-        related_name='usuario_autor'
+        db_column='AUTHOR_ID',
+        related_name='author_user'
     )
-    titulo = models.CharField(max_length=200)
-    texto = models.TextField()
-    imagens = models.TextField()
-    data_criacao = models.DateTimeField(editable=False)
-    data_ultima_edicao = models.DateTimeField()
+    title = models.CharField(max_length=200)
+    text = models.TextField()
+    images = models.TextField()
+    created_at = models.DateTimeField(editable=False)
+    last_edition_date = models.DateTimeField()
 
     class Meta:
         db_table = 'POST_BLOG'
