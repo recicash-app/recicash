@@ -1,0 +1,22 @@
+# Ignore node_modules (always avoid sending local dependencies)
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Ignore environment files
+.env
+.env.*
+
+# Ignore logs
+*.log
+
+# Ignore tests and local configs
+coverage
+*.test.js
+jest.config.js
+
+# Ignore system and editor files
+.DS_Store
+.vscode
+.idea
+*.swp
