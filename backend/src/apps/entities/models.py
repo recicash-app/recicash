@@ -13,6 +13,8 @@ class RecyclingPoint(models.Model):
     name = models.CharField(max_length=100, unique=True)
     cnpj = models.CharField(max_length=20, unique=True) 
     zip_code  = models.CharField(max_length=10)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
 
     class Meta:
         db_table = 'RECYCLING_POINT'
@@ -43,7 +45,7 @@ class User(models.Model):
     ACCESS_LEVELS = [
         ('U', 'Regular User'), # Only register recyclings and accumulate points 
         ('A', 'Administrator'), # Add coupons and create posts
-        ('G', 'Recycling Point Manager') # Register recycling for a recycling point
+        ('M', 'Recycling Point Manager') # Register recycling for a recycling point
     ]
 
     access_level = models.CharField(max_length=1,
@@ -85,7 +87,7 @@ class Wallet(models.Model):
         db_column='USER_ID',
         related_name='WALLET_USER'
     )
-    points = models.IntegerField()
+    points_balance = models.IntegerField()
 
     class Meta:
         db_table = 'WALLET'
@@ -94,6 +96,40 @@ class Wallet(models.Model):
     
     def __str__(self):
         return self.user_id
+    
+
+class WalletHistory(models.Model):
+    history_id = models.CharField(primary_key=True, max_length=255)
+    user_id = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        db_column='USER_ID',
+        related_name='WALLET_HISTORY_USER'
+    )
+
+    # Platform access levels
+    OPERATION = [
+        ('RECYCLING', 'Recycling'), 
+        ('COUPON_TRANSACTION', 'Bought coupon'), 
+        ('EARN_POINTS', 'Earned points') 
+    ]
+
+    operation = models.CharField(max_length=255,
+                                choices=OPERATION,
+                                default='RECYCLING',
+                                db_column='operation'
+                            )
+
+    value = models.IntegerField()
+    date = models.DateTimeField()
+
+    class Meta:
+        db_table = 'WALLET_HISTORY'
+        verbose_name = 'Wallet history'
+        verbose_name_plural = 'Wallet history'
+    
+    def __str__(self):
+        return self.history_id
 
 
 class RecyclingValue(models.Model):
@@ -181,7 +217,7 @@ class Coupon(models.Model):
         ('GIFT', 'Gift')
     ]
 
-    coupon_type = models.CharField(max_length=255,
+    type = models.CharField(max_length=255,
                                      choices=COUPON_TYPES,
                                      default='PERCENTAGE_DISCOUNT',
                                      db_column='COUPON_TYPE'
@@ -199,8 +235,8 @@ class Coupon(models.Model):
         verbose_name_plural = 'coupons'
 
 
-class CouponsTransations(models.Model):
-    transation_id = models.CharField(primary_key=True, max_length=100)
+class CouponsTransactions(models.Model):
+    transaction_id = models.CharField(primary_key=True, max_length=100)
     user_id = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -221,9 +257,9 @@ class CouponsTransations(models.Model):
     date = models.DateTimeField()
 
     class Meta:
-        db_table = 'COUPONS_TRANSATIONS'
-        verbose_name = 'coupon transation'
-        verbose_name_plural = 'coupon transations'
+        db_table = 'COUPONS_TRANSACTIONS'
+        verbose_name = 'coupon transaction'
+        verbose_name_plural = 'coupon transactions'
 
 
 class PostBlog(models.Model):
