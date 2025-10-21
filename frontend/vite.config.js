@@ -6,7 +6,7 @@ const appDir = path.resolve(__dirname, 'apps/app-client')
 
 export default defineConfig({
   root: appDir,
-  plugins: [react()],
+  plugins: [react(), svgr()],
   resolve: {
     alias: {
       '@': path.resolve(appDir, 'src'),
