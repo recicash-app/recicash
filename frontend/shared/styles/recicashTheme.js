@@ -176,6 +176,27 @@ const recicashTheme = createTheme({
             backgroundColor: "transparent",
           },
         },
+        
+        // Soft Outlined (light subtle border)
+        {
+          props: { variant: "recicashSoftOutlined" },
+          style: ({ ownerState }) => ({
+            width: 139,
+            height: 50,
+            borderRadius: "11px",
+            backgroundColor: "transparent",
+            border: "1px solid rgba(217, 217, 217, 0.38)",
+            color: "#212832",
+            transition: "all 0.2s ease",
+            "&:hover": {
+              backgroundColor: "rgba(217, 217, 217, 0.1)",
+            },
+            ...(ownerState.active && {
+              border: "1px solid #D9D9D9",
+              boxShadow: "0px 4px 4px 0px #00000040",
+            }),
+          }),
+        },
       ],
     },
     
