@@ -74,6 +74,8 @@ function EditableContainer({ blocks }) {
 
 function TestBasis() {
   const [overlayOpen, setOverlayOpen] = useState(false);
+  const [activeButton, setActiveButton] = useState(false);
+
 
   const articleBlocks = [
     { type: "title", content: "Do Lixo ao Luxo: Materiais Reciclados que Viraram Tendência" },
@@ -124,6 +126,14 @@ function TestBasis() {
           CTA com glow dourado
         </Button>
         <Button variant="recicashOutlined">Oco Escuro</Button>
+
+        {/* CLICKABLE BUTTON */}
+        <Button variant="recicashSoftOutlined" 
+          active={activeButton}
+          onClick={() => setActiveButton((prev) => !prev)}
+        > 
+          Oco Sutil 
+        </Button>
       </Box>
 
       {/* CONTAINERS */}
