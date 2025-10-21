@@ -135,5 +135,14 @@ dist
 !.yarn/versions
 
 # Vite logs files
-vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# virtual env
+venv/
+
+# python cache
+__pycache__/
+*.pyc
+
+# IDE cache
+.vscode
