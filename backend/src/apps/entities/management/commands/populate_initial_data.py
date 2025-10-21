@@ -1,10 +1,10 @@
-from django.core.management.base import BaseCommand
 from apps.entities.models import *
-from faker import Faker
+from collections import defaultdict
+from datetime import timedelta
+from django.core.management.base import BaseCommand
 from django.db import transaction as django_transaction
 from django.utils import timezone
-from datetime import timedelta
-from collections import defaultdict
+from faker import Faker
 import logging
 import random
 
@@ -24,7 +24,7 @@ def create_data(number_of_users=10):
     wallet_history_to_create = []
 
     # Create Users
-    logger.info('Creating users')
+    logger.info('Creating users...')
     try:
         users_to_insert = []
 
@@ -48,22 +48,22 @@ def create_data(number_of_users=10):
             )
 
         created_users = User.objects.bulk_create(users_to_insert)
-        logger.info(f"SUCCESS: {len(created_users)} users created")
+        logger.info(f"Users created successfully")
 
     except Exception as e:
-        logger.error(f"Error creating users: {e}")
+        logger.error(f"An unexpected error occurred while creating users: {e}")
         return
     
-    logger.info("Creating Passwords and Wallets for initial users.")
+    logger.info("Creating Passwords and Wallets for initial users...")
     passwords_to_insert = []
     for user in created_users:
         passwords_to_insert.append(Password(user_id=user, password='safe_hash_password'))
 
     try:
         Password.objects.bulk_create(passwords_to_insert)
-        logger.info(f"SUCCESS: Passwords and Wallets created for {len(created_users)} users")
+        logger.info(f"Passwords and Wallets created successfully for {len(created_users)} users")
     except Exception as e:
-        logger.error(f"Error creating Passwords and Wallets: {e}")
+        logger.error(f"An unexpected error occurred while creating Passwords and Wallets: {e}")
 
     # Create Recycling Points and its managers
     logger.info(f"Creating Recycling Points...")
@@ -115,20 +115,20 @@ def create_data(number_of_users=10):
         )
         logger.info(f"Recycling value created successfully")
     except Exception as e:
-        logger.error(f"Erros creating Recycling Value {i}: {e}")
+        logger.error(f"An unexpected error occurred while creating Recycling Value {i}: {e}")
     
     # Create Recycling
-    logger.info(f"Creating Recycling")
+    logger.info(f"Creating Recycling...")
     try:
         all_users = list(User.objects.filter(access_level='U'))
         all_recycling_points = list(RecyclingPoint.objects.all())
         recycling_value_instance = RecyclingValue.objects.get(recycling_value_id='000001')
 
         if not all_users:
-            logger.error("Nenhum usuário encontrado para associar às reciclagens. Abortando.")
+            logger.error("No users found to link up with recyclings. Aborting.")
             return
         if not all_recycling_points:
-            logger.error("Nenhum Ponto de Reciclagem encontrado para associar. Abortando.")
+            logger.error("No recycling points found to link up with recyclings. Aborting.")
             return
         
         recyclings_to_create = []
@@ -154,7 +154,7 @@ def create_data(number_of_users=10):
             )
         
         recyclings_created = Recycling.objects.bulk_create(recyclings_to_create)
-        logger.info(f"SUCCESS: {len(recyclings_to_create)} recycling records created.")
+        logger.info(f"Recycling records created successfully")
 
         for recycling in recyclings_created:
                 wallet_history_to_create.append(
@@ -166,9 +166,9 @@ def create_data(number_of_users=10):
                     )
                 )
     except RecyclingValue.DoesNotExist:
-        logger.error("Recycling Value with id '001' does not exist. Create it first")
+        logger.error("Recycling Value with id '000001' does not exist. Create it first")
     except Exception as e:
-        logger.error(f"Error creating Recycling records: {e}")
+        logger.error(f"An unexpected error occurred while creating Recycling records: {e}")
 
     logger.info(f"Creating Company Partners...")
     try:
@@ -185,7 +185,7 @@ def create_data(number_of_users=10):
         PartnerCompany.objects.bulk_create(partners_to_create)
         logger.info(f"Partner Company created successfully.")
     except Exception as e:
-        logger.error(f"Error creating Recycling records: {e}")
+        logger.error(f"An unexpected error occurred while creating Recycling records: {e}")
     
 
     logger.info(f"Creating coupons...")
@@ -218,7 +218,7 @@ def create_data(number_of_users=10):
                     )
                 )
             Coupon.objects.bulk_create(coupons_to_create)
-            logger.info(f"SUCCESS: {len(coupons_to_create)} coupons created.")
+            logger.info(f"Coupons created successfully")
     except Exception as e:
         logger.error(f"An unexpected error occurred while creating coupons: {e}")
     
@@ -271,7 +271,7 @@ def create_data(number_of_users=10):
         
         try:
             WalletHistory.objects.bulk_create(wallet_history_to_create)
-            logger.info(f"SUCCESS: {len(wallet_history_to_create)} wallet history records created.")
+            logger.info(f"Wallet history records created successfuly")
         except Exception as e:
             logger.error(f"An unexpected error occurred while creating wallet history: {e}")
     
