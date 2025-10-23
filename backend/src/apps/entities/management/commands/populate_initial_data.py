@@ -275,6 +275,48 @@ def create_data(number_of_users=10):
         except Exception as e:
             logger.error(f"An unexpected error occurred while creating wallet history: {e}")
     
+    logger.info(f"Creating blog posts...")
+    try:
+        # First, create or get an Admin user to be the author
+        admin_user, admin_created = User.objects.get_or_create(
+            user_id='00100',
+            defaults={
+                'name': 'Admin User',
+                'email': 'admin@recicash.fake',
+                'cpf': fake.cpf(),
+                'zip_code': fake.postcode(),
+                'access_level': 'A' # 'A' for Admin
+            }
+        )
+        
+        # Create a password for the admin if the user was just created
+        if admin_created:
+            Password.objects.create(user_id=admin_user, password='safe_admin_hash')
+            logger.info("Admin user created.")
+        else:
+            logger.info("Admin user '00100' already exists.")
+
+        posts_to_create = []
+        for i in range(1, 5 + 1):
+            posts_to_create.append(
+                PostBlog(
+                    post_id=f'{i:06}',
+                    author_id=admin_user,
+                    title=fake.sentence(nb_words=6, variable_nb_words=True),
+                    text=fake.text(max_nb_chars=1500), # Using faker for lorem ipsum
+                    images="https://placehold.co/800x400/22c55e/ffffff?text=Recicash+Blog", # Placeholder image
+                    created_at=timezone.now(),
+                    last_edition_date=timezone.now()
+                )
+            )
+        
+        PostBlog.objects.bulk_create(posts_to_create)
+        logger.info(f"Blog posts created successfully.")
+
+    except Exception as e:
+        logger.error(f"An unexpected error occurred while creating blog posts: {e}")
+
+    
     logger.info("Calculating final balances and creating wallets for all users...")
     try:
         # Use defaultdict to simplify balance aggregation
