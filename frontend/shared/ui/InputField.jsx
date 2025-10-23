@@ -1,52 +1,36 @@
-import { useState } from "react";
 import { Box, TextField, Typography } from "@mui/material";
+import { styled } from "@mui/system";
 
-function InputField({
-  label = "Título",
-  placeholder = "Digite aqui...",
-  type = "text",
-  required = false,
-  validator,
-  value,
-  onChange,
-  ...props
-}) {
-  const [touched, setTouched] = useState(false);
-  const [error, setError] = useState("");
+const DataField = styled(TextField)({
+  width: "404px",
+  height: "32px",
+  borderRadius: "10px",
+  border: "1px solid",
+  '& .MuiInputBase-root': {
+        height: '32px',
+        borderRadius: '10px',
+  },
 
-  const handleBlur = () => {
-    setTouched(true);
-    validate(value);
-  };
+  '& .MuiOutlinedInput-notchedOutline': {
+      border: 'none',
+  },
+});
 
-  const handleChange = (e) => {
-    const val = e.target.value;
-    onChange?.(e);
-    if (touched) validate(val);
-  };
+const FieldLabel = styled(Typography)({
+  fontSize: "14px",
+  fontWeight: "bold",
+  fontFamily: "Poppins"
+});
 
-  const validate = (val) => {
-    let msg = "";
-    if (required && !val.trim()) msg = "Campo obrigatório";
-    else if (validator) msg = validator(val) || "";
-    setError(msg);
-  };
-
+function InputField({ label, name, type, value, onChange, ...props }) {
   return (
-    <Box display="flex" flexDirection="column" gap={1} width="100%">
-      <Typography variant="body1" sx={{ fontWeight: 500, color: "#000000" }}>
-        {label}
-      </Typography>
-      <TextField
+    <Box display="flex" flexDirection="column" gap={"4px"}>
+      <FieldLabel>{label}</FieldLabel>
+      <DataField
+        name={name}
         type={type}
-        placeholder={placeholder}
         value={value}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        error={Boolean(error)}
-        helperText={error || " "}
-        fullWidth
-        variant="outlined"
+        onChange={onChange}
         {...props}
       />
     </Box>
@@ -54,3 +38,4 @@ function InputField({
 }
 
 export default InputField;
+
