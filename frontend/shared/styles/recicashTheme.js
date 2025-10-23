@@ -176,7 +176,59 @@ const recicashTheme = createTheme({
             backgroundColor: "transparent",
           },
         },
+        
+        // Soft Outlined (light subtle border)
+        {
+          props: { variant: "recicashSoftOutlined" },
+          style: ({ ownerState }) => ({
+            width: 139,
+            height: 50,
+            borderRadius: "11px",
+            backgroundColor: "transparent",
+            border: "1px solid rgba(217, 217, 217, 0.38)",
+            color: "#212832",
+            transition: "all 0.2s ease",
+            "&:hover": {
+              backgroundColor: "rgba(217, 217, 217, 0.1)",
+            },
+            ...(ownerState.active && {
+              border: "1px solid #D9D9D9",
+              boxShadow: "0px 4px 4px 0px #00000040",
+            }),
+          }),
+        },
       ],
+    },
+
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: "20px",
+          // You don't usually add `border` here because it conflicts with the notchedOutline
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#D9D9D9",
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#999",
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#212832",
+          },
+        },
+      },
+    },
+
+    MuiInputBase: {
+      styleOverrides: {
+        input: {
+          fontFamily: '"Poppins", sans-serif',
+          fontSize: "1rem",
+          "::placeholder": {
+            color: "#d3d3d3",
+            opacity: 1,
+          },
+        },
+      },
     },
     
     MuiPaper: {

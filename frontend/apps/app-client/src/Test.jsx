@@ -12,8 +12,38 @@ import LeafBox from '@shared/ui/LeafBox';
 import CardBox from '@shared/ui/CardBox';
 import TitleBlock from "@shared/ui/TitleBlock";
 import TextBlock from "@shared/ui/TextBlock";
+import InputField from "@shared/ui/InputField";
 import ImageBlock from "@shared/ui/ImageBlock";
 import FullScreenOverlay from "@shared/ui/FullScreenOverlay";
+
+function Form() {
+  const [address, setAddress] = useState("");
+  const [password, setPassword] = useState("");
+  
+  const exampleValidation = (value) => {
+    return value.length < 6 ? "A senha deve ter pelo menos 6 caracteres" : null;
+  }
+
+  return (
+    <Box>
+      <InputField
+        label="Endereço"
+        placeholder="Rua, número"
+        value={address}
+        onChange={(e) => setAddress(e.target.value)}
+      />
+
+      <InputField
+        label="Senha"
+        type="password"
+        placeholder="Digite sua senha"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        validator={exampleValidation}
+      />
+      </Box>
+  );
+}
 
 function EditableContainer({ blocks }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -74,7 +104,7 @@ function EditableContainer({ blocks }) {
 
 function TestBasis() {
   const [overlayOpen, setOverlayOpen] = useState(false);
-
+  const [activeButton, setActiveButton] = useState(false);
   const articleBlocks = [
     { type: "title", content: "Do Lixo ao Luxo: Materiais Reciclados que Viraram Tendência" },
     { type: "image" },
@@ -124,6 +154,14 @@ function TestBasis() {
           CTA com glow dourado
         </Button>
         <Button variant="recicashOutlined">Oco Escuro</Button>
+
+        {/* CLICKABLE BUTTON */}
+        <Button variant="recicashSoftOutlined" 
+          active={activeButton}
+          onClick={() => setActiveButton((prev) => !prev)}
+        > 
+          Oco Sutil 
+        </Button>
       </Box>
 
       {/* CONTAINERS */}
@@ -150,6 +188,9 @@ function TestBasis() {
         <EditableContainer blocks={articleBlocks} />
       </Box>
 
+      {/* INPUT FIELD */}
+      <Form />
+
       {/* DECORATIONS */}
       <Box sx={{ position: "relative", height: "80vh", border: "1px solid black" }}>
         <img src={shape1} alt="" style={{ position: "absolute", top: 0, left: 0, width: "20%" }} />
@@ -160,6 +201,10 @@ function TestBasis() {
 
       {/* OVERLAY */}
       <FullScreenOverlay open={overlayOpen} onClose={() => setOverlayOpen(false)} />
+    
+      {/* CAROUSEL 
+      <Carousel items={Array.from({ length: 10 }, (_, i) => <CardBox key={i} />)} itemsPerPage={4}/>
+      */}
     </Box>
   );
 }
