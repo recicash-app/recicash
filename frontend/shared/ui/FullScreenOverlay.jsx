@@ -1,5 +1,5 @@
 import { Box, IconButton, Modal } from "@mui/material";
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 
 function FullScreenOverlay({ open, onClose, children }) {
   return (
@@ -14,6 +14,7 @@ function FullScreenOverlay({ open, onClose, children }) {
         },
       }}
     >
+      {/* Centering wrapper */}
       <Box
         sx={{
           position: "fixed",
@@ -24,6 +25,7 @@ function FullScreenOverlay({ open, onClose, children }) {
           outline: "none",
         }}
       >
+        {/* Content container */}
         <Box
           sx={{
             position: "relative",
@@ -36,13 +38,13 @@ function FullScreenOverlay({ open, onClose, children }) {
             p: { xs: 3, md: 6 },
           }}
         >
+          {/* Close Button */}
           <IconButton
             onClick={onClose}
             sx={{
               position: "absolute",
               top: 32,
               left: 32,
-              p: 0,
               color: "text.primary",
               zIndex: 10,
             }}
@@ -50,6 +52,7 @@ function FullScreenOverlay({ open, onClose, children }) {
             <CancelOutlinedIcon fontSize="medium" />
           </IconButton>
 
+          {/* Overlay content */}
           {children}
         </Box>
       </Box>

@@ -199,6 +199,37 @@ const recicashTheme = createTheme({
         },
       ],
     },
+
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: "20px",
+          // You don't usually add `border` here because it conflicts with the notchedOutline
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#D9D9D9",
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#999",
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#212832",
+          },
+        },
+      },
+    },
+
+    MuiInputBase: {
+      styleOverrides: {
+        input: {
+          fontFamily: '"Poppins", sans-serif',
+          fontSize: "1rem",
+          "::placeholder": {
+            color: "#d3d3d3",
+            opacity: 1,
+          },
+        },
+      },
+    },
     
     MuiPaper: {
       styleOverrides: {

@@ -1,21 +1,11 @@
-import { useState } from "react";
 import { Box, IconButton } from "@mui/material";
-import { Upload, Delete, Link as LinkIcon } from "@mui/icons-material";
+import { Upload, Delete } from "@mui/icons-material";
 import { getDashedInputProps } from "../styles/dashedInputProps";
 
 function ImageBlock({ content, isEditing, onChange }) {
-  const [linkValue, setLinkValue] = useState("");
-
   const handleUpload = (e) => {
     const file = e.target.files[0];
     if (file) onChange(URL.createObjectURL(file));
-  };
-
-  const handleLinkSubmit = () => {
-    if (linkValue) {
-      onChange(linkValue);
-      setLinkValue("");
-    }
   };
 
   const handleDelete = () => {
@@ -59,9 +49,6 @@ function ImageBlock({ content, isEditing, onChange }) {
             gap: 1, p: 0.5,
           }}
         >
-          <IconButton size="small" sx={{ color: 'text.primary' }}>
-            <LinkIcon fontSize="small" />
-          </IconButton>
           <IconButton component="label" size="small" sx={{ color: 'text.primary' }}>
             <Upload fontSize="small" />
             <input
