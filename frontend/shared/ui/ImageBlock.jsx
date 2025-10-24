@@ -18,13 +18,13 @@ function ImageBlock({ content, isEditing, onChange }) {
         ...getDashedInputProps(isEditing).style,
         padding: 0,
         position: "relative",
-				minWidth: 120,             
+        minWidth: 120,             
         minHeight: 180,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-			}}
+      }}
     >
       {/* IMAGE */}
       {content ? (

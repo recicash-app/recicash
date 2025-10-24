@@ -42,7 +42,7 @@ function Form() {
         onChange={(e) => setPassword(e.target.value)}
         validator={exampleValidation}
       />
-      </Box>
+    </Box>
   );
 }
 
@@ -180,7 +180,7 @@ function TestBasis() {
           />
         </LeafBox>
         <LeafBox sx={{ gridRow: "2 / 4", gridColumn: "2 / 4" }}>
-            <LoremIpsum p={2} />
+          <LoremIpsum p={2} />
         </LeafBox>
       </Box>
 
