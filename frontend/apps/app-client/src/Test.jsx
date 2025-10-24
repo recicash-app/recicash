@@ -10,6 +10,7 @@ import shape4 from "@shared/assets/pattern-plus-green-white.svg";
 
 import LeafBox from '@shared/ui/LeafBox';
 import CardBox from '@shared/ui/CardBox';
+import Carousel from "@shared/ui/Carousel";
 import TitleBlock from "@shared/ui/TitleBlock";
 import TextBlock from "@shared/ui/TextBlock";
 import InputField from "@shared/ui/InputField";
@@ -157,7 +158,7 @@ function TestBasis() {
 
         {/* CLICKABLE BUTTON */}
         <Button variant="recicashSoftOutlined" 
-          active={activeButton}
+          state={{ active: activeButton }}
           onClick={() => setActiveButton((prev) => !prev)}
         > 
           Oco Sutil 
@@ -165,7 +166,7 @@ function TestBasis() {
       </Box>
 
       {/* CONTAINERS */}
-      <Box sx={{ position: "relative", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }} >        
+      <Box sx={{ position: "relative", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "40px" }} >        
         <CardBox />
         <CardBox focused />
         <CardBox focused onClick={() => setOverlayOpen(true)} />
@@ -202,9 +203,23 @@ function TestBasis() {
       {/* OVERLAY */}
       <FullScreenOverlay open={overlayOpen} onClose={() => setOverlayOpen(false)} />
     
-      {/* CAROUSEL 
-      <Carousel items={Array.from({ length: 10 }, (_, i) => <CardBox key={i} />)} itemsPerPage={4}/>
-      */}
+      {/* CAROUSEL */} 
+      <Box mt={4} >
+        BIGGER CARDS
+        <Carousel 
+          itemHeight={314}
+          itemWidth={267}
+          items={Array.from({ length: 10 }, (_, i) => <CardBox key={i}> Nº {i}</CardBox> )} 
+        />
+
+        SMALLER CARDS
+        <Carousel 
+          itemHeight={280}
+          itemWidth={180}
+          itemsPerBreakpoint={{ xs: 2, sm: 3, md: 4, lg: 5 }}
+          items={Array.from({ length: 10 }, (_, i) => <CardBox key={i} sx={{ width: 180, height: 280 }}> Nº {i}</CardBox> )} 
+        />
+      </Box>
     </Box>
   );
 }
