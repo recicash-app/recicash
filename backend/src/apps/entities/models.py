@@ -121,7 +121,7 @@ class WalletHistory(models.Model):
                             )
 
     value = models.IntegerField()
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'WALLET_HISTORY'
@@ -135,7 +135,7 @@ class WalletHistory(models.Model):
 class RecyclingValue(models.Model):
     recycling_value_id = models.BigAutoField(primary_key=True)
     points_value = models.FloatField()
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'RECYCLING_VALUE'
@@ -174,7 +174,7 @@ class Recycling(models.Model):
     )
     points_value = models.IntegerField()
     weight = models.FloatField(max_length=300)
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now_add=True)
     validation_hash = models.CharField(max_length=255)
 
     class Meta:
@@ -254,7 +254,7 @@ class CouponsTransactions(models.Model):
         related_name='user_coupon'
     )
     points_value = models.IntegerField()
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'COUPONS_TRANSACTIONS'
@@ -275,8 +275,8 @@ class PostBlog(models.Model):
     title = models.CharField(max_length=200)
     text = models.TextField()
     images = models.TextField()
-    created_at = models.DateTimeField(editable=False)
-    last_edition_date = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    last_edition_date = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'POST_BLOG'
