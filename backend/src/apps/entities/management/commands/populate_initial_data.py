@@ -37,7 +37,6 @@ def create_data(number_of_users=10):
 
             users_to_insert.append(
                 User(
-                    user_id = f'{i:06}',
                     name=name,
                     email=email,
                     cpf=cpf,
@@ -78,7 +77,6 @@ def create_data(number_of_users=10):
                 manager_email = f'manager.{manager_name.split()[0].lower()}{manager_id_num}@recicash.point'
                 
                 new_manager = User.objects.create(
-                    user_id=f'{manager_id_num:06}',
                     name=manager_name,
                     email=manager_email,
                     cpf=fake.cpf(),
@@ -87,7 +85,6 @@ def create_data(number_of_users=10):
                 )
 
                 RecyclingPoint.objects.create(
-                    recycling_point_id=f'{i:06}',
                     user_id=new_manager,
                     name=f"Ponto de Coleta - {fake.city()}",
                     cnpj=fake.cnpj(),
@@ -109,7 +106,6 @@ def create_data(number_of_users=10):
     try:
         i = 1
         RecyclingValue.objects.create(
-            recycling_value_id=f'{i:06}',
             points_value=500.0,
             date=timezone.now() - timedelta(days=366)
         )
@@ -122,7 +118,7 @@ def create_data(number_of_users=10):
     try:
         all_users = list(User.objects.filter(access_level='U'))
         all_recycling_points = list(RecyclingPoint.objects.all())
-        recycling_value_instance = RecyclingValue.objects.get(recycling_value_id='000001')
+        recycling_value_instance = RecyclingValue.objects.get(recycling_value_id=1)
 
         if not all_users:
             logger.error("No users found to link up with recyclings. Aborting.")
@@ -142,7 +138,6 @@ def create_data(number_of_users=10):
 
             recyclings_to_create.append(
                 Recycling(
-                    recycling_id=f'{i:06}',
                     user_id=random_user,
                     recycling_point_id=random_point,
                     recycling_value_id=recycling_value_instance,
@@ -166,7 +161,7 @@ def create_data(number_of_users=10):
                     )
                 )
     except RecyclingValue.DoesNotExist:
-        logger.error("Recycling Value with id '000001' does not exist. Create it first")
+        logger.error("Recycling Value with id 1 does not exist. Create it first")
     except Exception as e:
         logger.error(f"An unexpected error occurred while creating Recycling records: {e}")
 
@@ -176,7 +171,6 @@ def create_data(number_of_users=10):
         for i in range(1, 20 + 1):
             partners_to_create.append(
                 PartnerCompany(
-                    company_id=f'{i:06}',
                     name=fake.company(),
                     cnpj=fake.cnpj()
                 )
@@ -207,7 +201,6 @@ def create_data(number_of_users=10):
                 
                 coupons_to_create.append(
                     Coupon(
-                        coupon_id=f'{i:06}',
                         partner_company_id=random_partner,
                         type=coupon_type,
                         value=float(random.randint(5, 50)),
@@ -238,7 +231,6 @@ def create_data(number_of_users=10):
                 
                 transactions_to_create.append(
                     CouponsTransactions(
-                        transaction_id=f'{i:06}',
                         user_id=random_user,
                         coupon_id=random_coupon,
                         points_value=random_coupon.points_cost, # Set value_points equal to the coupon's points_cost
@@ -267,7 +259,7 @@ def create_data(number_of_users=10):
     else:
         # Assign unique IDs before bulk creating
         for i, history_item in enumerate(wallet_history_to_create, 1):
-            history_item.history_id = f'{i:06}'
+            history_item.history_id = i
         
         try:
             WalletHistory.objects.bulk_create(wallet_history_to_create)
@@ -279,7 +271,7 @@ def create_data(number_of_users=10):
     try:
         # First, create or get an Admin user to be the author
         admin_user, admin_created = User.objects.get_or_create(
-            user_id='00100',
+            user_id=1000,
             defaults={
                 'name': 'Admin User',
                 'email': 'admin@recicash.fake',
@@ -294,7 +286,7 @@ def create_data(number_of_users=10):
             Password.objects.create(user_id=admin_user, password='safe_admin_hash')
             logger.info("Admin user created.")
         else:
-            logger.info("Admin user '00100' already exists.")
+            logger.info("Admin user 1000 already exists.")
 
         posts_to_create = []
         for i in range(1, 5 + 1):
