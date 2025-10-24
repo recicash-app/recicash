@@ -1,7 +1,7 @@
 from django.db import models
 
 class RecyclingPoint(models.Model):
-    recycling_point_id = models.CharField(primary_key=True, max_length=100) # PK de Ecoponto
+    recycling_point_id = models.BigAutoField(primary_key=True) # PK de Ecoponto
     user_id  = models.ForeignKey( # FK that references to a Recycling Point representative User
         'User',
         on_delete=models.SET_NULL,
@@ -26,7 +26,7 @@ class RecyclingPoint(models.Model):
 
 
 class User(models.Model):
-    user_id = models.CharField(primary_key=True, max_length=100) # PK de Usuario
+    user_id = models.BigAutoField(primary_key=True) # PK de Usuario
     fav_recycling_point_id = models.ForeignKey( # FK that references to favorite Recycling Point 
         RecyclingPoint,
         on_delete=models.SET_NULL,
@@ -99,7 +99,7 @@ class Wallet(models.Model):
     
 
 class WalletHistory(models.Model):
-    history_id = models.CharField(primary_key=True, max_length=255)
+    history_id = models.BigAutoField(primary_key=True)
     user_id = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -133,7 +133,7 @@ class WalletHistory(models.Model):
 
 
 class RecyclingValue(models.Model):
-    recycling_value_id = models.CharField(primary_key=True, max_length=100)
+    recycling_value_id = models.BigAutoField(primary_key=True)
     points_value = models.FloatField()
     date = models.DateTimeField()
 
@@ -147,7 +147,7 @@ class RecyclingValue(models.Model):
     
 
 class Recycling(models.Model):
-    recycling_id = models.CharField(primary_key=True, max_length=100)
+    recycling_id = models.BigAutoField(primary_key=True)
     user_id = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -187,7 +187,7 @@ class Recycling(models.Model):
 
 
 class PartnerCompany(models.Model):
-    company_id = models.CharField(primary_key=True, max_length=100)
+    company_id = models.BigAutoField(primary_key=True)
     cnpj = models.CharField(unique=True, max_length=20)
     name = models.CharField(max_length=255)
 
@@ -201,7 +201,7 @@ class PartnerCompany(models.Model):
     
 
 class Coupon(models.Model):
-    coupon_id = models.CharField(primary_key=True, max_length=100)
+    coupon_id = models.BigAutoField(primary_key=True)
     partner_company_id = models.ForeignKey(
         PartnerCompany,
         on_delete=models.SET_NULL,
@@ -236,7 +236,7 @@ class Coupon(models.Model):
 
 
 class CouponsTransactions(models.Model):
-    transaction_id = models.CharField(primary_key=True, max_length=100)
+    transaction_id = models.BigAutoField(primary_key=True)
     user_id = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -263,7 +263,7 @@ class CouponsTransactions(models.Model):
 
 
 class PostBlog(models.Model):
-    post_id = models.CharField(max_length=100)
+    post_id = models.BigAutoField(primary_key=True)
     author_id = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
