@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
 import InputField from '../../shared/ui/InputField'
 import SendFormButton from '../../shared/ui/SendFormButton'
+import GreenSpot from '../../shared/assets/shape-bottom-right.svg'
+
+import React, { useState } from 'react';
 import { Stack, Checkbox, Modal, Button, Box, Typography } from '@mui/material'
 import { styled } from '@mui/system'
 
@@ -66,7 +68,7 @@ function Policy() {
     );
 }
 
-function SignUpPage() {
+function Form() {
 
   const [formData, setFormData] = useState({
     name: '',
@@ -185,6 +187,18 @@ function SignUpPage() {
       <SendFormButton text="Criar conta" onClick={handleSubmit}/>
     </Stack>
   );
+}
+
+function SignUpPage() {
+    return(
+        <Box>
+            <img src={GreenSpot} alt="Green Spot" style={{ position: 'fixed', bottom: '0vw', right: '0vw', width: "47vw", transform: "scaleX(1.2)", indexZ: '-1' }} />
+            <Stack spacing={8} style={{ position: 'absolute', left: '8vw', top: '20vh' }}>
+                <Typography variant='h4' fontFamily='Poppins' fontWeight='bold' > Cadastro </Typography>
+                {Form()}
+            </Stack>
+        </Box>
+    )
 }
   
 export default SignUpPage;
