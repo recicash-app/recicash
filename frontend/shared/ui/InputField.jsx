@@ -2,7 +2,7 @@ import { Box, TextField, Typography } from "@mui/material";
 import { styled } from "@mui/system";
 
 const DataField = styled(TextField)({
-  width: "404px",
+  width: "484px", 
   height: "32px",
   borderRadius: "10px",
   border: "1px solid #D9D9D9",
