@@ -274,7 +274,6 @@ class PostBlog(models.Model):
     )
     title = models.CharField(max_length=200)
     text = models.TextField()
-    images = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_edition_date = models.DateTimeField(auto_now=True)
 
@@ -282,3 +281,21 @@ class PostBlog(models.Model):
         db_table = 'POST_BLOG'
         verbose_name = 'post'
         verbose_name_plural = 'posts'
+
+
+class PostImage(models.Model):
+    post_id = models.ForeignKey(
+        PostBlog,
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+
+    image = models.ImageField(upload_to='blog_images/')
+
+    class Meta:
+        db_table = 'POST_IMAGE'
+        verbose_name = 'post_image'
+        verbose_name_plural = 'post_images'
+
+    def __str__(self):
+        return f"Post image: {self.post_id.title}"
