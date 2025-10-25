@@ -1,12 +1,13 @@
 {
-  "name": "frontend",
+  "name": "recicash-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host --port 3000",
     "build": "vite build",
-    "lint": "eslint .",
+    "lint": "eslint 'apps/**/*.{js,jsx}'",
+    "lint:fix": "eslint 'apps/**/*.{js,jsx}' --fix",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -16,7 +17,8 @@
     "@mui/material": "^7.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.4.1",
+    "react-lorem-ipsum": "^1.4.10",
+    "react-router-dom": "^7.9.4",
     "recharts": "^2.15.3"
   },
   "devDependencies": {
