@@ -4,7 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host --port 3000",
+    "dev": "npm run dev:web",
+    "dev:web": "vite --host --port 3000 --config apps/app-client/vite.config.client.js",
+    "dev:admin": "vite --host --port 3000 --config apps/app-admin/vite.config.admin.js",
+    "dev:ecoponto": "vite --host --port 3000 --config apps/app-ecoponto/vite.config.ecoponto.js",
     "build": "vite build",
     "lint": "eslint 'apps/**/*.{js,jsx}'",
     "lint:fix": "eslint 'apps/**/*.{js,jsx}' --fix",

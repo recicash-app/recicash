@@ -5,6 +5,13 @@ O backend do Recicash foi desenvolvido utilizando o framework [**Django**](https
 
 ## Arquitetura
 
+O backend é baseado em Django, estruturado em camadas conforme o padrão arquitetura em camadas (layered architecture) definido na ADR 002:
+
+Cada camada tem uma responsabilidade clara:
+- **Presentation Layer:** expõe endpoints REST para consumo do frontend (Views / Controllers).
+- **Application Layer:** orquestra casos de uso, valida regras e coordena entidades (Services / Use Cases).
+- **Domain Layer:** contém as entidades e regras de negócio centrais do domínio (Entities / Business Rules).
+- **Infrastructure Layer:** integra com recursos externos, como ORM, APIs externas e PostGIS.
 
 ## Dependências
 As dependências do projeto estão listadas no arquivo `requirements.txt`. Para instalar as dependências, utilize o comando:
@@ -25,5 +32,12 @@ O servidor estará disponível no endereço:
 ```
 http://127.0.0.1:8000/
 ```
+## Acesso via Docker e Traefik
 
-> **Nota:** O backend pode ser executado de forma isolada dentro de um container Docker, juntamente com o frontend e o banco de dados. Para isso, utilize os comandos definidos no `docker-compose.yml`. Os comandos acima são recomendados apenas se você deseja rodar o backend diretamente na sua máquina, fora do ambiente de containers.
+Quando executado via Docker, o acesso ao backend é feito pelo endereço:
+
+```
+http://api.docker.localhost
+```
+
+Esse roteamento é controlado pelo Traefik, que atua como proxy reverso e direciona as requisições para o serviço correto com base no subdomínio utilizado. Portanto, não utilize mais `localhost:8000` para acessar a API quando estiver rodando via Docker; utilize sempre o subdomínio `api.docker.localhost`.
