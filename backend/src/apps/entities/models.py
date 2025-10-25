@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 class RecyclingPoint(models.Model):
     recycling_point_id = models.BigAutoField(primary_key=True) # PK de Ecoponto
@@ -25,7 +26,7 @@ class RecyclingPoint(models.Model):
         return self.recycling_point_id
 
 
-class User(models.Model):
+class User(AbstractUser):
     user_id = models.BigAutoField(primary_key=True) # PK de Usuario
     fav_recycling_point_id = models.ForeignKey( # FK that references to favorite Recycling Point 
         RecyclingPoint,
@@ -36,9 +37,7 @@ class User(models.Model):
         related_name='favorite_recycling_point'
     )
 
-    name  = models.CharField(max_length=255)
-    email = models.EmailField(max_length=255, unique=True)
-    cpf   = models.CharField(max_length=14, unique=True)
+    cpf = models.CharField(max_length=14, unique=True)
     zip_code = models.CharField(max_length=10)
     
     # Platform access levels
@@ -50,7 +49,7 @@ class User(models.Model):
 
     access_level = models.CharField(max_length=1,
                                         choices=ACCESS_LEVELS,
-                                        default='C',
+                                        default='U',
                                         db_column='ACCESS_LEVEL'
     )
 
