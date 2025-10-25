@@ -1,12 +1,14 @@
 from apps.entities.models import *
 from collections import defaultdict
 from datetime import timedelta
+from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db import transaction as django_transaction
 from django.utils import timezone
 from faker import Faker
 import logging
 import random
+import requests
 
 # Logging basic configuration
 logger = logging.getLogger(__name__)
@@ -288,23 +290,39 @@ def create_data(number_of_users=10):
         else:
             logger.info("Admin user 1000 already exists.")
 
-        posts_to_create = []
         for i in range(1, 5 + 1):
-            posts_to_create.append(
-                PostBlog(
-                    post_id=f'{i:06}',
+            post = PostBlog(
                     author_id=admin_user,
                     title=fake.sentence(nb_words=6, variable_nb_words=True),
                     text=fake.text(max_nb_chars=1500), # Using faker for lorem ipsum
-                    images="https://placehold.co/800x400/22c55e/ffffff?text=Recicash+Blog", # Placeholder image
-                    created_at=timezone.now(),
-                    last_edition_date=timezone.now()
                 )
+            post.save()
+
+            image_url = f"https://placehold.co/600x400?text=Post-{i}"
+
+            # Download image
+            response = requests.get(image_url)
+            response.raise_for_status() # Raises error if download fails
+
+            # Create a file-like that Django understands
+            image_content = ContentFile(response.content)
+            
+            # Creates a PostImage register using the PostBlog created previously
+            post_image = PostImage(
+                post_id=post,
             )
+            post_image.save() # Save PostImage
+            
+            # Saves image in PostImage
+            filename = f"post_{post.post_id}_img.png"
+            post_image.image.save(filename, image_content, save=True)
+
+            logger.info(f"Post {post.post_id} and Image {post_image.id} created")
         
-        PostBlog.objects.bulk_create(posts_to_create)
         logger.info(f"Blog posts created successfully.")
 
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error downloading image {post.post_id}: {e}")
     except Exception as e:
         logger.error(f"An unexpected error occurred while creating blog posts: {e}")
 
