@@ -5,7 +5,7 @@ const DataField = styled(TextField)({
   width: "404px",
   height: "32px",
   borderRadius: "10px",
-  border: "1px solid",
+  border: "1px solid #D9D9D9",
   '& .MuiInputBase-root': {
         height: '32px',
         borderRadius: '10px',
