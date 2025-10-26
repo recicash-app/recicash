@@ -1,22 +1,22 @@
-# Node 20 oficial
+# Official Node 20
 FROM node:20
 
 WORKDIR /app
 
-# Copia package.json e package-lock.json
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Instala dependências
+# Install dependencies
 RUN npm install --include=dev
 
-# Copia o restante do código
+# Copy the rest of the code
 COPY . .
 
-# Expõe porta do React
+# Expose React port
 EXPOSE 3000
 
-# Define path para node_modules
+# Set path for node_modules
 ENV PATH=/app/node_modules/.bin:$PATH
 
-# Comando padrão para rodar o dev server
+# Default command to run the dev server
 CMD ["npm", "run", "dev"]

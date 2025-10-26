@@ -15,9 +15,16 @@ O Recicash é uma plataforma que promove a conscientização ambiental e incenti
 
 ## Como Rodar o Projeto
 
+### Versões Utilizadas
+
+Certifique-se de ter o Docker e o Docker Compose instalados. Para garantir o funcionamento do projeto, recomenda-se utilizar as seguintes versões das ferramentas de containerização:
+
+- **Docker:** 28.5.1 (`docker --version`)
+- **Docker Compose:** 1.29.2 (`docker-compose --version`)
+
 #### Configuração do Ambiente
 
-Antes de rodar o projeto, é necessário preencher o arquivo `.env` com as variáveis de ambiente. Utilize o arquivo `.env.example` como referência, copiando e preenchendo os valores necessários. Além disso, certifique-se de ter o Docker e o Docker Compose instalados. 
+Antes de rodar o projeto, é necessário preencher o arquivo `.env` com as variáveis de ambiente. Utilize o arquivo `.env.example` como referência, copiando e preenchendo os valores necessários.
 
 1. Para construir as imagens e subir os containers, faça:
 ```bash
@@ -33,31 +40,13 @@ make docker-down
 ```bash
 make access-data-base
 ```
-## Aplicando Migrações do Banco de Dados
-Este passo traduz os Models Python (definidos em backend/src/apps/entities/models.py) para tabelas reais no banco de dados MySQL.
 
-### Criando arquivos de migração
-Gera os arquivos .py na pasta migrations/ do aplicativo entities.
+## Acessando a Aplicação
 
-```bash
-docker-compose exec backend python manage.py makemigrations entities
-```
+Após subir os containers, acesse cada serviço pelos seguintes endereços:
 
-### Aplicando as Migrações
-Aplica as alterações ao banco de dados, criando todas as tabelas e relacionamentos definidos nos Models.
-
-```bash
-docker-compose exec backend python manage.py migrate
-```
-
-## População de Dados Iniciais
-Este passo insere os registros iniciais no banco de dados
-
-### Executar o comando de população
-O comando populate_initial_data é definido no aplicativo entities e é executado diretamente:
-
-```bash
-docker-compose exec backend python manage.py populate_initial_data
-```
-
-Se o comando for bem-sucedido, você verá logs formatados no console, indicando a criação dos registros.
+- **Backend (API):** http://api.docker.localhost
+- **Client:** http://web.docker.localhost
+- **Admin:** http://admin.docker.localhost
+- **Ecoponto:** http://ecoponto.docker.localhost
+- **Dashboard Traefik:** http://localhost:8080

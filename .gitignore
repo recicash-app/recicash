@@ -145,3 +145,6 @@ venv/
 # python cache
 __pycache__/
 *.pyc
+
+# IDE cache
+.vscode
