@@ -26,12 +26,12 @@ Antes de rodar o projeto, é necessário preencher o arquivo `.env` com as vari�
 
 1. Para construir as imagens e subir os containers, faça:
 ```bash
-make up
+make docker-up
 ```
 
 2. Para derrubar todos os containers, faça:
 ```bash
-make down
+make docker-down
 ```
 
 3. Para acessar o container do banco de dados local, faça:

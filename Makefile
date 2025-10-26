@@ -4,10 +4,10 @@ export
 .PHONY: docker-build
 .SILENT:
 
-up:
+docker-up:
 	docker-compose up -d --build
 
-down:
+docker-down:
 	docker-compose down
 
 access-data-base:
