@@ -103,7 +103,7 @@ class UserObtainPairSerializer(TokenObtainPairSerializer):
             'user_id': self.user.user_id,
             'email': self.user.email,
             'first_name': self.user.first_name,
-            'access_level': self.user.get_access_level_display,
+            'access_level': self.user.access_level,
         }
 
         return data
