@@ -283,7 +283,7 @@ class PostBlog(models.Model):
 
 
 class PostImage(models.Model):
-    post_id = models.ForeignKey(
+    post = models.ForeignKey(
         PostBlog,
         on_delete=models.CASCADE,
         related_name='images'
