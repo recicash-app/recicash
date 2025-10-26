@@ -1,7 +1,9 @@
+import GoogleSignInButton from './GoogleSignInButton';
+
 function App() {
   return (
     <div>
-      <h1>Recicash Frontend está funcionando!</h1>
+      <GoogleSignInButton />
     </div>
   );
 }
