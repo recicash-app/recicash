@@ -2,7 +2,7 @@ import { Box, IconButton } from "@mui/material";
 import { Upload, Delete } from "@mui/icons-material";
 import { getDashedInputProps } from "../styles/dashedInputProps";
 
-function ImageBlock({ content, isEditing, onChange }) {
+function ImageBlock({ content, isEditing, onChange, sx }) {
   const handleUpload = (e) => {
     const file = e.target.files[0];
     if (file) onChange(URL.createObjectURL(file));
@@ -24,16 +24,16 @@ function ImageBlock({ content, isEditing, onChange }) {
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
+        ...sx
       }}
     >
       {/* IMAGE */}
       {content ? (
         <img
           src={content}
-          alt="block"
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
-      ) : (
+      ) : isEditing && (
         <Box sx={{ textAlign: "center", px: 2 }}>
           Nenhuma imagem
         </Box>

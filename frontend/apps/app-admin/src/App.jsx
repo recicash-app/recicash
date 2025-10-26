@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import { Box } from "@mui/material";
 
 import Sidebar from "./components/sidebar/Sidebar";
-// import PostManagementPage from "./pages/PostManagementPage";
+import PostManagementPage from "./pages/PostManagementPage";
 
 const drawerWidth = 260;
 
@@ -24,7 +24,7 @@ function App() {
       >
         {/* Page routes */}
         <Routes>
-          <Route path="/" element={<div/>} />
+          <Route path="/" element={<PostManagementPage />} />
         </Routes>
       </Box>
     </Box>
