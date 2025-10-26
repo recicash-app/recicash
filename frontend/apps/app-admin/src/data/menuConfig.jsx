@@ -2,7 +2,7 @@ import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSetting
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 
-const sidebarItems = [
+export const menuItems = [
   {
     name: "Publicações", 
     icon: DashboardRoundedIcon, 
@@ -19,5 +19,3 @@ const sidebarItems = [
     path: "/settings"
   },
 ];
-
-export default sidebarItems;

@@ -2,7 +2,7 @@ import { Box, Divider, Drawer, List, Typography } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import menuItems from '../../data/menuItems';
+import { menuItems } from '../../data/menuConfig';
 import SidebarItem from './SidebarItem';
 
 const GradientDivider = styled(Divider)(({ theme }) => ({
