@@ -12,6 +12,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class UserObtainPairView(TokenObtainPairView):
     """
-    View de login customizada que usa email em vez de username.
+    Customized login view to accept email instead of username.
     """
     serializer_class = UserObtainPairSerializer

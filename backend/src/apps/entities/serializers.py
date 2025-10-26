@@ -30,7 +30,7 @@ class UserSerializer(serializers.ModelSerializer):
         """
         password = validated_data.pop('password')
         user = User(**validated_data)
-        user.set_password(password)  # Hasheia a senha
+        user.set_password(password)  # Hashes password
         user.save()
         return user
 
@@ -46,7 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
         instance.cpf = validated_data.get('cpf', instance.cpf)
         instance.zip_code = validated_data.get('zip_code', instance.zip_code)
         
-        # Hasheia a senha se ela foi enviada na requisição
+        # Hashes password if it was sent in request
         password = validated_data.get('password', None)
         if password:
             instance.set_password(password)
@@ -59,56 +59,51 @@ class UserObtainPairSerializer(TokenObtainPairSerializer):
     
     def __init__(self, *args, **kwargs):
         """
-        Modifica o serializer para aceitar 'email' em vez de 'username'.
+        Modify serializer to accept 'email' instead of 'username'.
         """
         super().__init__(*args, **kwargs)
-        # Remove o campo 'username'
+        # remove 'username'
         self.fields.pop('username', None)
-        # Adiciona o campo 'email'
+        # add 'email'
         self.fields['email'] = serializers.EmailField()
 
     def validate(self, attrs):
         """
-        Valida as credenciais usando email e senha.
+        Validate credentials using email and password.
         """
         email = attrs.get('email')
         password = attrs.get('password')
 
-        # Encontra o usuário pelo email
+        # Find user by email
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            raise serializers.ValidationError('Credenciais inválidas.')
+            raise serializers.ValidationError('Invalid credentials.')
 
-        # Usa a função 'authenticate' do Django para verificar a senha
-        # e o status 'is_active' do usuário.
-        # 'authenticate' requer o USERNAME_FIELD, que ainda é 'username'.
+        # Verify password and checks whether the user is active or not.
         user_auth = authenticate(
-            username=user.username,
+            username=user.username, # 'authenticate' requires USERNAME_FIELD.
             password=password
         )
 
         if not user_auth:
-            # Senha incorreta ou usuário inativo
-            raise serializers.ValidationError('Credenciais inválidas.')
+            # Incorrect password or inactive user
+            raise serializers.ValidationError('Invalid credentials.')
 
-        # Se a autenticação foi bem-sucedida, 'self.user' é setado
         self.user = user_auth
 
-        # A lógica original do 'simplejwt' para gerar os tokens
-        # é chamada aqui, mas precisamos fazer manualmente pois
-        # não chamamos o super().validate()
+        # Generate tokens
         data = {}
         refresh = self.get_token(self.user)
         data['refresh'] = str(refresh)
         data['access'] = str(refresh.access_token)
         
-        # (Opcional) Adiciona dados extras do usuário na resposta do login
+        # Add extra data to answer body
         data['user'] = {
             'user_id': self.user.user_id,
             'email': self.user.email,
             'first_name': self.user.first_name,
-            'access_level': self.user.get_access_level_display(), # 'get...display()' é melhor
+            'access_level': self.user.get_access_level_display,
         }
 
         return data
