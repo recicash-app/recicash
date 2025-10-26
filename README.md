@@ -11,6 +11,8 @@ O Recicash é uma plataforma que promove a conscientização ambiental e incenti
 - **Containerização:** Docker e Docker Compose para padronização e isolamento do ambiente.
 - **API:** Integração com Google Maps API para exibição de mapas e localização de ecopontos.
 
+
+
 ## Como Rodar o Projeto
 
 ### Versões Utilizadas
