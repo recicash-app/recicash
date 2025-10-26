@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'rest_framework',
+
+    # My apps
+    'apps.entities.apps.EntitiesConfig'
 ]
 
 MIDDLEWARE = [
@@ -106,6 +109,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTH_USER_MODEL = 'entities.User'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
