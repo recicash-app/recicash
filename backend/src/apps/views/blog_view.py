@@ -1,7 +1,8 @@
 from rest_framework import viewsets
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from apps.entities.models import PostBlog, PostImage
-from apps.entities.serializers import PostBlogSerializer
+from apps.entities.serializers import PostBlogSerializer, PostImageSerializer
 from apps.entities.permissions import IsAppAdminUser
 
 
@@ -9,6 +10,9 @@ class PostBlogViewSet(viewsets.ModelViewSet):
     # Gets all posts from blog
     queryset = PostBlog.objects.all()
     serializer_class = PostBlogSerializer
+
+    # Deal with diffent formats of files and inputs
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_permissions(self):
         if self.action == 'list' or self.action == 'retrieve':
@@ -23,4 +27,7 @@ class PostBlogViewSet(viewsets.ModelViewSet):
 
 class PostImageViewSet(viewsets.ModelViewSet):
     queryset = PostImage.objects.all()
-    serializer_class = PostBlogSerializer
+    serializer_class = PostImageSerializer
+
+    permission_classes = [IsAuthenticated, IsAppAdminUser]
+    parser_classes = [MultiPartParser, FormParser]
