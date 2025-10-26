@@ -4,8 +4,40 @@ import GreenSpot from '../../shared/assets/shape-bottom-right.svg'
 import Tree from '../../shared/assets/tree.svg'
 
 import React, { useState, useEffect } from 'react';
-import { Stack, Checkbox, Modal, Button, Divider, Box, Typography } from '@mui/material'
+import { Stack, Button, Divider, Box, Typography } from '@mui/material'
 import { styled } from '@mui/system'
+
+function SignUpOption() {
+
+    const ButtonText = styled(Button)({
+        boxShadow: 'none',
+        textTransform: 'none',
+        color: '#3A5B22',
+        fontWeight: 'bold',
+        fontFamily: 'Poppins',
+        fontSize: '14px',
+
+        "& .MuiTouchRipple-root": {
+            display: "none",
+        },
+
+        '&:hover': {
+            textDecoration: 'underline',
+            backgroundColor: 'transparent',
+        },
+    });
+
+    const handleClick = () => {
+        console.log("Redirecionando para a página de cadastro");
+        //window.location.href = '/cadastro';
+    };
+
+    return(
+        <ButtonText variant='text' onClick={handleClick}>
+            Cadastrar-se
+        </ButtonText>
+    )
+}
 
 function GoogleButton() {
     useEffect(() => {
@@ -32,7 +64,6 @@ function Form() {
   const [formData, setFormData] = useState({
     name: '',
     password: '',
-    passwordConfirmation: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -134,9 +165,13 @@ function SignUpPage() {
                 <Stack spacing={4}>
                     <Form />
                     <Divider>ou</Divider>
-                    <Box style={{ display:'flex', justifyContent:'center', alignItems:'center' }}>
+                    <Stack spacing={4} style={{ alignItems:'center' }}>
                         <GoogleButton />
-                    </Box>
+                        <Box display="flex" alignItems="center">
+                            <Typography fontFamily="Poppins" fontSize="14px"> Não tem conta?</Typography>
+                            <SignUpOption />
+                        </Box>
+                    </Stack>
                 </Stack>
             </Stack>
 
