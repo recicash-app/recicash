@@ -1,9 +1,12 @@
 import React, { useEffect } from 'react';
 
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
 function GoogleButton() {
+
     useEffect(() => {
         google.accounts.id.initialize({
-          client_id: 'SEU_CLIENT_ID_DO_GOOGLE', // TO-DO: console.cloud.google.com
+          client_id: clientId,
           callback: handleCredentialResponse,
         });
     
@@ -15,6 +18,10 @@ function GoogleButton() {
     
       const handleCredentialResponse = (response) => {
         console.log("Token JWT do Google:", response.credential);
+        // Esse token JWT precisa ser enviado ao backend.
+        // O backend valida o JWT usando a biblioteca google-auth ou PyJWT
+        // Após validar, loga o usuário no sistema (criando token)
+        // Retorna ao frontend
       };
     
       return <div id="googleSignInDiv"></div>;
