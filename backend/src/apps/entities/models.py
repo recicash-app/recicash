@@ -28,6 +28,7 @@ class RecyclingPoint(models.Model):
 
 class User(AbstractUser):
     user_id = models.BigAutoField(primary_key=True) # PK de Usuario
+
     fav_recycling_point_id = models.ForeignKey( # FK that references to favorite Recycling Point 
         RecyclingPoint,
         on_delete=models.SET_NULL,
@@ -60,22 +61,6 @@ class User(AbstractUser):
     
     def __str__(self):
         return self.email
-
-
-class Password(models.Model):
-    user_id = models.OneToOneField(
-        User,
-        primary_key=True,
-        on_delete=models.CASCADE,
-        db_column='USER_ID',
-        related_name='user_password'
-    )
-    password = models.CharField(max_length=30)
-
-    class Meta:
-        db_table = 'PASSWORD'
-        verbose_name = 'User password'
-        verbose_name_plural = 'User passwords'
 
 
 class Wallet(models.Model):
