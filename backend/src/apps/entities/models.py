@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 
 class RecyclingPoint(models.Model):
     recycling_point_id = models.BigAutoField(primary_key=True) # PK de Ecoponto
@@ -26,7 +25,7 @@ class RecyclingPoint(models.Model):
         return self.recycling_point_id
 
 
-class User(AbstractUser):
+class User(models.Model):
     user_id = models.BigAutoField(primary_key=True) # PK de Usuario
     fav_recycling_point_id = models.ForeignKey( # FK that references to favorite Recycling Point 
         RecyclingPoint,
@@ -37,7 +36,9 @@ class User(AbstractUser):
         related_name='favorite_recycling_point'
     )
 
-    cpf = models.CharField(max_length=14, unique=True)
+    name  = models.CharField(max_length=255)
+    email = models.EmailField(max_length=255, unique=True)
+    cpf   = models.CharField(max_length=14, unique=True)
     zip_code = models.CharField(max_length=10)
     
     # Platform access levels
@@ -49,7 +50,7 @@ class User(AbstractUser):
 
     access_level = models.CharField(max_length=1,
                                         choices=ACCESS_LEVELS,
-                                        default='U',
+                                        default='C',
                                         db_column='ACCESS_LEVEL'
     )
 
@@ -60,6 +61,22 @@ class User(AbstractUser):
     
     def __str__(self):
         return self.email
+
+
+class Password(models.Model):
+    user_id = models.OneToOneField(
+        User,
+        primary_key=True,
+        on_delete=models.CASCADE,
+        db_column='USER_ID',
+        related_name='user_password'
+    )
+    password = models.CharField(max_length=30)
+
+    class Meta:
+        db_table = 'PASSWORD'
+        verbose_name = 'User password'
+        verbose_name_plural = 'User passwords'
 
 
 class Wallet(models.Model):
@@ -257,6 +274,7 @@ class PostBlog(models.Model):
     )
     title = models.CharField(max_length=200)
     text = models.TextField()
+    images = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_edition_date = models.DateTimeField(auto_now=True)
 
@@ -264,21 +282,3 @@ class PostBlog(models.Model):
         db_table = 'POST_BLOG'
         verbose_name = 'post'
         verbose_name_plural = 'posts'
-
-
-class PostImage(models.Model):
-    post = models.ForeignKey(
-        PostBlog,
-        on_delete=models.CASCADE,
-        related_name='images'
-    )
-
-    image = models.ImageField(upload_to='blog_images/')
-
-    class Meta:
-        db_table = 'POST_IMAGE'
-        verbose_name = 'post_image'
-        verbose_name_plural = 'post_images'
-
-    def __str__(self):
-        return f"Post image: {self.post_id.title}"

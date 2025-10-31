@@ -28,7 +28,11 @@ except KeyError:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'api.localhost',
+    'api.docker.localhost', 
+    'localhost',           
+]
 
 
 # Application definition
@@ -42,9 +46,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'rest_framework',
-    'rest_framework.authtoken',
-    'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',
 
     # My apps
     'apps.entities.apps.EntitiesConfig'
@@ -150,3 +151,37 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Logging definitions
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    # Formatter definition
+    'formatters': {
+        'custom_simple': {
+            'format': '[%(levelname)s] %(message)s' 
+        },
+    },
+    
+    # Handler definition
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'custom_simple',
+        },
+    },
+    'loggers': {
+        # Root logger config
+        '': {
+            'handlers': ['console'],
+            'level': 'INFO',  # INFO or superior level messages must be processed
+        },
+        # Specific loggers
+        'apps.entities.scripts.populate_initial_data': { 
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False, # Para não duplicar com o root logger
+        },
+    },
+}
