@@ -33,6 +33,7 @@ function Policy() {
         fontWeight: 'bold',
         fontFamily: 'Poppins',
         fontSize: '14px',
+        border: 'none',
 
         "& .MuiTouchRipple-root": {
             display: "none",
@@ -41,6 +42,11 @@ function Policy() {
         '&:hover': {
             textDecoration: 'underline',
             backgroundColor: 'transparent',
+            boxShadow: 'none',
+        },
+
+        '&:focus': {
+            outline: 'none',
         },
     });
 
