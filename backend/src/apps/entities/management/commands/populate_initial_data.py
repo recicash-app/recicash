@@ -290,10 +290,19 @@ def create_data(number_of_users=10):
         else:
             logger.info("Admin user 1000 already exists.")
 
+        # Predefined titles for testing search functionality
+        test_titles = [
+            "Como fazer reciclagem correta de plástico",
+            "Benefícios da reciclagen para o meio ambiente", # Typo intentional: "reciclagen"
+            "Separação de lixo: guia completo",
+            "Pontos de coleta seletiva em São Paulo",
+            "Reciclagem de papel: dicas importantes"
+        ]
+
         for i in range(1, 5 + 1):
             post = PostBlog(
                     author_id=admin_user,
-                    title=fake.sentence(nb_words=6, variable_nb_words=True),
+                    title=test_titles[i-1],  # Use predefined titles
                     text=fake.text(max_nb_chars=1500), # Using faker for lorem ipsum
                 )
             post.save()
