@@ -194,6 +194,7 @@ function Form() {
         {Policy()}
       </Box>
       <SendFormButton text="Criar conta" onClick={handleSubmit}/>
+    <Box height="32px" />
     </Stack>
   );
 }
@@ -266,7 +267,7 @@ function Information() {
 function SignUpPage() {
     return(
         <Box>
-            <Information />
+            <Information style={{ zIndex: '-1' }}/>
             <Stack spacing={8} style={{ position: 'absolute', left: '8vw', top: '20vh' }}>
                 <Typography variant='h4' fontFamily='Poppins' fontWeight='bold' > Cadastro </Typography>
                 {Form()}
