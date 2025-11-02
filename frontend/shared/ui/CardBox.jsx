@@ -28,7 +28,7 @@ function CardBox({ sx, children, focused = false, ...props }) {
   ];
 
   return (
-    <Box sx={{ position: "relative", display: "inline-block", ml: "40px", mb: "40px" }}>
+    <Box sx={{ position: "relative", display: "inline-block" }}>
       {/* Leaf Decoration */}
       {focused && (
         <Box

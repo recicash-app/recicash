@@ -180,7 +180,7 @@ const recicashTheme = createTheme({
         // Soft Outlined (light subtle border)
         {
           props: { variant: "recicashSoftOutlined" },
-          style: ({ ownerState }) => ({
+          style: ({ state }) => ({
             width: 139,
             height: 50,
             borderRadius: "11px",
@@ -191,7 +191,7 @@ const recicashTheme = createTheme({
             "&:hover": {
               backgroundColor: "rgba(217, 217, 217, 0.1)",
             },
-            ...(ownerState.active && {
+            ...(state.active && {
               border: "1px solid #D9D9D9",
               boxShadow: "0px 4px 4px 0px #00000040",
             }),
