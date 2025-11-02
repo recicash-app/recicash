@@ -223,13 +223,13 @@ function Information() {
             {dir === 1 ? (
                 <>
                 <img src={img} alt={text} style={{ width: '40%', height: '30%', opacity: '0.9', borderRadius: '50%', ...commonAnimation, animationDelay: delay }} />
-                <Typography marginLeft={2} fontSize="14px" fontWeight="bold" fontFamily="Poppins" color="#225C22" maxWidth="30vw">
+                <Typography marginLeft={2} fontSize="1.3vw" fontWeight="bold" fontFamily="Poppins" color="#225C22" maxWidth="30vw">
                     {text}
                 </Typography>
                 </>
             ) : (
                 <>
-                <Typography marginRight={2} fontSize="14px" fontWeight="bold" fontFamily="Poppins" color="#225C22" maxWidth="30vw">
+                <Typography marginRight={2} fontSize="1.3vw" fontWeight="bold" fontFamily="Poppins" color="#225C22" maxWidth="30vw">
                     {text}
                 </Typography>
                 <img src={img} alt={text} style={{ width: '40%', height: '30%', opacity: '0.9', borderRadius: '50%', ...commonAnimation, animationDelay: delay }} />
