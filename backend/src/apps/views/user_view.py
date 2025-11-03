@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
-from rest_framework_simplejwt.views import TokenObtainPairView 
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
@@ -28,13 +28,14 @@ class UserViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 
-class UserObtainPairView(TokenObtainPairView): 
+class UserObtainPairView(TokenObtainPairView):
     """
     Customized login view that uses email instead of username.
     Validate credentials and define access tokens and refresh token as HttpOnly cookies.
     """
     serializer_class = UserObtainPairSerializer
 
+    @method_decorator(csrf_protect) # Guarantee that X-CSRFToken header is verified
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
@@ -75,7 +76,7 @@ class UserObtainPairView(TokenObtainPairView):
             key='refresh_token',
             value=validated_data['refresh'],
             httponly=True,
-            secure=False,         # False to development in HTTP.
+            secure=True,         # False to development in HTTP.
             samesite='Lax', 
             path='/'
         )
