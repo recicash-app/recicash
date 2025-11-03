@@ -54,6 +54,16 @@ class UserSerializer(serializers.ModelSerializer):
             
         instance.save()
         return instance
+    
+    def validate_cpf(self, cpf):
+        """
+        Verify CPF format: XXX.XXX.XXX-XX.
+        """
+        cpf_regex = re.compile(r'^\d{3}\.\d{3}\.\d{3}\-\d{2}$')
+        if not cpf_regex.match(cpf):
+            raise serializers.ValidationError("Invalid CPF. The format required is XXX.XXX.XXX-XX.")
+        
+        return cpf
         
     def validate_password(self, value):
         """
