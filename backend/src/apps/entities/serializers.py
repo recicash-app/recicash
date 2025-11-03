@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import User
+import re
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -53,7 +54,22 @@ class UserSerializer(serializers.ModelSerializer):
             
         instance.save()
         return instance
-    
+        
+    def validate_password(self, value):
+        """
+        Verify password strength.
+        """
+        if len(value) < 8:
+            raise serializers.ValidationError("Password must have at least 8 characters.")
+        
+        if not any(char.isdigit() for char in value):
+            raise serializers.ValidationError("Password must contains at least one number")
+            
+        if not any(char.isupper() for char in value):
+             raise serializers.ValidationError("Password must have at least one capitalized letter")
+
+        return value
+
 
 class UserObtainPairSerializer(TokenObtainPairSerializer):
     
