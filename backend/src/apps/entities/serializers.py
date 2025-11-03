@@ -1,47 +1,136 @@
+from django.contrib.auth import authenticate
 from rest_framework import serializers
-from .models import PostBlog, PostImage
-        
-class PostImageSerializer(serializers.ModelSerializer):
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from .models import User
+import re
+
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PostImage
-        fields = ('id', 'post', 'image')
+        model = User
+        fields = (
+            'user_id',
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'password',
+            'cpf',
+            'zip_code',
+            'access_level'
+        )
+        read_only_fields = ('user_id', 'access_level')
 
-
-class PostBlogSerializer(serializers.ModelSerializer):
-    images = PostImageSerializer(many=True, read_only=True)
-
-    uploaded_images = serializers.ListField(
-        child=serializers.ImageField(allow_empty_file=False, use_url=False),
-        write_only=True,
-        required=False
-    )
-
-    class Meta:
-        model = PostBlog
-
-        # Post blog fields that will be shown
-        fields = ('post_id', 'author_id', 'title', 'text',
-                  'images', 'uploaded_images', 
-                  'created_at', 'last_edition_date'
-            )
-        
-        # Fields that cannot be edited by user
-        read_only_fields = ('author_id', 'created_at', 'last_edition_date')
+        # Ensures that 'password' won't be return in GET requisitions
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
     
     def create(self, validated_data):
         """
-        Overwrite 'create' method to deal with files
-        sent in 'uploaded_images'
+        Create and return a new User, hashing password.
         """
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)  # Hasheia a senha
+        user.save()
+        return user
 
-        # Separate the images data from the rest of the data
-        uploaded_images_data = validated_data.pop('uploaded_images', [])
-
-        # Create BlogPost without the 'uploaded_images'
-        post = PostBlog.objects.create(**validated_data)
-
-        # Create and link up all images to the post
-        for image_data in uploaded_images_data:
-            PostImage.objects.create(post_id=post, image=image_data)
+    def update(self, instance, validated_data):
+        """
+        Update an User, hashing password if it is known.
+        """
         
-        return post
+        instance.username = validated_data.get('username', instance.username)
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.email = validated_data.get('email', instance.email)
+        instance.cpf = validated_data.get('cpf', instance.cpf)
+        instance.zip_code = validated_data.get('zip_code', instance.zip_code)
+        
+        # Hash password
+        password = validated_data.get('password', None)
+        if password:
+            instance.set_password(password)
+            
+        instance.save()
+        return instance
+    
+    def validate_cpf(self, cpf):
+        """
+        Verify CPF format: XXX.XXX.XXX-XX.
+        """
+        cpf_regex = re.compile(r'^\d{3}\.\d{3}\.\d{3}\-\d{2}$')
+        if not cpf_regex.match(cpf):
+            raise serializers.ValidationError("Invalid CPF. The format required is XXX.XXX.XXX-XX.")
+        
+        return cpf
+        
+    def validate_password(self, value):
+        """
+        Verify password strength.
+        """
+        if len(value) < 8:
+            raise serializers.ValidationError("Password must have at least 8 characters.")
+        
+        if not any(char.isdigit() for char in value):
+            raise serializers.ValidationError("Password must contains at least one number")
+            
+        if not any(char.isupper() for char in value):
+             raise serializers.ValidationError("Password must have at least one capitalized letter")
+
+        return value
+
+
+class UserObtainPairSerializer(TokenObtainPairSerializer):
+    
+    def __init__(self, *args, **kwargs):
+        """
+        Change the serializer to accept 'email' instead of 'username'.
+        """
+        super().__init__(*args, **kwargs)
+        # remove 'username' field
+        self.fields.pop('username', None)
+        # Add 'email' field
+        self.fields['email'] = serializers.EmailField()
+
+    def validate(self, attrs):
+        """
+        Credentials using email and password
+        """
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        # Find user by email
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError('Credenciais inválidas.')
+
+        # verify password and 'is_active' status
+        # 'authenticate' require USERNAME_FIELD
+        user_auth = authenticate(
+            username=user.username,
+            password=password
+        )
+
+        if not user_auth:
+            # Wrong password or inactive user
+            raise serializers.ValidationError('Credenciais inválidas.')
+
+        self.user = user_auth
+
+        # Generate the tokens
+        data = {}
+        refresh = self.get_token(self.user)
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+        
+        # Add extra data to login response
+        data['user'] = {
+            'user_id': self.user.user_id,
+            'email': self.user.email,
+            'first_name': self.user.first_name,
+            'access_level': self.user.access_level,
+        }
+
+        return data
