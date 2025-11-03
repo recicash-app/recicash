@@ -38,6 +38,9 @@ class User(AbstractUser):
         related_name='favorite_recycling_point'
     )
 
+    username = models.CharField(max_length=150, default='defaultusername', unique=True)
+    password = models.CharField(max_length=128, default='defaultpassword')
+
     cpf = models.CharField(max_length=14, unique=True)
     zip_code = models.CharField(max_length=10)
     
@@ -201,7 +204,7 @@ class Coupon(models.Model):
         ('GIFT', 'Gift')
     ]
 
-    type = models.CharField(max_length=255,
+    coupon_type = models.CharField(max_length=255,
                                      choices=COUPON_TYPES,
                                      default='PERCENTAGE_DISCOUNT',
                                      db_column='COUPON_TYPE'
