@@ -7,7 +7,7 @@ import Reciclagem from '../../../../shared/assets/reciclagem.jpg'
 
 import React, { useState } from 'react';
 import { Stack, Checkbox, Modal, Button, Box, Typography, Alert } from '@mui/material'
-import { styled } from '@mui/system'
+import { styled } from '@mui/system' 
 
 function Policy() { 
     

@@ -1,13 +1,13 @@
-import InputField from '../../shared/ui/InputField'
-import SendFormButton from '../../shared/ui/SendFormButton'
-import GreenSpot from '../../shared/assets/shape-bottom-right.svg'
-import Tree from '../../shared/assets/tree.svg'
+import InputField from '../../../../shared/ui/InputField'
+import SendFormButton from '../../../../shared/ui/SendFormButton'
+import GreenSpot from '../../../../shared/assets/shape-bottom-right.svg'
+import Tree from '../../../../shared/assets/tree.svg'
 
 import React, { useState, useEffect } from 'react';
-import { Stack, Button, Divider, Box, Typography } from '@mui/material'
+import { Stack, Button, Divider, Box, Typography, Alert } from '@mui/material'
 import { styled } from '@mui/system'
 
-function SignUpOption() {
+function SignUpOption() { 
 
     const ButtonText = styled(Button)({
         boxShadow: 'none',
@@ -24,6 +24,11 @@ function SignUpOption() {
         '&:hover': {
             textDecoration: 'underline',
             backgroundColor: 'transparent',
+            boxShadow: 'none',
+        },
+
+        '&:focus': {
+            outline: 'none',
         },
     });
 
@@ -39,34 +44,13 @@ function SignUpOption() {
     )
 }
 
-function GoogleButton() {
-    useEffect(() => {
-        google.accounts.id.initialize({
-          client_id: 'SEU_CLIENT_ID_DO_GOOGLE', // TO-DO: console.cloud.google.com
-          callback: handleCredentialResponse,
-        });
-    
-        google.accounts.id.renderButton(
-          document.getElementById('googleSignInDiv'),
-          { theme: 'outline', size: 'large', width: 300 }
-        );
-      }, []);
-    
-      const handleCredentialResponse = (response) => {
-        console.log("Token JWT do Google:", response.credential);
-      };
-    
-      return <div id="googleSignInDiv"></div>;
-}
-
 function Form() {
 
   const [formData, setFormData] = useState({
-    name: '',
+    email: '',
     password: '',
   });
 
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
@@ -83,6 +67,11 @@ function Form() {
         setError('Email é obrigatório');
         return false;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+        setError('Email deve estar em um formato válido');
+        return false;
+    }
     if (!formData.password.trim()) {
         setError('Senha é obrigatória');
         return false;
@@ -91,22 +80,13 @@ function Form() {
   };
 
   const handleSubmit = async (e) => { 
-    
-    console.log("Formulário enviado");
-    console.log(formData);
-
-    /*
     e.preventDefault();
     setError('');
     setSuccess(false);
-
     if (!validateForm()) return;
-
-    setLoading(true);
-
     
     try {
-        const response = await fetch('http://localhost:8080/formulario-login', {
+        const response = await fetch(`http://api.docker.localhost:${import.meta.env.VITE_HTTP_PORT}/api/v1/token/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -114,35 +94,28 @@ function Form() {
             },
             body: JSON.stringify({
                 email: formData.email,
-                senha: formData.password
+                password: formData.password
             }),
         });
 
         if (response.ok) {
-            console.log('Formulário enviado com sucesso');
+            console.log('Login feito com sucesso :)');
             setSuccess(true);
             setFormData({ email: '', password: '' });
-
-            setTimeout(() => {
-                 window.location.href = '/inicio';
-            }, 2000);
+            // window.location.href = '/inicio';
         } 
         else {
-            const data = await response.json();
-            throw new Error(data.message || 'Erro ao fazer login na conta');
+            throw new Error('Credenciais inválidas');
         }
 
+        const data = await response.json();
+        //console.log('Tokens recebidos:', data);
     } 
     
     catch (error) {
-        console.error('Erro:', error);
+        console.error('Erro:', error.message);
         setError(error.message || 'Erro de conexão. Tente novamente.');
     } 
-    
-    finally {
-        setLoading(false);
-    }
-  */
 
   };
 
@@ -151,22 +124,23 @@ function Form() {
       <InputField required label="Email" name="email" type="email" value={formData.email} onChange={handleChange}/>
       <InputField required label="Senha" name="password" type="password" value={formData.password} onChange={handleChange}/> 
       <SendFormButton text="Entrar" onClick={handleSubmit}/>
+      {error && <Alert severity="error"> {error}</Alert>}
+      {success && <Alert severity="success">Login realizado com sucesso!</Alert>}
     </Stack>
   );
 }
 
-function SignUpPage() {
+function SignInPage() {
     return(
         <Box>
             <img src={GreenSpot} alt="Green Spot" style={{ position: 'fixed', bottom: '0vw', right: '0vw', width: "47vw", transform: "scaleX(1.2)", indexZ: '-1' }} />
             <img src={Tree} alt="Tree" style={{ position: 'fixed', bottom: '0vw', right: '0vw', width: "45vw", indexZ: '-1' }} />
-            <Stack spacing={8} style={{ position: 'absolute', left: '8vw', top: '20vh' }}>
+            <Stack spacing={8} style={{ position: 'absolute', left: '8vw', top: '25vh' }}>
                 <Typography variant='h4' fontFamily='Poppins' fontWeight='bold' > Login </Typography>
                 <Stack spacing={4}>
                     <Form />
                     <Divider>ou</Divider>
                     <Stack spacing={4} style={{ alignItems:'center' }}>
-                        <GoogleButton />
                         <Box display="flex" alignItems="center">
                             <Typography fontFamily="Poppins" fontSize="14px"> Não tem conta?</Typography>
                             <SignUpOption />
@@ -181,5 +155,5 @@ function SignUpPage() {
     )
 }
   
-export default SignUpPage;
+export default SignInPage;
   
