@@ -6,10 +6,10 @@ import Ecoponto from '../../../../shared/assets/ecoponto.jpeg'
 import Reciclagem from '../../../../shared/assets/reciclagem.jpg'
 
 import React, { useState } from 'react';
-import { Stack, Checkbox, Modal, Button, Box, Typography } from '@mui/material'
+import { Stack, Checkbox, Modal, Button, Box, Typography, Alert } from '@mui/material'
 import { styled } from '@mui/system'
 
-function Policy() {
+function Policy() { 
     
     const PopUp = styled(Box)({
         backgroundColor: "#FFFFFF",
@@ -80,15 +80,17 @@ function Policy() {
 function Form() {
 
   const [formData, setFormData] = useState({
-    name: '',
-    cpf: '',
+    first_name: '',
+    last_name: '',
+    username: '',
     email: '',
     password: '',
     passwordConfirmation: '',
+    cpf: '',
+    zip_code: '',
     policy: false
   });
 
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
@@ -100,71 +102,101 @@ function Form() {
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) {
+    if (!formData.first_name.trim()) {
         setError('Nome é obrigatório');
         return false;
     }
-    if (!formData.cpf.trim()) {
-      setError('CPF é obrigatório');
-      return false;
-  }
+    if (!formData.last_name.trim()) {
+        setError('Sobrenome é obrigatório');
+        return false;
+    }
+    if (!formData.username.trim()) {
+        setError('Nome de usuário é obrigatório');
+        return false;
+    }
     if (!formData.email.trim()) {
         setError('Email é obrigatório');
+        return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+        setError('Email deve estar em um formato válido');
         return false;
     }
     if (!formData.password.trim()) {
         setError('Senha é obrigatória');
         return false;
     }
+    if (formData.password.length < 8) {
+        setError('Senha deve ter pelo menos 8 caracteres, incluindo números e letras minúsculas e maiúsculas');
+        return false;
+    }
     if (formData.password !== formData.passwordConfirmation) {
         setError('As senhas não coincidem');
         return false;
+    }
+    if (!formData.cpf.trim()) {
+      setError('CPF é obrigatório');
+      return false;
+    }
+    const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+    if (!cpfRegex.test(formData.cpf)) {
+        setError('CPF deve estar no formato xxx.xxx.xxx-xx');
+        return false;
+    }
+    if (!formData.cpf.trim()) {
+      setError('CPF é obrigatório');
+      return false;
+    }
+    if (!formData.zip_code.trim()) {
+      setError('Código postal é obrigatório');
+      return false;
+    }
+    const zipCodeRegex = /^\d{5}-\d{3}$/;
+    if (!zipCodeRegex.test(formData.zip_code)) {
+        setError('Código postal deve estar no formato xxxxx-xxx');
+        return false;
+    }
+    if (formData.policy !== true) {
+      setError('Você deve concordar com a política de privacidade');
+      return false;
     }
     return true;
   };
 
   const handleSubmit = async (e) => { 
-    
-    console.log("Formulário enviado");
-    console.log(formData);
-
-    /*
     e.preventDefault();
     setError('');
     setSuccess(false);
-
     if (!validateForm()) return;
 
-    setLoading(true);
-
-    
     try {
-        const response = await fetch('http://localhost:8080/formulario-cadastro', {
+        const response = await fetch(`http://api.docker.localhost:${import.meta.env.VITE_HTTP_PORT}/api/v1/users/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                nome: formData.name,
-                cpf: formData.cpf,
+                first_name: formData.first_name,
+                last_name: formData.last_name,
+                username: formData.username,
                 email: formData.email,
-                senha: formData.password
+                password: formData.password,
+                cpf: formData.cpf,
+                zip_code: formData.zip_code
             }),
         });
 
         if (response.ok) {
-            console.log('Formulário enviado com sucesso');
+            console.log('Cadastro feito com sucesso :)');
             setSuccess(true);
-            setFormData({ name: '', cpf: '', email: '', password: '', passwordConfirmation: '' });
-
-            setTimeout(() => {
-                 window.location.href = '/fazer-login';
-            }, 2000);
+            setFormData({ first_name: '', last_name: '', username: '', email: '', password: '', passwordConfirmation: '', cpf: '', zip_code: '', policy: false });
+            // window.location.href = '/login';
         } 
         else {
-            const data = await response.json();
-            throw new Error(data.message || 'Erro ao criar conta');
+            const data = await response.text();
+            throw new Error(data || 'Erro ao criar conta');
         }
 
     } 
@@ -173,18 +205,16 @@ function Form() {
         console.error('Erro:', error);
         setError(error.message || 'Erro de conexão. Tente novamente.');
     } 
-    
-    finally {
-        setLoading(false);
-    }
-  */
 
   };
 
   return (
     <Stack spacing={3}>
-      <InputField required label="Nome" name="name" type="name" value={formData.name} onChange={handleChange}/>
+      <InputField required label="Nome" name="first_name" type="name" value={formData.first_name} onChange={handleChange}/>
+      <InputField required label="Sobrenome" name="last_name" type="name" value={formData.last_name} onChange={handleChange}/>
       <InputField required label="CPF" name="cpf" type="cpf" value={formData.cpf} onChange={handleChange}/>
+      <InputField required label="Código postal" name="zip_code" type="zip_code" value={formData.zip_code} onChange={handleChange}/>
+      <InputField required label="Nome de usuário" name="username" type="name" value={formData.username} onChange={handleChange}/>
       <InputField required label="Email" name="email" type="email" value={formData.email} onChange={handleChange}/>
       <InputField required label="Senha" name="password" type="password" value={formData.password} onChange={handleChange}/>
       <InputField required label="Repetir senha" name="passwordConfirmation" type="password" value={formData.passwordConfirmation} onChange={handleChange}/>
@@ -194,7 +224,9 @@ function Form() {
         {Policy()}
       </Box>
       <SendFormButton text="Criar conta" onClick={handleSubmit}/>
-    <Box height="32px" />
+      {error && <Alert severity="error"> {error}</Alert>}
+      {success && <Alert severity="success">Conta criada com sucesso!</Alert>}
+      <Box height="32px" />
     </Stack>
   );
 }
