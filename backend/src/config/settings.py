@@ -72,6 +72,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React app door
     "http://127.0.0.1:3000",
+    f"http://web.docker.localhost:{os.environ.get('HTTP_PORT', '80')}"
 ]
 
 # Allow browser to send cookies
@@ -83,6 +84,7 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    f"http://web.docker.localhost:{os.environ.get('HTTP_PORT', '80')}"
 ]
 
 # Allow React to read CSRF cookie
