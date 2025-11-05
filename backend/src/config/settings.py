@@ -45,7 +45,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'corsheaders',
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 
     # My apps
     'apps.entities.apps.EntitiesConfig'
@@ -61,6 +65,38 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# CORS configs
+
+# List of sources that can make requests.
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React app door
+    "http://127.0.0.1:3000",
+    f"http://web.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
+    f"http://ecoponto.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
+    f"http://admin.docker.localhost:{os.environ.get('HTTP_PORT', '80')}"
+]
+
+# Allow browser to send cookies
+CORS_ALLOW_CREDENTIALS = True
+
+# CSRF configs
+
+# guarantees that CSRF cookie is sent
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    f"http://web.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
+    f"http://ecoponto.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
+    f"http://admin.docker.localhost:{os.environ.get('HTTP_PORT', '80')}"
+]
+
+# Allow React to read CSRF cookie
+CSRF_COOKIE_HTTPONLY = False 
+
+# Cookie configs
+CSRF_COOKIE_SECURE = False  # It is False because we are testing in HTTP
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 ROOT_URLCONF = 'config.urls'
 
@@ -96,6 +132,8 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = 'entities.User'
+
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -119,6 +157,13 @@ CORS_ALLOW_ALL_ORIGINS = True
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.TokenAuthentication"],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework_simplejwt.authentication.JWTAuthentication"],
+    "DEFAULT_AUTHENTICATION_CLASSES": ['apps.entities.authentication.CustomJWTAuthentication']
+}
+
+SIMPLE_JWT = {
+    "USER_ID_FIELD": "user_id"
 }
 
 
@@ -143,7 +188,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 # Logging definitions
 LOGGING = {
