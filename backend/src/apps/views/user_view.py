@@ -1,5 +1,5 @@
 from apps.entities.models import User
-from apps.entities.serializers import UserSerializer, UserObtainPairSerializer
+from apps.entities.serializers import UserSerializer, UserObtainPairSerializer, ChangePasswordSerializer
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from rest_framework import viewsets, status
@@ -133,3 +133,31 @@ class GetCSRFToken(APIView):
     @method_decorator(ensure_csrf_cookie)
     def get(self, request, *args, **kwargs):
         return Response({"detail": "CSRF cookie set"}, status=status.HTTP_200_OK)
+
+
+class ChangePasswordView(APIView):
+    """
+    Change user password endpoint.
+    Requires authentication. Validates old password and updates with new password.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @method_decorator(csrf_protect)
+    def post(self, request, *args, **kwargs):
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+
+        #DRE calls validate methods inside serializer through is_valid()
+        if serializer.is_valid():
+            user = request.user
+            new_password = serializer.validated_data['new_password']
+            
+            # Set new password (Django handles hashing automatically)
+            user.set_password(new_password)
+            user.save()
+            
+            return Response(
+                {"detail": "Password changed successfully."}, 
+                status=status.HTTP_200_OK
+            )
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
