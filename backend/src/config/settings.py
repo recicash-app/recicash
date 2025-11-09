@@ -70,7 +70,7 @@ MIDDLEWARE = [
 
 # List of sources that can make requests.
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React app door
+    "http://localhost:3000",  # React app port
     "http://127.0.0.1:3000",
 ]
 
