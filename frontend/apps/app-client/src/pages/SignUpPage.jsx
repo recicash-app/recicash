@@ -91,8 +91,20 @@ function Form() {
     policy: false
   });
 
-  const [error, setError] = useState('');
+  const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const [formError, setFormError] = useState({
+    first_name: '',
+    last_name: '',
+    username: '',
+    email: '',
+    password: '',
+    passwordConfirmation: '',
+    cpf: '',
+    zip_code: '',
+    policy: ''
+})
 
   const handleChange = (e) => {
     setFormData({
@@ -102,69 +114,99 @@ function Form() {
   };
 
   const validateForm = () => {
+    let localFormError = {
+        first_name: '',
+        last_name: '',
+        username: '',
+        email: '',
+        password: '',
+        passwordConfirmation: '',
+        cpf: '',
+        zip_code: '',
+        policy: ''
+    };
+    let hasError = false;
+
     if (!formData.first_name.trim()) {
-        setError('Nome é obrigatório');
-        return false;
+        localFormError.first_name = 'Nome é obrigatório';
+        hasError = true;
     }
+
     if (!formData.last_name.trim()) {
-        setError('Sobrenome é obrigatório');
-        return false;
+        localFormError.last_name = 'Sobrenome é obrigatório';
+        hasError = true;
     }
+
     if (!formData.username.trim()) {
-        setError('Nome de usuário é obrigatório');
-        return false;
+        localFormError.username = 'Nome de usuário é obrigatório';
+        hasError = true;
     }
+
     if (!formData.email.trim()) {
-        setError('Email é obrigatório');
-        return false;
+        localFormError.email = 'Email é obrigatório';
+        hasError = true;
+    } 
+    else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            localFormError.email = 'Email inválido';
+            hasError = true;
+        }
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-        setError('Email deve estar em um formato válido');
-        return false;
-    }
+
     if (!formData.password.trim()) {
-        setError('Senha é obrigatória');
-        return false;
+        localFormError.password = 'Senha é obrigatória';
+        hasError = true;
+    } 
+    else if (formData.password.length < 8) {
+        localFormError.password = 'Senha deve ter pelo menos 8 caracteres';
+        hasError = true;
     }
-    if (formData.password.length < 8) {
-        setError('Senha deve ter pelo menos 8 caracteres, incluindo números e letras minúsculas e maiúsculas');
-        return false;
-    }
+
     if (formData.password !== formData.passwordConfirmation) {
-        setError('As senhas não coincidem');
-        return false;
+        localFormError.passwordConfirmation = 'As senhas não coincidem';
+        hasError = true;
     }
+
     if (!formData.cpf.trim()) {
-      setError('CPF é obrigatório');
-      return false;
+        localFormError.cpf = 'CPF é obrigatório';
+        hasError = true;
+    } 
+    else {
+        const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
+        if (!cpfRegex.test(formData.cpf)) {
+            localFormError.cpf = 'CPF deve estar no formato xxx.xxx.xxx-xx';
+            hasError = true;
+        }
     }
-    const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
-    if (!cpfRegex.test(formData.cpf)) {
-        setError('CPF deve estar no formato xxx.xxx.xxx-xx');
-        return false;
-    }
+
     if (!formData.zip_code.trim()) {
-      setError('Código postal é obrigatório');
-      return false;
+        localFormError.zip_code = 'Código postal é obrigatório';
+        hasError = true;
+    } 
+    else {
+        const zipCodeRegex = /^\d{5}-\d{3}$/;
+        if (!zipCodeRegex.test(formData.zip_code)) {
+            localFormError.zip_code = 'Código postal deve estar no formato xxxxx-xxx';
+            hasError = true;
+        }
     }
-    const zipCodeRegex = /^\d{5}-\d{3}$/;
-    if (!zipCodeRegex.test(formData.zip_code)) {
-        setError('Código postal deve estar no formato xxxxx-xxx');
-        return false;
+
+    if (!formData.policy) {
+        localFormError.policy = 'Você deve concordar com a política de privacidade';
+        hasError = true;
     }
-    if (formData.policy !== true) {
-      setError('Você deve concordar com a política de privacidade');
-      return false;
-    }
-    return true;
-  };
+
+    setFormError(localFormError);
+    setError(hasError);
+};
 
   const handleSubmit = async (e) => { 
     e.preventDefault();
-    setError('');
+    setError(false);
     setSuccess(false);
-    if (!validateForm()) return;
+    validateForm();
+    if (error) return;
 
     try {
         const response = await fetch(`http://api.docker.localhost:${import.meta.env.VITE_HTTP_PORT}/api/v1/users/`, {
@@ -188,7 +230,7 @@ function Form() {
             console.log('Cadastro feito com sucesso :)');
             setSuccess(true);
             setFormData({ first_name: '', last_name: '', username: '', email: '', password: '', passwordConfirmation: '', cpf: '', zip_code: '', policy: false });
-            // window.location.href = '/login';
+            window.location.href = '/login';
         } 
         else {
             const data = await response.text();
@@ -204,27 +246,29 @@ function Form() {
 
   };
 
-  return (
+  console.log(formError)
+
+return (
     <Stack spacing={3}>
-      <InputField required label="Nome" name="first_name" type="name" value={formData.first_name} onChange={handleChange}/>
-      <InputField required label="Sobrenome" name="last_name" type="name" value={formData.last_name} onChange={handleChange}/>
-      <InputField required label="CPF" name="cpf" type="cpf" value={formData.cpf} onChange={handleChange}/>
-      <InputField required label="Código postal" name="zip_code" type="zip_code" value={formData.zip_code} onChange={handleChange}/>
-      <InputField required label="Nome de usuário" name="username" type="name" value={formData.username} onChange={handleChange}/>
-      <InputField required label="Email" name="email" type="email" value={formData.email} onChange={handleChange}/>
-      <InputField required label="Senha" name="password" type="password" value={formData.password} onChange={handleChange}/>
-      <InputField required label="Repetir senha" name="passwordConfirmation" type="password" value={formData.passwordConfirmation} onChange={handleChange}/>
-      <Box display="flex" alignItems="center" >
-        <Checkbox required name="policy" onChange={handleChange} />
-        <Typography fontFamily="Poppins" fontSize="14px"> Eu concordo com a</Typography>
-        {Policy()}
-      </Box>
-      <SendFormButton text="Criar conta" onClick={handleSubmit}/>
-      {error && <Alert severity="error"> {error}</Alert>}
-      {success && <Alert severity="success">Conta criada com sucesso!</Alert>}
-      <Box height="32px" />
+        <InputField required label="Nome" name="first_name" type="name" value={formData.first_name} onChange={handleChange} error={formError.first_name ? true : false} errorText={formError.first_name}/>
+        <InputField required label="Sobrenome" name="last_name" type="name" value={formData.last_name} onChange={handleChange} error={formError.last_name ? true : false} errorText={formError.last_name}/>
+        <InputField required label="CPF" name="cpf" type="cpf" value={formData.cpf} onChange={handleChange} error={formError.cpf ? true : false} errorText={formError.cpf}/>
+        <InputField required label="Código postal" name="zip_code" type="zip_code" value={formData.zip_code} onChange={handleChange} error={formError.zip_code ? true : false} errorText={formError.zip_code}/>
+        <InputField required label="Nome de usuário" name="username" type="name" value={formData.username} onChange={handleChange} error={formError.username ? true : false} errorText={formError.username}/>
+        <InputField required label="Email" name="email" type="email" value={formData.email} onChange={handleChange} error={formError.email ? true : false} errorText={formError.email}/>
+        <InputField required label="Senha" name="password" type="password" value={formData.password} onChange={handleChange} error={formError.password ? true : false} errorText={formError.password}/>
+        <InputField required label="Repetir senha" name="passwordConfirmation" type="password" value={formData.passwordConfirmation} onChange={handleChange} error={formError.passwordConfirmation ? true : false} errorText={formError.passwordConfirmation}/>
+        <Box display="flex" alignItems="center" >
+            <Checkbox required name="policy" onChange={handleChange} />
+            <Typography fontFamily="Poppins" fontSize="14px"> Eu concordo com a</Typography>
+            {Policy()}
+        </Box>
+        {formError.policy && <Typography color="error" fontSize="12px">{formError.policy}</Typography>}
+        <SendFormButton text="Criar conta" onClick={handleSubmit}/>
+        {success && <Alert severity="success">Conta criada com sucesso!</Alert>}
+        <Box height="32px" />
     </Stack>
-  );
+);
 }
 
 function Information() {

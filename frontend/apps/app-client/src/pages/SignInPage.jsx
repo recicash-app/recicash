@@ -34,7 +34,7 @@ function SignUpOption() {
 
     const handleClick = () => {
         console.log("Redirecionando para a página de cadastro");
-        //window.location.href = '/cadastro';
+        window.location.href = '/cadastro';
     };
 
     return(
@@ -51,8 +51,13 @@ function Form() {
     password: '',
   });
 
-  const [error, setError] = useState('');
+  const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const [formError, setFormError] = useState({
+    email: '',
+    password: '',
+  })
 
   const handleChange = (e) => {
     setFormData({
@@ -62,28 +67,36 @@ function Form() {
   };
 
   const validateForm = () => {
-    
+    let localFormError = { email: '', password: '' };
+    let hasError = false;
+
     if (!formData.email.trim()) {
-        setError('Email é obrigatório');
-        return false;
+        localFormError.email = 'Email é obrigatório';
+        hasError = true;
+    } 
+    else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            localFormError.email = 'Email inválido';
+            hasError = true;
+        }
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-        setError('Email deve estar em um formato válido');
-        return false;
-    }
+
     if (!formData.password.trim()) {
-        setError('Senha é obrigatória');
-        return false;
+        localFormError.password = 'Senha é obrigatória';
+        hasError = true;
     }
-    return true;
+
+    setFormError(localFormError);
+    setError(hasError);
   };
 
   const handleSubmit = async (e) => { 
     e.preventDefault();
-    setError('');
+    setError(false);
     setSuccess(false);
-    if (!validateForm()) return;
+    validateForm();
+    if (error) return;
     
     try {
         const response = await fetch(`http://api.docker.localhost:${import.meta.env.VITE_HTTP_PORT}/api/v1/token/`, {
@@ -102,6 +115,7 @@ function Form() {
             console.log('Login feito com sucesso :)');
             setSuccess(true);
             setFormData({ email: '', password: '' });
+            setFormError({ email: '', password: '' });
             // window.location.href = '/inicio';
         } 
         else {
@@ -117,14 +131,14 @@ function Form() {
         setError(error.message || 'Erro de conexão. Tente novamente.');
     } 
 
-  };
+  };    
+
 
   return (
     <Stack spacing={3}>
-      <InputField required label="Email" name="email" type="email" value={formData.email} onChange={handleChange}/>
-      <InputField required label="Senha" name="password" type="password" value={formData.password} onChange={handleChange}/> 
+      <InputField required label="Email" name="email" type="email" value={formData.email} onChange={handleChange} error={formError.email ? true : false} errorText={formError.email}/>
+      <InputField required label="Senha" name="password" type="password" value={formData.password} onChange={handleChange} error={formError.password ? true : false} errorText={formError.password}/> 
       <SendFormButton text="Entrar" onClick={handleSubmit}/>
-      {error && <Alert severity="error"> {error}</Alert>}
       {success && <Alert severity="success">Login realizado com sucesso!</Alert>}
     </Stack>
   );
