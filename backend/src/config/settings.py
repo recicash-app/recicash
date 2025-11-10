@@ -151,9 +151,9 @@ CORS_ALLOW_ALL_ORIGINS = True
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
-    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.TokenAuthentication"],
-    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework_simplejwt.authentication.JWTAuthentication"],
-    "DEFAULT_AUTHENTICATION_CLASSES": ['apps.entities.authentication.CustomJWTAuthentication']
+    "DEFAULT_AUTHENTICATION_CLASSES": ['apps.entities.authentication.CustomJWTAuthentication',
+                                        "rest_framework.authentication.TokenAuthentication",
+                                       "rest_framework_simplejwt.authentication.JWTAuthentication"]
 }
 
 SIMPLE_JWT = {

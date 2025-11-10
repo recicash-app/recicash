@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from apps.views.user_view import UserViewSet, UserObtainPairView, LogoutView, GetCSRFToken
+from apps.views.user_view import UserViewSet, UserObtainPairView, LogoutView, GetCSRFToken, ChangePasswordView
 
 # Router to ViewSets. It generates GET/POST/PUT/DELETE URLs automatically.
 router = DefaultRouter()
@@ -22,5 +22,10 @@ urlpatterns = [
     path('token/csrf/', 
          GetCSRFToken.as_view(), 
          name='token_csrf'
+    ),
+    
+    path('change-password/', 
+         ChangePasswordView.as_view(), 
+         name='change_password'
     ),
 ]

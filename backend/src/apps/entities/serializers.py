@@ -3,6 +3,9 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import User
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -134,3 +137,39 @@ class UserObtainPairSerializer(TokenObtainPairSerializer):
         }
 
         return data
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """
+    Serializer for password change endpoint.
+    Validates old password and new password.
+    """
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    
+    def validate_new_password(self, value):
+        """
+        Verify new password strength using same validation as UserSerializer.
+        """
+        #logger.info(f"validate_new_password foi chamado") -> for debug purposes
+
+        if len(value) < 8:
+            raise serializers.ValidationError("Password must have at least 8 characters.")
+        
+        if not any(char.isdigit() for char in value):
+            raise serializers.ValidationError("Password must contains at least one number")
+            
+        if not any(char.isupper() for char in value):
+             raise serializers.ValidationError("Password must have at least one capitalized letter")
+
+        return value
+    
+    def validate_old_password(self, value):
+        """
+        Validate that old password is correct for the current user.
+        """
+        #logger.info(f"validate_old_password foi chamado")
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Old password is incorrect.")
+        return value
