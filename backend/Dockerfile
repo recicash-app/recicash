@@ -4,7 +4,7 @@ FROM python:3.12-slim
 # Diretório de trabalho
 WORKDIR /app/src
 
-# Atualiza e instala dependências do sistema para mysqlclient
+# Atualiza e instala dependências do sistema para PostgreSQL/PostGIS
 RUN apt-get update && apt-get install -y \
     build-essential \
     pkg-config \
