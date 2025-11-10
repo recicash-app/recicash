@@ -4,6 +4,7 @@ import { Box } from '@mui/material';
 import Test from './Test';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
+import BlogPage from './pages/BlogPage';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/test" element={<Test />} />
         <Route path="/cadastro" element={<SignUpPage />} />
         <Route path="/login" element={<SignInPage />} />
+        <Route path="/blog" element={<BlogPage />} />
       </Routes>
     </Box>
   );

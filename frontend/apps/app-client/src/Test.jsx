@@ -1,8 +1,7 @@
-import BlogPage from './pages/BlogPage';
+import BlogPage from './pages/SignInPage';
 
 function Test() {
   return <BlogPage />;
 }
 
-export default Test;
 export default Test;
