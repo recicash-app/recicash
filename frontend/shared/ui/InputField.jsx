@@ -22,7 +22,7 @@ const FieldLabel = styled(Typography)({
   fontFamily: "Poppins"
 });
 
-function InputField({ label, name, type, value, onChange, ...props }) {
+function InputField({ label, name, type, value, onChange, error, errorText, ...props }) {
   return (
     <Box display="flex" flexDirection="column" gap={"4px"}>
       <FieldLabel>{label}</FieldLabel>
@@ -31,6 +31,8 @@ function InputField({ label, name, type, value, onChange, ...props }) {
         type={type}
         value={value}
         onChange={onChange}
+        error={error}
+        helperText={error ? errorText : ''}
         {...props}
       />
     </Box>

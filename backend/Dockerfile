@@ -1,10 +1,10 @@
-# Usando Python 3.12 oficial
+# Using official Python 3.12
 FROM python:3.12-slim
 
 # Diretório de trabalho
 WORKDIR /app/src
 
-# Atualiza e instala dependências do sistema para mysqlclient
+# Atualiza e instala dependências do sistema para PostgreSQL/PostGIS
 RUN apt-get update && apt-get install -y \
     build-essential \
     pkg-config \
@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia o restante do código
 COPY src/ .  
 
-# Expõe a porta do Django
+# Expose Django port
 EXPOSE 8000
 
 
