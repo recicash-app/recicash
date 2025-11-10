@@ -144,10 +144,6 @@ function Form() {
         setError('CPF deve estar no formato xxx.xxx.xxx-xx');
         return false;
     }
-    if (!formData.cpf.trim()) {
-      setError('CPF é obrigatório');
-      return false;
-    }
     if (!formData.zip_code.trim()) {
       setError('Código postal é obrigatório');
       return false;
