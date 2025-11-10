@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia o restante do código
 COPY src/ .  
 
-# Expõe a porta do Django
+# Expose Django port
 EXPOSE 8000
 
 
