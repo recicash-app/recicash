@@ -3,7 +3,7 @@ import SendFormButton from '../../../../shared/ui/SendFormButton'
 import GreenSpot from '../../../../shared/assets/shape-bottom-right.svg'
 import Tree from '../../../../shared/assets/tree.svg'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Stack, Button, Divider, Box, Typography, Alert } from '@mui/material'
 import { styled } from '@mui/system'
 
