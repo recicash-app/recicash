@@ -125,7 +125,7 @@ class LogoutView(APIView):
 
 class GetCSRFToken(APIView):
     """
-    "Empty" view" only used to "priming".
+    Empty view only used to priming.
     Front-end does a GET here before login, so Django can send 'csrftoken' token in response.
     """
     permission_classes = [AllowAny]
