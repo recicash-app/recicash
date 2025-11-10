@@ -1,4 +1,4 @@
-# Usando Python 3.12 oficial
+# Using official Python 3.12
 FROM python:3.12-slim
 
 # Diretório de trabalho
