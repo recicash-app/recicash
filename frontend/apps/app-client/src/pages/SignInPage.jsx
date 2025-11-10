@@ -1,7 +1,7 @@
-import InputField from '../../../../shared/ui/InputField'
-import SendFormButton from '../../../../shared/ui/SendFormButton'
-import GreenSpot from '../../../../shared/assets/shape-bottom-right.svg'
-import Tree from '../../../../shared/assets/tree.svg'
+import InputField from '@shared/ui/InputField'
+import SendFormButton from '@shared/ui/SendFormButton'
+import GreenSpot from '@shared/assets/shape-bottom-right.svg'
+import Tree from '@shared/assets/tree.svg'
 
 import React, { useState } from 'react';
 import { Stack, Button, Divider, Box, Typography, Alert } from '@mui/material'
@@ -132,7 +132,6 @@ function Form() {
     } 
 
   };    
-
 
   return (
     <Stack spacing={3}>

@@ -1,9 +1,9 @@
-import InputField from '../../../../shared/ui/InputField'
-import SendFormButton from '../../../../shared/ui/SendFormButton'
-import GreenSpot from '../../../../shared/assets/shape-bottom-right.svg'
-import Cupom from '../../../../shared/assets/cupom.jpg'
-import Ecoponto from '../../../../shared/assets/ecoponto.jpeg'
-import Reciclagem from '../../../../shared/assets/reciclagem.jpg'
+import InputField from '@shared/ui/InputField'
+import SendFormButton from '@shared/ui/SendFormButton'
+import GreenSpot from '@shared/assets/shape-bottom-right.svg'
+import Cupom from '@shared/assets/cupom.jpg'
+import Ecoponto from '@shared/assets/ecoponto.jpeg'
+import Reciclagem from '@shared/assets/reciclagem.jpg'
 
 import React, { useState } from 'react';
 import { Stack, Checkbox, Modal, Button, Box, Typography, Alert } from '@mui/material'
