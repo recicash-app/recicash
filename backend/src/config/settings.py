@@ -88,7 +88,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
     f"http://web.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
     f"http://ecoponto.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
-    f"http://admin.docker.localhost:{os.environ.get('HTTP_PORT', '80')}"
+    f"http://admin.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
+    "http://api.docker.localhost"
 ]
 
 # Allow React to read CSRF cookie
