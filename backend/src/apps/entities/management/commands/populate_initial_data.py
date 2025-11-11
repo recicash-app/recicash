@@ -29,96 +29,97 @@ def create_data(number_of_users=10):
         users_to_insert = []
 
         for i in range(1, number_of_users + 1):
-            name = fake.name()
+            full_name = fake.name()
+            name_parts = full_name.split()
+            first_name = name_parts[0]
+            last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
+            
             cpf = fake.cpf()
-            email = f'{name.split()[0].lower()}{i}@recicash.fake'
+            username = f'{first_name.lower()}{i}'
+            email = f'{username}@recicash.fake'
             zip_code = fake.postcode()
             access_level = 'U'
 
-            users_to_insert.append(
-                User(
-                    name=name,
-                    email=email,
-                    cpf=cpf,
-                    zip_code=zip_code,
-                    access_level=access_level
-                    # fav_recycling_point = 
-                )
+            user = User(
+                username=username,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                cpf=cpf,
+                zip_code=zip_code,
+                access_level=access_level
             )
+            user.set_password('senha123')  # Sets password securely
+            users_to_insert.append(user)
 
         created_users = User.objects.bulk_create(users_to_insert)
-        logger.info(f"Users created successfully")
+        logger.info(f"Users created successfully: {len(created_users)} users")
 
     except Exception as e:
         logger.error(f"An unexpected error occurred while creating users: {e}")
         return
-    
-    logger.info("Creating Passwords and Wallets for initial users...")
-    passwords_to_insert = []
-    for user in created_users:
-        passwords_to_insert.append(Password(user_id=user, password='safe_hash_password'))
-
-    try:
-        Password.objects.bulk_create(passwords_to_insert)
-        logger.info(f"Passwords and Wallets created successfully for {len(created_users)} users")
-    except Exception as e:
-        logger.error(f"An unexpected error occurred while creating Passwords and Wallets: {e}")
 
     # Create Recycling Points and its managers
     logger.info(f"Creating Recycling Points...")
-    total_current_users = User.objects.count()
+    created_managers = []
 
-    for i in range(1, 10 + 1):
+    for i in range(1, 11):
         try:
-            # Uses a transaction to make sure that RP and User will be created together
             with django_transaction.atomic():
-                manager_name = fake.name()
-                manager_id_num = total_current_users + i
-                manager_email = f'manager.{manager_name.split()[0].lower()}{manager_id_num}@recicash.point'
+                manager_full_name = fake.name()
+                name_parts = manager_full_name.split()
+                first_name = name_parts[0]
+                last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
                 
-                new_manager = User.objects.create(
-                    name=manager_name,
+                manager_username = f'manager_{first_name.lower()}{i}'
+                manager_email = f'{manager_username}@recicash.point'
+                
+                new_manager = User(
+                    username=manager_username,
+                    first_name=first_name,
+                    last_name=last_name,
                     email=manager_email,
                     cpf=fake.cpf(),
                     zip_code=fake.postcode(),
-                    access_level='M' # Manager access level
+                    access_level='M'
                 )
+                new_manager.set_password('senha123')
+                new_manager.save()
+                created_managers.append(new_manager)
 
                 RecyclingPoint.objects.create(
                     user_id=new_manager,
-                    name=f"Ponto de Coleta - {fake.city()}",
+                    name=f"Ecoponto {fake.city()}",
                     cnpj=fake.cnpj(),
                     zip_code=fake.postcode(),
                     latitude=float(fake.latitude()),
                     longitude=float(fake.longitude())
                 )
-            logger.info(f"Recycling Point '{i}' and manager created successfully")
+            logger.info(f"Recycling Point {i} and manager created successfully")
         
         except Exception as e:
-            logger.error(f"Erros creating Recycling Point {i} and its manager: {e}")
-            # Continua para o próximo item do loop
+            logger.error(f"Error creating Recycling Point {i} and its manager: {e}")
             continue
 
-    logger.info("Initial data created successfully!")
+    logger.info(f"Total Recycling Points created: {RecyclingPoint.objects.count()}")
 
     # Create Recycling Value
     logger.info(f"Creating Recycling value...")
     try:
-        i = 1
-        RecyclingValue.objects.create(
+        recycling_value = RecyclingValue.objects.create(
             points_value=500.0,
             date=timezone.now() - timedelta(days=366)
         )
         logger.info(f"Recycling value created successfully")
     except Exception as e:
-        logger.error(f"An unexpected error occurred while creating Recycling Value {i}: {e}")
+        logger.error(f"An unexpected error occurred while creating Recycling Value: {e}")
+        return
     
     # Create Recycling
-    logger.info(f"Creating Recycling...")
+    logger.info(f"Creating Recycling records...")
     try:
         all_users = list(User.objects.filter(access_level='U'))
         all_recycling_points = list(RecyclingPoint.objects.all())
-        recycling_value_instance = RecyclingValue.objects.get(recycling_value_id=1)
 
         if not all_users:
             logger.error("No users found to link up with recyclings. Aborting.")
@@ -134,41 +135,40 @@ def create_data(number_of_users=10):
             random_point = random.choice(all_recycling_points)
 
             weight_value = round(random.uniform(0.5, 5.0), 2)
-            points = weight_value * recycling_value_instance.points_value
+            points = int(weight_value * recycling_value.points_value)
 
             recyclings_to_create.append(
                 Recycling(
                     user_id=random_user,
                     recycling_point_id=random_point,
-                    recycling_value_id=recycling_value_instance,
+                    recycling_value_id=recycling_value,
                     points_value=points,
-                    weight=weight_value, # Random weight between 0.5kg and 50kg
-                    date=fake.past_datetime(start_date="-1y", tzinfo=tz), # Random date in last year
+                    weight=weight_value,
+                    date=fake.past_datetime(start_date="-1y", tzinfo=tz),
                     validation_hash=fake.sha256()
                 )
             )
         
         recyclings_created = Recycling.objects.bulk_create(recyclings_to_create)
-        logger.info(f"Recycling records created successfully")
+        logger.info(f"Recycling records created successfully: {len(recyclings_created)} records")
 
         for recycling in recyclings_created:
-                wallet_history_to_create.append(
-                    WalletHistory(
-                        user_id=recycling.user_id,
-                        operation='RECYCLING',
-                        value=recycling.points_value,
-                        date=recycling.date
-                    )
+            wallet_history_to_create.append(
+                WalletHistory(
+                    user_id=recycling.user_id,
+                    operation='RECYCLING',
+                    value=recycling.points_value,
+                    date=recycling.date
                 )
-    except RecyclingValue.DoesNotExist:
-        logger.error("Recycling Value with id 1 does not exist. Create it first")
+            )
     except Exception as e:
         logger.error(f"An unexpected error occurred while creating Recycling records: {e}")
 
-    logger.info(f"Creating Company Partners...")
+    # Create Partner Companies
+    logger.info(f"Creating Partner Companies...")
     try:
         partners_to_create = []
-        for i in range(1, 20 + 1):
+        for i in range(1, 21):
             partners_to_create.append(
                 PartnerCompany(
                     name=fake.company(),
@@ -176,15 +176,14 @@ def create_data(number_of_users=10):
                 )
             )
         
-        PartnerCompany.objects.bulk_create(partners_to_create)
-        logger.info(f"Partner Company created successfully.")
+        created_partners = PartnerCompany.objects.bulk_create(partners_to_create)
+        logger.info(f"Partner Companies created successfully: {len(created_partners)} companies")
     except Exception as e:
-        logger.error(f"An unexpected error occurred while creating Recycling records: {e}")
+        logger.error(f"An unexpected error occurred while creating Partner Companies: {e}")
     
-
+    # Create Coupons
     logger.info(f"Creating coupons...")
     try:
-        # Pre-fetch partners to avoid DB queries inside the loop
         all_partners = list(PartnerCompany.objects.all())
         coupon_types = ['PERCENTAGE_DISCOUNT', 'DIRECT_DISCOUNT', 'GIFT']
 
@@ -192,32 +191,40 @@ def create_data(number_of_users=10):
             logger.warning("No partner companies found. Skipping coupon creation.")
         else:
             coupons_to_create = []
-            for i in range(1, 300 + 1):
+            for i in range(1, 301):
                 random_partner = random.choice(all_partners)
                 coupon_type = random.choice(coupon_types)
 
                 start_date = fake.past_datetime(start_date='-1y', tzinfo=tz)
                 expiring_date = start_date + timedelta(days=random.randint(30, 120))
                 
+                # Adjust value based on coupon type
+                if coupon_type == 'PERCENTAGE_DISCOUNT':
+                    value = random.randint(5, 50)  # 5% to 50%
+                elif coupon_type == 'DIRECT_DISCOUNT':
+                    value = random.randint(10, 100)  # R$ 10 to R$ 100
+                else:  # GIFT
+                    value = 1  # Quantity or boolean indicator
+                
                 coupons_to_create.append(
                     Coupon(
                         partner_company_id=random_partner,
-                        type=coupon_type,
-                        value=float(random.randint(5, 50)),
+                        coupon_type=coupon_type,
+                        value=value,
                         points_cost=random.randint(100, 2500),
                         validation_hash=fake.sha256(),
                         start_date=start_date,
                         expiring_date=expiring_date
                     )
                 )
-            Coupon.objects.bulk_create(coupons_to_create)
-            logger.info(f"Coupons created successfully")
+            created_coupons = Coupon.objects.bulk_create(coupons_to_create)
+            logger.info(f"Coupons created successfully: {len(created_coupons)} coupons")
     except Exception as e:
         logger.error(f"An unexpected error occurred while creating coupons: {e}")
     
+    # Create Coupon Transactions
     logger.info(f"Creating coupon transactions...")
     try:
-        # Pre-fetch users and coupons for efficiency
         all_users = list(User.objects.filter(access_level='U'))
         all_coupons = list(Coupon.objects.all())
 
@@ -225,7 +232,7 @@ def create_data(number_of_users=10):
             logger.warning("No users or coupons found. Skipping coupon transaction creation.")
         else:
             transactions_to_create = []
-            for i in range(1, 100 + 1):
+            for i in range(1, 101):
                 random_user = random.choice(all_users)
                 random_coupon = random.choice(all_coupons)
                 
@@ -233,19 +240,19 @@ def create_data(number_of_users=10):
                     CouponsTransactions(
                         user_id=random_user,
                         coupon_id=random_coupon,
-                        points_value=random_coupon.points_cost, # Set value_points equal to the coupon's points_cost
+                        points_value=random_coupon.points_cost,
                         date=fake.past_datetime(start_date="-1y", tzinfo=tz)
                     )
                 )
             transactions_created = CouponsTransactions.objects.bulk_create(transactions_to_create)
-            logger.info(f"Coupons transactions created successfully")
+            logger.info(f"Coupon transactions created successfully: {len(transactions_created)} transactions")
 
             for transaction in transactions_created:
                 wallet_history_to_create.append(
                     WalletHistory(
                         user_id=transaction.user_id,
                         operation='COUPON_TRANSACTION',
-                        value=-transaction.points_value, # Note: Negative value for point deduction
+                        value=-transaction.points_value,
                         date=transaction.date
                     )
                 )
@@ -257,96 +264,111 @@ def create_data(number_of_users=10):
     if not wallet_history_to_create:
         logger.warning("No history items to create. Skipping.")
     else:
-        # Assign unique IDs before bulk creating
-        for i, history_item in enumerate(wallet_history_to_create, 1):
-            history_item.history_id = i
-        
         try:
-            WalletHistory.objects.bulk_create(wallet_history_to_create)
-            logger.info(f"Wallet history records created successfuly")
+            created_history = WalletHistory.objects.bulk_create(wallet_history_to_create)
+            logger.info(f"Wallet history records created successfully: {len(created_history)} records")
         except Exception as e:
             logger.error(f"An unexpected error occurred while creating wallet history: {e}")
     
+    # Create Blog Posts
     logger.info(f"Creating blog posts...")
     try:
-        # First, create or get an Admin user to be the author
         admin_user, admin_created = User.objects.get_or_create(
-            user_id=1000,
+            username='admin',
             defaults={
-                'name': 'Admin User',
+                'first_name': 'Admin',
+                'last_name': 'Recicash',
                 'email': 'admin@recicash.fake',
                 'cpf': fake.cpf(),
                 'zip_code': fake.postcode(),
-                'access_level': 'A' # 'A' for Admin
+                'access_level': 'A'
             }
         )
         
-        # Create a password for the admin if the user was just created
         if admin_created:
-            Password.objects.create(user_id=admin_user, password='safe_admin_hash')
+            admin_user.set_password('admin123')
+            admin_user.save()
             logger.info("Admin user created.")
         else:
-            logger.info("Admin user 1000 already exists.")
+            logger.info("Admin user already exists.")
 
         posts_to_create = []
-        for i in range(1, 5 + 1):
+        blog_titles = [
+            "A Importância da Reciclagem para o Meio Ambiente",
+            "Como Separar Corretamente Seus Resíduos",
+            "Materiais Recicláveis que Você Pode Não Conhecer",
+            "O Impacto do Plástico nos Oceanos",
+            "Economia Circular: O Futuro da Sustentabilidade"
+        ]
+        
+        for i, title in enumerate(blog_titles, 1):
             posts_to_create.append(
                 PostBlog(
-                    post_id=f'{i:06}',
                     author_id=admin_user,
-                    title=fake.sentence(nb_words=6, variable_nb_words=True),
-                    text=fake.text(max_nb_chars=1500), # Using faker for lorem ipsum
-                    images="https://placehold.co/800x400/22c55e/ffffff?text=Recicash+Blog", # Placeholder image
-                    created_at=timezone.now(),
+                    title=title,
+                    text=fake.text(max_nb_chars=1500),
+                    images="https://placehold.co/800x400/22c55e/ffffff?text=Recicash+Blog",
+                    created_at=timezone.now() - timedelta(days=random.randint(1, 180)),
                     last_edition_date=timezone.now()
                 )
             )
         
-        PostBlog.objects.bulk_create(posts_to_create)
-        logger.info(f"Blog posts created successfully.")
+        created_posts = PostBlog.objects.bulk_create(posts_to_create)
+        logger.info(f"Blog posts created successfully: {len(created_posts)} posts")
 
     except Exception as e:
         logger.error(f"An unexpected error occurred while creating blog posts: {e}")
 
-    
+    # Create Wallets
     logger.info("Calculating final balances and creating wallets for all users...")
     try:
-        # Use defaultdict to simplify balance aggregation
-        user_balances = defaultdict(float)
+        user_balances = defaultdict(int)
         for history_item in wallet_history_to_create:
             user_balances[history_item.user_id] += history_item.value
 
         wallets_to_create = []
         all_system_users = User.objects.all()
 
-        # Ensure every user has a wallet, even if they have no transactions
         for user in all_system_users:
-            balance = user_balances[user] # Returns 0.0 for users not in the dict
+            balance = user_balances.get(user, 0)
             wallets_to_create.append(
                 Wallet(user_id=user, points_balance=balance)
             )
         
-        # To ensure a clean slate, delete existing wallets before creating new ones
         Wallet.objects.all().delete()
-        Wallet.objects.bulk_create(wallets_to_create)
-        logger.info(f"Wallets created successfully")
+        created_wallets = Wallet.objects.bulk_create(wallets_to_create)
+        logger.info(f"Wallets created successfully: {len(created_wallets)} wallets")
 
     except Exception as e:
         logger.error(f"An unexpected error occurred while creating wallets: {e}")
+
+    logger.info("="*60)
+    logger.info("Initial data creation completed successfully!")
+    logger.info(f"Summary:")
+    logger.info(f"  - Users: {User.objects.count()}")
+    logger.info(f"  - Recycling Points: {RecyclingPoint.objects.count()}")
+    logger.info(f"  - Recyclings: {Recycling.objects.count()}")
+    logger.info(f"  - Partner Companies: {PartnerCompany.objects.count()}")
+    logger.info(f"  - Coupons: {Coupon.objects.count()}")
+    logger.info(f"  - Coupon Transactions: {CouponsTransactions.objects.count()}")
+    logger.info(f"  - Wallet History: {WalletHistory.objects.count()}")
+    logger.info(f"  - Blog Posts: {PostBlog.objects.count()}")
+    logger.info(f"  - Wallets: {Wallet.objects.count()}")
+    logger.info("="*60)
 
 
 class Command(BaseCommand):
     help = 'Populates the database with initial, necessary data for the application to run.'
 
     def add_arguments(self, parser):
-        # Allows user to define how much users must be created
         parser.add_argument(
             '--total', 
             type=int, 
             default=10, 
-            help='Number of fake users'
+            help='Number of fake users to create'
         )
 
     def handle(self, *args, **options):
+        self.stdout.write(self.style.WARNING('Starting database population...'))
         create_data(options['total'])
         self.stdout.write(self.style.SUCCESS('Population command executed successfully!'))
