@@ -76,7 +76,7 @@ class UserObtainPairView(TokenObtainPairView):
             key='refresh_token',
             value=validated_data['refresh'],
             httponly=True,
-            secure=True,         # False to development in HTTP.
+            secure=False,        # False to development in HTTP.
             samesite='Lax', 
             path='/'
         )
