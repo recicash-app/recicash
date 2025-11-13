@@ -49,7 +49,7 @@ def create_data(number_of_users=10):
                 zip_code=zip_code,
                 access_level=access_level
             )
-            user.set_password('senha123')  # Define senha de forma segura
+            user.set_password('senha123')  # Set password securely
             users_to_insert.append(user)
 
         created_users = User.objects.bulk_create(users_to_insert)
