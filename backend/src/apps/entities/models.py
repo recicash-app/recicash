@@ -266,7 +266,7 @@ class PostBlog(models.Model):
     author_id = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
-        null=True,
+        null=False,
         blank=False,
         db_column='AUTHOR_ID',
         related_name='author_user'
