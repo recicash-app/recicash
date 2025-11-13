@@ -300,4 +300,4 @@ class PostImage(models.Model):
         verbose_name_plural = 'post_images'
 
     def __str__(self):
-        return f"Post image: {self.post_id.title}"
+        return f"Post image: {self.post.title}"
