@@ -197,6 +197,30 @@ const recicashTheme = createTheme({
             }),
           }),
         },
+
+        // Select Button Header
+        {
+          props: { variant: "recicashSelectHeader" },
+          style: (props) => {
+            const state = props?.state ?? props?.ownerState ?? {};
+            const active = state?.active ?? false;
+
+            return {
+              width: 120,
+              height: 30,
+              borderRadius: "5px",
+              backgroundColor: "transparent",
+              transition: "all 0.2s ease",
+              "&:hover": {
+                backgroundColor: "rgba(217, 217, 217, 0.1)",
+              },
+              ...(active && {
+                border: "1px solid rgba(104, 96, 96, 0.38)",
+              }),
+            };
+          },
+        },
+
       ],
     },
 
