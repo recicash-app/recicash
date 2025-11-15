@@ -1,6 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+"""
+Model definitions for the entities app.
+
+Contains:
+- User, RecyclingPoint, PostBlog, PostImage, etc.
+
+Notes:
+- PostBlog.author_id must be a User instance (see PostBlogViewSet.perform_create).
+- PostImage.image stored under MEDIA_ROOT/blog_images/.
+"""
+
 class RecyclingPoint(models.Model):
     recycling_point_id = models.BigAutoField(primary_key=True) # PK de Ecoponto
     user_id  = models.ForeignKey( # FK that references to a Recycling Point representative User
@@ -301,4 +312,4 @@ class PostImage(models.Model):
         verbose_name_plural = 'post_images'
 
     def __str__(self):
-        return f"Post image: {self.post_id.title}"
+        return f"Post image: {self.post.title}"
