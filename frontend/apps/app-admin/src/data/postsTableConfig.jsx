@@ -17,12 +17,17 @@ export const postsColumns = [
   {
     key: "images",
     label: "Imagem",
-    render: (value) => (
-      <img
-        src={value?.length > 0 && value[0].image_url}
-        style={{ width: 80, height: 60, objectFit: "scale-down" }}
-      />
-    ),
+    render: (value) => {
+      const url = value?.length > 0 ? value[0]?.image_url : null;
+      return url ? (
+        <img
+          src={url}
+          style={{ width: 80, height: 60, objectFit: "scale-down" }}
+        />
+      ) : (
+        <div> Sem imagem </div>
+      );
+    },
   },
 ];
 
