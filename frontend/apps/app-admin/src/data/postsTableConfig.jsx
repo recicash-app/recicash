@@ -7,23 +7,27 @@ export const postsColumns = [
     key: "text",
     label: "Conteúdo",
     render: (value) =>
-      value.length > 80 ? value.substring(0, 80) + "..." : value,
+      value?.length > 80 ? value.substring(0, 80) + "..." : value,
   },
   {
     key: "images",
     label: "Imagem",
-    render: (value, row) => (
-      <img src={value} alt={row.title} style={{ width: 80 }} />
+    render: (value) => (
+      <img
+        src={value?.length > 0 && value[0].image_url}
+        style={{ width: 80, height: 60, objectFit: "scale-down" }}
+      />
     ),
   },
 ];
 
-export const postsActions = (handleOpenEdit, handleOpenDelete) => (post) => (
+export const postsActions = (onEdit, onDelete) => (row) => (
   <>
-    <IconButton onClick={() => handleOpenEdit(post)}>
+    <IconButton onClick={() => onEdit(row)}>
       <EditRounded />
     </IconButton>
-    <IconButton onClick={() => handleOpenDelete(post)}>
+
+    <IconButton onClick={() => onDelete(row)}>
       <DeleteRounded />
     </IconButton>
   </>

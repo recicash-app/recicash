@@ -1,59 +1,46 @@
 import { useEffect, useState } from "react";
-import {
-  Box,
-  Tooltip,
-  IconButton,
-} from "@mui/material";
+import { Box, Tooltip, IconButton } from "@mui/material";
 import { Edit, Save, Preview } from "@mui/icons-material";
 
-import AppSnackbar from "../AppSnackbar";
-import ConfirmDialog from "../ConfirmDialog";
 import TextBlock from "@shared/ui/TextBlock";
 import TitleBlock from "@shared/ui/TitleBlock";
 import ImageBlock from "@shared/ui/ImageBlock";
 import FullscreenOverlay from "@shared/ui/FullscreenOverlay";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 function PostFormOverlay({ open, post = {}, onClose, onSave }) {
-  const [formData, setFormData] = useState({ title: "", text: "", images: "" });
+  const [formData, setFormData] = useState({ title: "", text: "", image: null });
   const [editingMode, setEditingMode] = useState(true);
   const [confirmClose, setConfirmClose] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
+  // Initialize form state when post or open changes
   useEffect(() => {
     setFormData({
-        title: post?.title || "",
-        text: post?.text || "",
-        images: post?.images || "",
-      });
+      title: post?.title || "",
+      text: post?.text || "",
+      image: post?.images?.length > 0 ? post.images[0].image_url : null, // existing URL
+    });
     setEditingMode(open);
   }, [post, open]);
-
-  const handleSave = () => {
-    if (onSave) onSave(formData);
-
-    setSnackbar({
-      open: true,
-      message: post?.id
-        ? "Alterações salvas com sucesso!"
-        : "Post criado com sucesso!",
-      severity: "success",
-    });
-  };
-
-  const handleCloseRequest = () => {
-    setConfirmClose(true);
-  };
 
   const confirmCloseDialog = () => {
     setConfirmClose(false);
     onClose?.();
   };
 
+  // Image change handler
+  const handleImageChange = (val) => {
+    setFormData((prev) => ({
+      ...prev,
+      image: val, // null | URL string | { file, preview }
+    }));
+  };
+
   return (
     <>
       <FullscreenOverlay
         open={open}
-        onClose={handleCloseRequest}
+        onClose={() => setConfirmClose(true)}
         actions={
           <Box>
             <Tooltip title={editingMode ? "Pré-visualizar" : "Editar"}>
@@ -65,7 +52,7 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
               </IconButton>
             </Tooltip>
             <Tooltip title={post?.id ? "Salvar Alterações" : "Criar"}>
-              <IconButton size="small" onClick={handleSave}>
+              <IconButton size="small" onClick={() => onSave && onSave(formData)}>
                 <Save fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -76,21 +63,15 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
-            gap: "32px", p: 3,
+            gap: "32px",
+            p: 3,
             minHeight: "60vh",
             width: "100%",
             alignItems: "start",
           }}
         >
           {/* Left Column */}
-          <Box
-            sx={{
-              gridColumn: "1",
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-            }}
-          >
+          <Box sx={{ gridColumn: "1", display: "flex", flexDirection: "column", gap: 2, width: "2fr" }}>
             <TitleBlock
               sx={{ minHeight: "4rem" }}
               isEditing={editingMode}
@@ -107,10 +88,11 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
 
           {/* Right Column */}
           <ImageBlock
+            key={post?.id || "new"}
             isEditing={editingMode}
-            content={formData.images}
+            content={formData.image}
             sx={{ gridColumn: "2", maxHeight: "300px", width: "1fr" }}
-            onChange={(val) => setFormData((prev) => ({ ...prev, images: val }))}
+            onChange={handleImageChange}
           />
         </Box>
       </FullscreenOverlay>
@@ -124,14 +106,6 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
         confirmColor="error"
         onCancel={() => setConfirmClose(false)}
         onConfirm={confirmCloseDialog}
-      />
-
-      {/* Snackbar */}
-      <AppSnackbar
-        open={snackbar.open}
-        message={snackbar.message}
-        severity={snackbar.severity}
-        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
       />
     </>
   );

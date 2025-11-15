@@ -3,13 +3,17 @@ import { Upload, Delete } from "@mui/icons-material";
 import { getDashedInputProps } from "../styles/dashedInputProps";
 
 function ImageBlock({ content, isEditing, onChange, sx }) {
+   console.log(content)
+   
   const handleUpload = (e) => {
     const file = e.target.files[0];
-    if (file) onChange(URL.createObjectURL(file));
+    if (file) {
+      onChange({ file, preview: URL.createObjectURL(file) });
+    }
   };
 
   const handleDelete = () => {
-    onChange("");
+    onChange(null);
   };
 
   return (
@@ -30,8 +34,8 @@ function ImageBlock({ content, isEditing, onChange, sx }) {
       {/* IMAGE */}
       {content ? (
         <img
-          src={content}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          src={content?.preview || content}
+          style={{ width: "100%", height: "100%", objectFit: "scale-down" }}
         />
       ) : isEditing && (
         <Box sx={{ textAlign: "center", px: 2 }}>

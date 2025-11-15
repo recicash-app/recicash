@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Typography,
@@ -7,32 +7,22 @@ import {
 } from "@mui/material";
 import { AddRounded } from "@mui/icons-material";
 
-import DataTable from "../components/DataTable";
-import ConfirmDialog from "../components/ConfirmDialog";
-import PostFormOverlay from "../components/posts/PostFormOverlay";
+import AppSnackbar from "@/components/AppSnackbar";
+import DataGridTable from "@/components/DataGridTable";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import PostFormOverlay from "@/components/posts/PostFormOverlay";
+
 import { postsColumns, postsActions } from "../data/postsTableConfig";
+import { fetchPosts, createPost, updatePost, deletePost } from "../utils/postService";
 
 function PostManagementPage() {
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      title: "Primeiro Post",
-      text: "Descrição do primeiro post",
-      images: "https://via.placeholder.com/150",
-    },
-    {
-      id: 2,
-      title: "Notícia Ambiental",
-      text: "Um texto sobre sustentabilidade.",
-      images: "https://via.placeholder.com/150",
-    },
-  ]);
-
   const [openModal, setOpenModal] = useState(false);
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+
+  const [refreshKey, setRefreshKey] = useState(0);
   const [selectedPost, setSelectedPost] = useState(null);
 
-  // --- Handlers ---
   const handleOpenCreate = () => {
     setSelectedPost(null);
     setOpenModal(true);
@@ -48,31 +38,69 @@ function PostManagementPage() {
     setOpenConfirmDelete(true);
   };
 
-  const handleCloseModal = () => {
-    setOpenModal(false);
-  };
+  const handleSave = async (formData) => {
+    const { title, text, image } = formData;
+    const payload = { title, text, imageFile: image?.file };
+    const isEdit = Boolean(selectedPost?.id);
 
-  const handleCloseConfirm = () => {
-    setOpenConfirmDelete(false);
-  };
-
-  const handleSave = (formData) => {
-    if (selectedPost) {
-      // Update
-      setPosts((prev) =>
-        prev.map((p) => (p.id === selectedPost.id ? { ...formData, id: p.id } : p))
-      );
-    } else {
-      // Create
-      const newPost = { ...formData, id: Date.now() };
-      setPosts((prev) => [...prev, newPost]);
+    console.log(payload)
+    if (!title || !text ) {
+      setSnackbar({
+        open: true,
+        message: "É obrigatório preencher os campos de título e conteúdo.",
+        severity: "warning",
+      });
+      return;
     }
-    setOpenModal(false);
+    try {
+      if (isEdit) {
+        await updatePost(selectedPost.id, payload);
+      } else {
+        await createPost(payload);
+      }
+
+      setRefreshKey((k) => k + 1);
+      setSnackbar({
+        open: true,
+        message: isEdit ? "Alterações salvas com sucesso!" : "Post criado com sucesso!",
+        severity: "success",
+      });
+    } catch (error) {
+      // console.error("Failed to save post:", error);
+      setSnackbar({
+        open: true,
+        message: "Falha ao criar ou editar post.",
+        severity: "error",
+      });
+    } finally {
+      setOpenModal(false);
+    }
   };
 
-  const handleDelete = () => {
-    setPosts((prev) => prev.filter((p) => p.id !== selectedPost.id));
-    setOpenConfirmDelete(false);
+  const handleDelete = async () => {
+    if (!selectedPost) {
+      setOpenConfirmDelete(false);
+      return;
+    }
+
+    try {
+      await deletePost(selectedPost.id);
+      setRefreshKey((k) => k + 1);
+      setSnackbar({
+        open: true,
+        message: "Post excluído com sucesso!",
+        severity: "success",
+      });
+    } catch (error) {
+      // console.error("Failed to delete post:", error);
+      setSnackbar({
+        open: true,
+        message: "Falha ao excluir post.",
+        severity: "error",
+      });
+    } finally {
+      setOpenConfirmDelete(false);
+    }
   };
 
   return (
@@ -98,18 +126,20 @@ function PostManagementPage() {
       </Stack>
 
       {/* Posts Table */}
-      <DataTable
+      <DataGridTable
+        refreshKey={refreshKey}
         columns={postsColumns}
-        rows={posts}
-        renderActions={postsActions(handleOpenEdit, handleOpenDelete)}
+        fetchCallback={fetchPosts}
+        actionsColumn={postsActions(handleOpenEdit, handleOpenDelete)}
       />
 
       {/* Create / Update Modal */}
       <PostFormOverlay
         open={openModal}
         post={selectedPost}
-        onClose={handleCloseModal}
         onSave={handleSave}
+        onClose={() => setOpenModal(false)}
+        setLog={setSnackbar}
       />
       
       {/* Confirm Delete Popup */}
@@ -119,8 +149,19 @@ function PostManagementPage() {
         description={`Tem certeza que deseja remover o post "${selectedPost?.title}"?`}
         confirmLabel="Remover"
         confirmColor="error"
-        onCancel={handleCloseConfirm}
-        onConfirm={handleDelete}
+        onCancel={() => setOpenConfirmDelete(false)}
+        onConfirm={() => {
+          handleDelete();
+          setOpenConfirmDelete(false);
+        }}
+      />
+
+      {/* Snackbar */}
+      <AppSnackbar
+        open={snackbar.open}
+        message={snackbar.message}
+        severity={snackbar.severity}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
       />
     </Box>
   );
