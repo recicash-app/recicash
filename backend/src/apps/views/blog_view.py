@@ -209,3 +209,47 @@ class PostImageRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSe
     queryset = PostImage.objects.all()
     serializer_class = PostImageSerializer
     permission_classes = [AllowAny]
+
+
+# ------------------------------------------------------------------
+# TESTING GUIDE (quick)
+#
+# 1) Test without admin permissions (local/dev)
+#    - The view currently allows all actions for testing (AllowAny).
+#    - To explicitly force admin-only behavior, change get_permissions to:
+#          return [IsAuthenticated(), IsAppAdminUser()]
+#      and comment out the AllowAny returns above.
+#
+#    Example swap:
+#      def get_permissions(self):
+#          if self.action in ["list", "retrieve", "search", "search_suggestions"]:
+#              return [AllowAny()]
+#          # production: enforce auth+admin
+#          return [IsAuthenticated(), IsAppAdminUser()]
+#
+# 2) Create a post (multipart/form-data) without authentication (works because perform_create uses User(pk=1)):
+#    curl -v -X POST "http://api.docker.localhost/api/v1/posts/" \
+#      -F "title=Test post from curl" \
+#      -F "text=Some content" \
+#      -F "image=@/full/path/to/image.jpg;type=image/jpeg"
+#
+#    - Note: field name for single image expected in perform_create is "image".
+#    - If you switch serializer to accept multiple files, append multiple -F "uploaded_images=@file"
+#
+# 3) List posts:
+#    curl "http://api.docker.localhost/api/v1/posts/"
+#
+# 4) Search posts:
+#    curl "http://api.docker.localhost/api/v1/posts/search/?q=term"
+#
+# 5) If you want to require authentication:
+#    - Create or use a user and obtain token (e.g. via your auth endpoint).
+#    - Call endpoints with header:
+#        -H "Authorization: Bearer <access_token>"
+#
+# 6) Troubleshooting:
+#    - If you see "Cannot assign AnonymousUser" errors, ensure perform_create uses a real User instance:
+#        author = self.request.user   # and make sure request.user is authenticated
+#    - For file upload issues, confirm client sends multipart/form-data (use -F in curl; do not send JSON).
+#
+# ------------------------------------------------------------------
