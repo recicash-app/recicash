@@ -3,8 +3,6 @@ import { Upload, Delete } from "@mui/icons-material";
 import { getDashedInputProps } from "../styles/dashedInputProps";
 
 function ImageBlock({ content, isEditing, onChange, sx }) {
-   console.log(content)
-   
   const handleUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
