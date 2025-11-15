@@ -13,7 +13,7 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import PostFormOverlay from "@/components/posts/PostFormOverlay";
 
 import { postsColumns, postsActions } from "../data/postsTableConfig";
-import { fetchPosts, createPost, updatePost, deletePost } from "../utils/postService";
+import { fetchPosts, createPost, updatePost, deletePost, deletePostImage } from "../utils/postApi";
 
 function PostManagementPage() {
   const [openModal, setOpenModal] = useState(false);
@@ -43,7 +43,6 @@ function PostManagementPage() {
     const payload = { title, text, imageFile: image?.file };
     const isEdit = Boolean(selectedPost?.id);
 
-    console.log(payload)
     if (!title || !text ) {
       setSnackbar({
         open: true,
@@ -55,6 +54,7 @@ function PostManagementPage() {
     try {
       if (isEdit) {
         await updatePost(selectedPost.id, payload);
+        if (!image && selectedPost?.images.length > 0) await deletePostImage(selectedPost.id);
       } else {
         await createPost(payload);
       }

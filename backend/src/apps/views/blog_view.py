@@ -55,24 +55,81 @@ class PostBlogViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """
-        Save a new PostBlog and attach an uploaded file (if present).
+        Create a new PostBlog and attach an uploaded image (if provided).
 
+        Notes:
         - For local/testing convenience this uses a fixed user:
             author = User.objects.get(pk=1)
-          and calls serializer.save(author_id=author)
-        - Expects uploaded file field name "image" (single file). If present,
-          renames the file to use the created post.post_id and creates PostImage.
+            In production you would normally use:
+            author = self.request.user
+        - Expects a single uploaded file under the form field name "image".
+        - Renames the uploaded file to "<post.post_id>.<ext>" before saving.
         """
-        # For testing convenience we use a fixed user. In production you would use:
-        # author = self.request.user
         author = User.objects.get(pk=1)
         post = serializer.save(author_id=author)
 
         image_file = self.request.FILES.get("image")
         if image_file:
+            # Preserve original extension and rename to use the post's identifier.
             extension = image_file.name.split(".")[-1]
             image_file.name = f"{post.post_id}.{extension}"
             PostImage.objects.create(post=post, image=image_file)
+
+    def perform_update(self, serializer):
+        """
+        Update a PostBlog instance and optionally replace its image.
+
+        Behavior:
+        - Saves provided fields via serializer.
+        - If a new image is uploaded (field "image"), deletes the existing image
+            (if any) and creates a new PostImage with the renamed file.
+        """
+        post = serializer.save()
+        image_file = self.request.FILES.get("image")
+
+        # If a new image was uploaded, replace the existing one.
+        if image_file:
+            # Delete the existing image object, if present.
+            old_img = post.images.first()
+            if old_img:
+                old_img.delete()
+
+            extension = image_file.name.split(".")[-1]
+            image_file.name = f"{post.post_id}.{extension}"
+
+            PostImage.objects.create(post=post, image=image_file)
+
+    @action(detail=True, methods=["delete"])
+    def delete_image(self, request, pk=None):
+        """
+        Delete the image associated with a post.
+
+        Returns:
+        - 200: image deleted successfully
+        - 404: no image associated with the post
+        - 500: failed to delete due to server error
+        """
+        try:
+            post = self.get_object()
+            image_obj = post.images.first()  # currently support only one image per post
+
+            if not image_obj:
+                return Response(
+                    {"message": "No image is associated with this post."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            image_obj.delete()
+            return Response(
+                {"message": "Image deleted successfully."},
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            return Response(
+                {"message": f"Failed to delete image: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def list(self, request, *args, **kwargs):
         """

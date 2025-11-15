@@ -2,7 +2,12 @@ import { IconButton } from "@mui/material";
 import { EditRounded, DeleteRounded } from "@mui/icons-material";
 
 export const postsColumns = [
-  { key: "title", label: "Título" },
+  { 
+    key: "title", 
+    label: "Título",
+    render: (value) =>
+      <b> {value} </b>,
+  },
   {
     key: "text",
     label: "Conteúdo",
