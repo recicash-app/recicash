@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button, Menu, MenuItem, Box, useTheme } from '@mui/material';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
@@ -17,7 +17,6 @@ const buttonSx = {
 const menuSx = {
 	borderRadius: '5px',
 	minWidth: 150,
-	boxShadow: "#FFFFFF",
 	'&:before': { display: 'none' },
 	'&:after': { display: 'none' },
 };
@@ -26,6 +25,7 @@ const menuSx = {
 function DesktopToolbar({ options, isAuth, onLogin, onLogout, activeItem, onOptionClick }) {
 
 	const navigate = useNavigate();
+	const theme = useTheme();
 	const [anchorEl, setAnchorEl] = useState(null);
 
 	const handleMenuOpen = (event) => {
@@ -37,7 +37,8 @@ function DesktopToolbar({ options, isAuth, onLogin, onLogout, activeItem, onOpti
 
 	const handleEdit = () => {
 		handleMenuClose();
-		navigate('/settings');
+		onOptionClick(null);
+		navigate('/configurações');
 	};
 
 	const handleLogout = () => {
@@ -60,7 +61,7 @@ function DesktopToolbar({ options, isAuth, onLogin, onLogout, activeItem, onOpti
 	}
 
 	return (
-		<Box sx={{ display: 'flex', gap: 5, alignItems: 'center', justifyContent: 'flex-end', width: 'auto' }}>
+		<Box sx={{ display: 'flex', gap: 5, alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap', width: '100%' }}>
 			{options.map((option, item) => (
 				<Button
 					key={option.name}

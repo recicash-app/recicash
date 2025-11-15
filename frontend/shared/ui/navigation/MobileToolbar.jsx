@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import { Link } from 'react-router-dom';
 
 import { styled } from '@mui/material/styles';
-import { Box, Button, Drawer, IconButton, MenuItem } from '@mui/material';
+import { Box, Button, Drawer, IconButton, MenuItem, useTheme } from '@mui/material';
 
 import ListIcon from '@mui/icons-material/List';
 import CloseIcon from '@mui/icons-material/Close';
@@ -17,6 +17,8 @@ const StyledMenuItem = styled(MenuItem)(({
 function MobileToolbar({ options, isAuth, onLogin, onLogout }) {
 
 	const [open, setOpen] = useState(false);
+
+	const theme = useTheme();
 
 	function toggleDrawer(open) {
 		return (event) => {
@@ -33,14 +35,14 @@ function MobileToolbar({ options, isAuth, onLogin, onLogout }) {
 				<ListIcon fontSize="medium" sx={{ color: 'neutral.main' }} />
 			</IconButton>
 			<Drawer anchor="top" open={open} onClose={toggleDrawer(false)} PaperProps={{ sx: { borderRadius: '0px 0px 10px 10px' } }}>
-				<Box sx={{ p: 2, backgroundColor: '#0000', height: '100%' }}>
-					<Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+				<Box sx={{ p: 2, backgroundColor: theme.palette.background.default, height: '100%' }}>
+					<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
 						<Link to="/" style={{ textDecoration: 'none' }}>
 							<Logo variant="icon" size="sm"/>
 						</Link>
 						<Box sx={{ display: 'flex', alignItems: 'center' }}> 
 							<IconButton aria-label="Menu button" onClick={toggleDrawer(false)}>
-								<CloseIcon fontSize="medium" sx={{ color: '#181E4B' }} />
+								<CloseIcon fontSize="medium" sx={{ color: theme.palette.text.hint }} />
 							</IconButton>
 						</Box>
 					</Box>
@@ -54,7 +56,6 @@ function MobileToolbar({ options, isAuth, onLogin, onLogout }) {
 					
 					{options.map((option, index) => (
 						<React.Fragment key={option.name}>
-							{index !== 0 }
 							<StyledMenuItem component={Link} to={option.path} onClick={toggleDrawer(false)}>
 								{option.icon && <option.icon fontSize="small" />}
 								{option.name}
@@ -65,7 +66,7 @@ function MobileToolbar({ options, isAuth, onLogin, onLogout }) {
 					{isAuth && (
 						<Button 
 							color="#181E4B" size="small" variant="contained" fullWidth
-							sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}
+							sx={{ display: 'flex', justifyContent: 'center', gap: 0.5, color: '#181E4B' }}
 							startIcon={<LogoutIcon fontSize="small" />}
 							onClick={() => {
 								onLogout();

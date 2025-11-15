@@ -12,15 +12,13 @@ export default function Logo({ asLink = false, sx = {} }) {
         height: 68,
         display: 'flex',
         alignItems: 'center',
-        alignItems: 'flex-start',
         opacity: 1,
         ...sx,
       }}
     >
       <Typography
+        variant="h1"
         sx={{
-          fontFamily: 'Volkhov, serif',
-          fontWeight: 700,
           fontSize: '32px',
           lineHeight: '32px',
           letterSpacing: '-0.04em',

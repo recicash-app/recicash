@@ -21,20 +21,21 @@ const ToolbarContent = styled(Box)(({ theme }) => ({
   justifyContent: 'space-between',
   gap: 40,
   width: '100%',
-  px: theme.spacing(3),
+  paddingLeft: theme.spacing(0),
+  paddingRight: theme.spacing(0),
 }));
 
 function Header() {
 
 	const [isAuth, setIsAuth] = useState(true);
-	const user = { username: 'usuario' };
+	//const user = { username: 'usuario' };
 
 	const publicOptions = [];
 	const privateOptions = [
-		{ name: 'Início', path: `/${user.username}/inicio` },
-		{ name: 'Mapa', path: `/${user.username}/mapa` },
-		{ name: 'Recompensas', path: `/${user.username}/recompensas` },
-		{ name: 'Carteira', path: `/${user.username}/carteira` },
+		{ name: 'Início', path: `/inicio` },
+		{ name: 'Mapa', path: `/mapa` },
+		{ name: 'Recompensas', path: `/recompensas` },
+		{ name: 'Carteira', path: `/carteira` },
 		{ name: 'Informações', path: `/blog` }
 	];
 
@@ -42,7 +43,7 @@ function Header() {
 	const handleLogin = () => {
 		setIsAuth(true);
 		setActiveItem(0);
-	}
+	};
 	const handleLogout = () => {
 		setIsAuth(false);
 		setActiveItem(null);
