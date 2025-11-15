@@ -9,7 +9,7 @@ function TextBlock({ content, isEditing, onChange, sx }) {
       fullWidth
       value={content}
       onChange={(e) => onChange(e.target.value)}
-      InputProps={{
+      slotProps={{ input: {
         ...getDashedInputProps(isEditing),
         sx: (theme) => ({
           ...theme.typography.body1,
@@ -17,10 +17,10 @@ function TextBlock({ content, isEditing, onChange, sx }) {
           alignItems: 'flex-start',
           ...sx
         })
-      }}
+      }}}
     />
   ) : (
-    <Typography sx={{ color: "#5E6282", lineHeight: 1.7 }}>
+    <Typography sx={{ color: "#5E6282", lineHeight: 1.7, ...sx }}>
       {content}
     </Typography>
   );

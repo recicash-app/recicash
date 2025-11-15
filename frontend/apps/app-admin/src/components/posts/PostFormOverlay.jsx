@@ -76,7 +76,7 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
-            gap: 3, mt: 2, p: 3,
+            gap: "32px", p: 3,
             minHeight: "60vh",
             width: "100%",
             alignItems: "start",
@@ -98,7 +98,7 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
               onChange={(val) => setFormData((prev) => ({ ...prev, title: val }))}
             />
             <TextBlock
-              sx={{ flex: 1, minHeight: "25rem" }}
+              sx={{ flex: 1, minHeight: "25rem", mb: { sx: 3, md: 6 } }}
               isEditing={editingMode}
               content={formData.text}
               onChange={(val) => setFormData((prev) => ({ ...prev, text: val }))}
@@ -109,7 +109,7 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
           <ImageBlock
             isEditing={editingMode}
             content={formData.images}
-            sx={{ gridColumn: "2", maxHeight: "300px" }}
+            sx={{ gridColumn: "2", maxHeight: "300px", width: "1fr" }}
             onChange={(val) => setFormData((prev) => ({ ...prev, images: val }))}
           />
         </Box>
@@ -126,7 +126,7 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
         onConfirm={confirmCloseDialog}
       />
 
-      {/* Success Snackbar */}
+      {/* Snackbar */}
       <AppSnackbar
         open={snackbar.open}
         message={snackbar.message}
