@@ -5,7 +5,7 @@ import { Edit, Save, Preview } from "@mui/icons-material";
 import TextBlock from "@shared/ui/TextBlock";
 import TitleBlock from "@shared/ui/TitleBlock";
 import ImageBlock from "@shared/ui/ImageBlock";
-import FullscreenOverlay from "@shared/ui/FullscreenOverlay";
+import FullScreenOverlay from "@shared/ui/FullScreenOverlay";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
 function PostFormOverlay({ open, post = {}, onClose, onSave }) {
@@ -38,7 +38,7 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
 
   return (
     <>
-      <FullscreenOverlay
+      <FullScreenOverlay
         open={open}
         onClose={() => setConfirmClose(true)}
         actions={
@@ -95,7 +95,7 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
             onChange={handleImageChange}
           />
         </Box>
-      </FullscreenOverlay>
+      </FullScreenOverlay>
 
       {/* Confirm Close Popup */}
       <ConfirmDialog

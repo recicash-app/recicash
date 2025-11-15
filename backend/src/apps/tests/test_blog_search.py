@@ -5,9 +5,8 @@ Tests the BlogSearchService class and related API endpoints for searching posts
 by title with multiple strategies including exact match, contains, and trigram similarity.
 """
 
-from django.test import TestCase, TransactionTestCase
+from django.test import TransactionTestCase
 from django.contrib.auth import get_user_model
-from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from apps.entities.models import PostBlog

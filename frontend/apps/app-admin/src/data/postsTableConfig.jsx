@@ -22,6 +22,7 @@ export const postsColumns = [
       return url ? (
         <img
           src={url}
+          alt="Post image"
           style={{ width: 80, height: 60, objectFit: "scale-down" }}
         />
       ) : (

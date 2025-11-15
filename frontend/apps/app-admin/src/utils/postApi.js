@@ -25,8 +25,6 @@ export async function createPost({ title, text, imageFile }) {
 }
 
 export async function updatePost(id, { title, text, imageFile }) {
-
-  console.log({ title, text, imageFile });
   const formData = new FormData();
   formData.append("title", title);
   formData.append("text", text);
@@ -35,9 +33,6 @@ export async function updatePost(id, { title, text, imageFile }) {
     formData.append("image", imageFile);
   }
 
-  for (let [key, value] of formData.entries()) {
-    console.log(key, value);
-  }
   const res = await api.put(`/posts/${id}/`, formData);
   return res.data;
 }
