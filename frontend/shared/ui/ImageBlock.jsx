@@ -28,6 +28,8 @@ function ImageBlock({ content, isEditing, onChange, sx }) {
         justifyContent: "center",
         overflow: "hidden",
         boxSizing: "border-box",
+        pointerEvents: "none",
+        userSelect: "none",
         ...sx
       }}
     >
@@ -37,6 +39,7 @@ function ImageBlock({ content, isEditing, onChange, sx }) {
         <Box sx={{ width: "100%", boxSizing: "border-box" }}>
           <img
             src={content?.preview || content}
+            draggable="false"
             alt=""
             style={{
               display: "block",
@@ -44,6 +47,8 @@ function ImageBlock({ content, isEditing, onChange, sx }) {
               height: "auto",                 // keep aspect ratio, do not force 100%
               maxHeight: "70vh",              // prevent image from overflowing the viewport
               objectFit: "contain",
+              pointerEvents: "none",
+              userSelect: "none",
               margin: 0,
             }}
           />

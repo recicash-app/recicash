@@ -15,11 +15,12 @@ function PostLayout({ data, isEditing, onChange }) {
       sx={{
         display: "grid",
         gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
-        gap: "24px",
+        gap: "8px",
         p: 3,
         minHeight: "60vh",
         width: "100%",
         alignItems: "start",
+        cursor: "default",
       }}
     >
       {/* Left Column */}
