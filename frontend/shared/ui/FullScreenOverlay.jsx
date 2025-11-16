@@ -1,18 +1,18 @@
 import { Box, IconButton, Modal } from "@mui/material";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 
-function FullScreenOverlay({ open, onClose, children }) {
+function FullScreenOverlay({ open, onClose, actions, children }) {
   return (
     <Modal
       open={open}
       onClose={onClose}
       closeAfterTransition
-      BackdropProps={{
+      slotProps={{ backdrop: {
         sx: {
           bgcolor: "rgba(0, 0, 0, 0.5)",
           backdropFilter: "blur(4px)",
         },
-      }}
+      }}}
     >
       {/* Centering wrapper */}
       <Box
@@ -38,19 +38,24 @@ function FullScreenOverlay({ open, onClose, children }) {
             p: { xs: 3, md: 6 },
           }}
         >
-          {/* Close Button */}
-          <IconButton
-            onClick={onClose}
+          <Box
             sx={{
-              position: "absolute",
-              top: 32,
-              left: 32,
-              color: "text.primary",
-              zIndex: 10,
+              display: "flex",
+              justifyContent: 'space-between'
             }}
           >
-            <CancelOutlinedIcon fontSize="medium" />
-          </IconButton>
+            {/* Close Button */}
+            <IconButton onClick={onClose}>
+              <CancelOutlinedIcon fontSize="medium" />
+            </IconButton>
+            
+            {/* Optional Actions */}
+            {actions && (
+              <Box>
+                {actions}
+              </Box>
+            )}
+          </Box>
 
           {/* Overlay content */}
           {children}
