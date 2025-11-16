@@ -167,7 +167,6 @@ class PostBlogSerializer(serializers.ModelSerializer):
         model = PostBlog
         fields = (
             'id',
-            'author_id',
             'title',
             'text',
             'images',
@@ -176,7 +175,6 @@ class PostBlogSerializer(serializers.ModelSerializer):
         )
         read_only_fields = (
             'id',
-            'author_id',
             'created_at',
             'last_edition_date'
         )
