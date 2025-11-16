@@ -20,26 +20,39 @@ function ImageBlock({ content, isEditing, onChange, sx }) {
         ...getDashedInputProps(isEditing).style,
         padding: 0,
         position: "relative",
-        minWidth: 120,             
-        minHeight: 180,
+        minWidth: 0,
+        minHeight: "70vh",
+        height: "auto",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
+        boxSizing: "border-box",
         ...sx
       }}
     >
       {/* IMAGE */}
       {content ? (
-        <img
-          src={content?.preview || content}
-          style={{ width: "100%", height: "100%", objectFit: "scale-down" }}
-        />
-      ) : isEditing && (
-        <Box sx={{ textAlign: "center", px: 2 }}>
-          Nenhuma imagem
+        // wrapper preserves outer Box height/spacing while image can scale within limits
+        <Box sx={{ width: "100%", boxSizing: "border-box" }}>
+          <img
+            src={content?.preview || content}
+            alt=""
+            style={{
+              display: "block",
+              width: "100%",
+              height: "auto",                 // keep aspect ratio, do not force 100%
+              maxHeight: "70vh",              // prevent image from overflowing the viewport
+              objectFit: "contain",
+              margin: 0,
+            }}
+          />
         </Box>
-      )}
+       ) : isEditing && (
+         <Box sx={{ textAlign: "center", px: 2 }}>
+           Nenhuma imagem
+         </Box>
+       )}
 
       {/* TOOLBAR */}
       {isEditing && (

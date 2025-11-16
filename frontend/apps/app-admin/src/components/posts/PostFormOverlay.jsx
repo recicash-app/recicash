@@ -63,7 +63,7 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
-            gap: "32px",
+            gap: "24px",
             p: 3,
             minHeight: "60vh",
             width: "100%",
@@ -71,15 +71,15 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
           }}
         >
           {/* Left Column */}
-          <Box sx={{ gridColumn: "1", display: "flex", flexDirection: "column", gap: 2, width: "2fr" }}>
+          <Box sx={{ gridColumn: "1", display: "flex", flexDirection: "column", gap: "2vh", width: "2fr" }}>
             <TitleBlock
-              sx={{ minHeight: "4rem" }}
+              sx={{ minHeight: "10vh" }}
               isEditing={editingMode}
               content={formData.title}
               onChange={(val) => setFormData((prev) => ({ ...prev, title: val }))}
             />
             <TextBlock
-              sx={{ flex: 1, minHeight: "25rem", mb: { sx: 3, md: 6 } }}
+              sx={{ flex: 1, minHeight: "58vh", mb: 2 }}
               isEditing={editingMode}
               content={formData.text}
               onChange={(val) => setFormData((prev) => ({ ...prev, text: val }))}
@@ -91,7 +91,7 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
             key={post?.id || "new"}
             isEditing={editingMode}
             content={formData.image}
-            sx={{ gridColumn: "2", maxHeight: "300px", width: "1fr" }}
+            sx={{ gridColumn: "2", width: "33vw", mb: 2 }}
             onChange={handleImageChange}
           />
         </Box>
