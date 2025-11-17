@@ -1,4 +1,16 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+
+"""
+Model definitions for the entities app.
+
+Contains:
+- User, RecyclingPoint, PostBlog, PostImage, etc.
+
+Notes:
+- PostBlog.author_id must be a User instance (see PostBlogViewSet.perform_create).
+- PostImage.image stored under MEDIA_ROOT/blog_images/.
+"""
 
 class RecyclingPoint(models.Model):
     recycling_point_id = models.BigAutoField(primary_key=True) # PK de Ecoponto
@@ -25,7 +37,7 @@ class RecyclingPoint(models.Model):
         return self.recycling_point_id
 
 
-class User(models.Model):
+class User(AbstractUser):
     user_id = models.BigAutoField(primary_key=True) # PK de Usuario
     fav_recycling_point_id = models.ForeignKey( # FK that references to favorite Recycling Point 
         RecyclingPoint,
@@ -36,9 +48,10 @@ class User(models.Model):
         related_name='favorite_recycling_point'
     )
 
-    name  = models.CharField(max_length=255)
-    email = models.EmailField(max_length=255, unique=True)
-    cpf   = models.CharField(max_length=14, unique=True)
+    username = models.CharField(max_length=150, default='defaultusername', unique=True)
+    password = models.CharField(max_length=128, default='defaultpassword')
+
+    cpf = models.CharField(max_length=14, unique=True)
     zip_code = models.CharField(max_length=10)
     
     # Platform access levels
@@ -50,7 +63,7 @@ class User(models.Model):
 
     access_level = models.CharField(max_length=1,
                                         choices=ACCESS_LEVELS,
-                                        default='C',
+                                        default='U',
                                         db_column='ACCESS_LEVEL'
     )
 
@@ -60,6 +73,7 @@ class User(models.Model):
         verbose_name_plural = 'Users'
     
     def __str__(self):
+        return self.email
         return self.email
 
 
@@ -217,7 +231,7 @@ class Coupon(models.Model):
         ('GIFT', 'Gift')
     ]
 
-    type = models.CharField(max_length=255,
+    coupon_type = models.CharField(max_length=255,
                                      choices=COUPON_TYPES,
                                      default='PERCENTAGE_DISCOUNT',
                                      db_column='COUPON_TYPE'
@@ -274,7 +288,6 @@ class PostBlog(models.Model):
     )
     title = models.CharField(max_length=200)
     text = models.TextField()
-    images = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_edition_date = models.DateTimeField(auto_now=True)
 
@@ -282,3 +295,21 @@ class PostBlog(models.Model):
         db_table = 'POST_BLOG'
         verbose_name = 'post'
         verbose_name_plural = 'posts'
+
+
+class PostImage(models.Model):
+    post = models.ForeignKey(
+        PostBlog,
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+
+    image = models.ImageField(upload_to='blog_images/')
+
+    class Meta:
+        db_table = 'POST_IMAGE'
+        verbose_name = 'post_image'
+        verbose_name_plural = 'post_images'
+
+    def __str__(self):
+        return f"Post image: {self.post.title}"

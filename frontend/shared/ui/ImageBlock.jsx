@@ -2,14 +2,16 @@ import { Box, IconButton } from "@mui/material";
 import { Upload, Delete } from "@mui/icons-material";
 import { getDashedInputProps } from "../styles/dashedInputProps";
 
-function ImageBlock({ content, isEditing, onChange }) {
+function ImageBlock({ content, isEditing, onChange, sx }) {
   const handleUpload = (e) => {
     const file = e.target.files[0];
-    if (file) onChange(URL.createObjectURL(file));
+    if (file) {
+      onChange({ file, preview: URL.createObjectURL(file) });
+    }
   };
 
   const handleDelete = () => {
-    onChange("");
+    onChange(null);
   };
 
   return (
@@ -18,26 +20,39 @@ function ImageBlock({ content, isEditing, onChange }) {
         ...getDashedInputProps(isEditing).style,
         padding: 0,
         position: "relative",
-        minWidth: 120,             
-        minHeight: 180,
+        minWidth: 0,
+        minHeight: "70vh",
+        height: "auto",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
+        boxSizing: "border-box",
+        ...sx
       }}
     >
       {/* IMAGE */}
       {content ? (
-        <img
-          src={content}
-          alt="block"
-          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-        />
-      ) : (
-        <Box sx={{ textAlign: "center", px: 2 }}>
-          Nenhuma imagem
+        // wrapper preserves outer Box height/spacing while image can scale within limits
+        <Box sx={{ width: "100%", boxSizing: "border-box" }}>
+          <img
+            src={content?.preview || content}
+            alt=""
+            style={{
+              display: "block",
+              width: "100%",
+              height: "auto",                 // keep aspect ratio, do not force 100%
+              maxHeight: "70vh",              // prevent image from overflowing the viewport
+              objectFit: "contain",
+              margin: 0,
+            }}
+          />
         </Box>
-      )}
+       ) : isEditing && (
+         <Box sx={{ textAlign: "center", px: 2 }}>
+           Nenhuma imagem
+         </Box>
+       )}
 
       {/* TOOLBAR */}
       {isEditing && (

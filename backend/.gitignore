@@ -30,3 +30,6 @@ coverage.xml
 
 # MyPy cache
 .mypy_cache/
+
+# Media files
+media
