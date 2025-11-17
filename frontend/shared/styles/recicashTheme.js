@@ -239,6 +239,14 @@ const recicashTheme = createTheme({
         },
       },
     },
+
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          color: "#222222",
+        }
+      }
+    }
   },
 });
 

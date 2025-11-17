@@ -292,7 +292,7 @@ def create_data(number_of_users=10):
         else:
             logger.info("Admin user already exists.")
 
-        posts_to_create = []
+        posts = []
         blog_titles = [
             "A Importância da Reciclagem para o Meio Ambiente",
             "Como Separar Corretamente Seus Resíduos",
@@ -300,24 +300,34 @@ def create_data(number_of_users=10):
             "O Impacto do Plástico nos Oceanos",
             "Economia Circular: O Futuro da Sustentabilidade"
         ]
-        
-        for i, title in enumerate(blog_titles, 1):
-            posts_to_create.append(
+
+        for title in blog_titles:
+            posts.append(
                 PostBlog(
                     author_id=admin_user,
                     title=title,
-                    text=fake.text(max_nb_chars=1500),
-                    images="https://placehold.co/800x400/22c55e/ffffff?text=Recicash+Blog",
+                    text=fake.text(max_nb_chars=2000),
                     created_at=timezone.now() - timedelta(days=random.randint(1, 180)),
                     last_edition_date=timezone.now()
                 )
             )
-        
-        created_posts = PostBlog.objects.bulk_create(posts_to_create)
-        logger.info(f"Blog posts created successfully: {len(created_posts)} posts")
+
+        created_posts = PostBlog.objects.bulk_create(posts)
+        logger.info(f"Blog posts created: {len(created_posts)}")
+
+        for post in created_posts:
+            from django.core.files.base import ContentFile
+            image_content = ContentFile(b"fake-image-bytes", name=f"{post.post_id}.jpg")
+
+            PostImage.objects.create(
+                post=post,
+                image=image_content
+            )
+
+        logger.info("Blog post images created successfully.")
 
     except Exception as e:
-        logger.error(f"An unexpected error occurred while creating blog posts: {e}")
+        logger.error(f"An error occurred while creating blog posts: {e}")
 
     # Create Wallets
     logger.info("Calculating final balances and creating wallets for all users...")

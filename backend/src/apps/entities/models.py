@@ -1,6 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+"""
+Model definitions for the entities app.
+
+Contains:
+- User, RecyclingPoint, PostBlog, PostImage, etc.
+
+Notes:
+- PostBlog.author_id must be a User instance (see PostBlogViewSet.perform_create).
+- PostImage.image stored under MEDIA_ROOT/blog_images/.
+"""
+
 class RecyclingPoint(models.Model):
     recycling_point_id = models.BigAutoField(primary_key=True) # PK de Ecoponto
     user_id  = models.ForeignKey( # FK that references to a Recycling Point representative User
@@ -38,6 +49,8 @@ class User(AbstractUser):
         related_name='favorite_recycling_point'
     )
 
+    username = models.CharField(max_length=150, default='defaultusername', unique=True)
+    password = models.CharField(max_length=128, default='defaultpassword')
 
     cpf = models.CharField(max_length=14, unique=True)
     zip_code = models.CharField(max_length=10)
@@ -61,6 +74,7 @@ class User(AbstractUser):
         verbose_name_plural = 'Users'
     
     def __str__(self):
+        return self.email
         return self.email
 
 
@@ -259,7 +273,6 @@ class PostBlog(models.Model):
     )
     title = models.CharField(max_length=200)
     text = models.TextField()
-    images = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     last_edition_date = models.DateTimeField(auto_now=True)
 
@@ -267,3 +280,21 @@ class PostBlog(models.Model):
         db_table = 'POST_BLOG'
         verbose_name = 'post'
         verbose_name_plural = 'posts'
+
+
+class PostImage(models.Model):
+    post = models.ForeignKey(
+        PostBlog,
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+
+    image = models.ImageField(upload_to='blog_images/')
+
+    class Meta:
+        db_table = 'POST_IMAGE'
+        verbose_name = 'post_image'
+        verbose_name_plural = 'post_images'
+
+    def __str__(self):
+        return f"Post image: {self.post.title}"
