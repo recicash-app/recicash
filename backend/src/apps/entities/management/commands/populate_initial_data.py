@@ -2,11 +2,13 @@ from apps.entities.models import *
 from collections import defaultdict
 from datetime import timedelta
 from django.core.management.base import BaseCommand
+from django.core.files.base import ContentFile
 from django.db import transaction as django_transaction
 from django.utils import timezone
 from faker import Faker
 import logging
 import random
+import requests
 
 # Logging basic configuration
 logger = logging.getLogger(__name__)
@@ -292,7 +294,6 @@ def create_data(number_of_users=10):
         else:
             logger.info("Admin user already exists.")
 
-        posts_to_create = []
         blog_titles = [
             "A Importância da Reciclagem para o Meio Ambiente",
             "Como Separar Corretamente Seus Resíduos",
@@ -301,19 +302,30 @@ def create_data(number_of_users=10):
             "Economia Circular: O Futuro da Sustentabilidade"
         ]
         
+        created_posts = []
+
         for i, title in enumerate(blog_titles, 1):
-            posts_to_create.append(
-                PostBlog(
-                    author_id=admin_user,
-                    title=title,
-                    text=fake.text(max_nb_chars=1500),
-                    images="https://placehold.co/800x400/22c55e/ffffff?text=Recicash+Blog",
-                    created_at=timezone.now() - timedelta(days=random.randint(1, 180)),
-                    last_edition_date=timezone.now()
-                )
+            post = PostBlog.objects.create(
+                author_id=admin_user,
+                title=title,
+                text=fake.text(max_nb_chars=1500),
+                created_at=timezone.now() - timedelta(days=random.randint(1, 180)),
+                last_edition_date=timezone.now()
             )
-        
-        created_posts = PostBlog.objects.bulk_create(posts_to_create)
+
+            image_url = "https://placehold.co/800x400/22c55e/ffffff?text=Recicash+Blog"
+    
+            # Download image and attach to PostImage
+            response = requests.get(image_url)
+            
+            image_name = f"blog_image_{i}.png"
+            image_file = ContentFile(response.content)
+
+            image_instance = PostImage(post=post)
+            image_instance.image.save(image_name, image_file, save=True)
+            
+            created_posts.append(post)
+
         logger.info(f"Blog posts created successfully: {len(created_posts)} posts")
 
     except Exception as e:
