@@ -1,7 +1,7 @@
 import { Typography, TextField } from "@mui/material";
 import { getDashedInputProps } from "../styles/dashedInputProps";
 
-function TitleBlock({ content, isEditing, onChange }) {  
+function TitleBlock({ content, isEditing, onChange, sx }) {  
   return isEditing ? (
     <TextField
       variant="standard"
@@ -15,6 +15,9 @@ function TitleBlock({ content, isEditing, onChange }) {
           sx: (theme) => ({
             ...theme.typography.h4,
             color: theme.palette.text.hint,
+            justifyContent: 'flex-start',
+            alignItems: 'flex-start',
+            ...sx
           })
         }
       }}

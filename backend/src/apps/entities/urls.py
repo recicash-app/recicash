@@ -1,10 +1,12 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from apps.views.blog_view import PostBlogViewSet
 from apps.views.user_view import UserViewSet, UserObtainPairView, LogoutView, GetCSRFToken
 
 # Router to ViewSets. It generates GET/POST/PUT/DELETE URLs automatically.
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
+router.register(r'posts', PostBlogViewSet)
 
 # The URL pattern is /api/[feat]/ and /api/[feat]/{pk}/
 urlpatterns = [
