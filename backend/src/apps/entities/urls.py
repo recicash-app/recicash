@@ -18,7 +18,7 @@ urlpatterns = [
     ),
 
     path('token/logout/', 
-    LogoutView.as_view(), 
+         LogoutView.as_view(), 
          name='token_logout'
     ),
     path('token/csrf/', 
