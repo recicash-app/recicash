@@ -76,7 +76,7 @@ class UserObtainPairView(TokenObtainPairView):
             key='refresh_token',
             value=validated_data['refresh'],
             httponly=True,
-            secure=True,         # False to development in HTTP.
+            secure=False,        # False to development in HTTP.
             samesite='Lax', 
             path='/'
         )
@@ -125,8 +125,8 @@ class LogoutView(APIView):
 
 class GetCSRFToken(APIView):
     """
-    "Empty" view" only used to "priming".
-    Front-end does a GET here before login, so Django can send 'csrftoken' token in response.
+    Empty view only used to prime CSRF token.
+    Front-end does a GET here before login, so Django can send the 'csrftoken' cookie in response.
     """
     permission_classes = [AllowAny]
 

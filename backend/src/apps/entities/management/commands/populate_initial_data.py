@@ -2,11 +2,13 @@ from apps.entities.models import *
 from collections import defaultdict
 from datetime import timedelta
 from django.core.management.base import BaseCommand
+from django.core.files.base import ContentFile
 from django.db import transaction as django_transaction
 from django.utils import timezone
 from faker import Faker
 import logging
 import random
+import requests
 
 # Logging basic configuration
 logger = logging.getLogger(__name__)
@@ -49,7 +51,7 @@ def create_data(number_of_users=10):
                 zip_code=zip_code,
                 access_level=access_level
             )
-            user.set_password('senha123')  # Define senha de forma segura
+            user.set_password('senha123')  # Set password securely
             users_to_insert.append(user)
 
         created_users = User.objects.bulk_create(users_to_insert)
@@ -292,7 +294,6 @@ def create_data(number_of_users=10):
         else:
             logger.info("Admin user already exists.")
 
-        posts = []
         blog_titles = [
             "A Importância da Reciclagem para o Meio Ambiente",
             "Como Separar Corretamente Seus Resíduos",
@@ -300,34 +301,35 @@ def create_data(number_of_users=10):
             "O Impacto do Plástico nos Oceanos",
             "Economia Circular: O Futuro da Sustentabilidade"
         ]
+        
+        created_posts = []
 
-        for title in blog_titles:
-            posts.append(
-                PostBlog(
-                    author_id=admin_user,
-                    title=title,
-                    text=fake.text(max_nb_chars=2000),
-                    created_at=timezone.now() - timedelta(days=random.randint(1, 180)),
-                    last_edition_date=timezone.now()
-                )
+        for i, title in enumerate(blog_titles, 1):
+            post = PostBlog.objects.create(
+                author_id=admin_user,
+                title=title,
+                text=fake.text(max_nb_chars=1500),
+                created_at=timezone.now() - timedelta(days=random.randint(1, 180)),
+                last_edition_date=timezone.now()
             )
 
-        created_posts = PostBlog.objects.bulk_create(posts)
-        logger.info(f"Blog posts created: {len(created_posts)}")
+            image_url = "https://placehold.co/800x400/22c55e/ffffff?text=Recicash+Blog"
+    
+            # Download image and attach to PostImage
+            response = requests.get(image_url)
+            
+            image_name = f"blog_image_{i}.png"
+            image_file = ContentFile(response.content)
 
-        for post in created_posts:
-            from django.core.files.base import ContentFile
-            image_content = ContentFile(b"fake-image-bytes", name=f"{post.post_id}.jpg")
+            image_instance = PostImage(post=post)
+            image_instance.image.save(image_name, image_file, save=True)
+            
+            created_posts.append(post)
 
-            PostImage.objects.create(
-                post=post,
-                image=image_content
-            )
-
-        logger.info("Blog post images created successfully.")
+        logger.info(f"Blog posts created successfully: {len(created_posts)} posts")
 
     except Exception as e:
-        logger.error(f"An error occurred while creating blog posts: {e}")
+        logger.error(f"An unexpected error occurred while creating blog posts: {e}")
 
     # Create Wallets
     logger.info("Calculating final balances and creating wallets for all users...")

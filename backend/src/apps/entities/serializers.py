@@ -31,7 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
         """
         password = validated_data.pop('password')
         user = User(**validated_data)
-        user.set_password(password)  # Hasheia a senha
+        user.set_password(password)  # Hashes the password
         user.save()
         return user
 
@@ -104,7 +104,7 @@ class UserObtainPairSerializer(TokenObtainPairSerializer):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            raise serializers.ValidationError('Credenciais inválidas.')
+            raise serializers.ValidationError('Invalid credentials.')
 
         # verify password and 'is_active' status
         # 'authenticate' require USERNAME_FIELD
@@ -115,7 +115,7 @@ class UserObtainPairSerializer(TokenObtainPairSerializer):
 
         if not user_auth:
             # Wrong password or inactive user
-            raise serializers.ValidationError('Credenciais inválidas.')
+            raise serializers.ValidationError('Invalid credentials.')
 
         self.user = user_auth
 
