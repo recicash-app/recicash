@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
-from apps.entities.models import Recycling, User, RecyclingPoint, RecyclingValue, WalletHistory
+from apps.entities.models import Recycling, User, RecyclingPoint, RecyclingValue, WalletHistory, Wallet
 from apps.entities.serializers import RecyclingSerializer
 
 
@@ -128,6 +128,11 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                 operation='RECYCLING',
                 value=points_value
             )
+            
+            # Update user's wallet points
+            wallet, created = Wallet.objects.get_or_create(user_id=user)
+            wallet.points_balance += points_value
+            wallet.save()
             
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
