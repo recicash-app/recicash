@@ -35,7 +35,6 @@ class UserObtainPairView(TokenObtainPairView):
     """
     serializer_class = UserObtainPairSerializer
 
-    @method_decorator(csrf_protect) # Guarantee that X-CSRFToken header is verified
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
