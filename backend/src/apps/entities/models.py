@@ -75,7 +75,6 @@ class User(AbstractUser):
     
     def __str__(self):
         return self.email
-        return self.email
 
 
 class Wallet(models.Model):
@@ -142,7 +141,7 @@ class RecyclingValue(models.Model):
         verbose_name_plural = 'Recycling values'
     
     def __str__(self):
-        return self.id_valor_reciclagem
+        return self.recycling_value_id
     
 
 class Recycling(models.Model):
@@ -182,7 +181,7 @@ class Recycling(models.Model):
         verbose_name_plural = 'Recyclings'
     
     def __str__(self):
-        return self.id_reciclagem
+        return self.recycling_id
 
 
 class PartnerCompany(models.Model):

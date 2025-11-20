@@ -221,7 +221,7 @@ LOGGING = {
         'apps.entities.scripts.populate_initial_data': { 
             'handlers': ['console'],
             'level': 'INFO',
-            'propagate': False, # Para não duplicar com o root logger
+            'propagate': False, # Prevent duplication with root logger
         },
     },
 }
