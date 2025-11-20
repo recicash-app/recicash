@@ -60,6 +60,14 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         
         Note: points_value is automatically calculated from recycling_value.points_value * weight
         """
+
+        # Validate that user is authenticated
+        if not request.user.is_authenticated:
+            return Response(
+                {"error": "Authentication required."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
         # Validate that user, recycling_point, and recycling_value exist
         user_id = request.data.get('user_id')
         recycling_point_id = request.data.get('recycling_point_id')
@@ -73,6 +81,13 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             return Response(
                 {"error": "User not found."},
                 status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Ensure user can only create records for their own account
+        if request.user.user_id != user.user_id:
+            return Response(
+                {"error": "You can only create recycling records for your own account."},
+                status=status.HTTP_403_FORBIDDEN
             )
         
         try:
