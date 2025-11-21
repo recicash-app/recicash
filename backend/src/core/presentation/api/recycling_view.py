@@ -52,7 +52,17 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         Filter recycling records to only show the authenticated user's records.
         Prevents users from seeing recycling records of other users.
 
-        API Usage: GET /api/v1/recyclings/?user_id={user_id}
+        API Usage: 
+        - GET /api/v1/recyclings/?user_id={user_id}
+        - GET /api/v1/recyclings/?start_date={start_date}
+        - GET /api/v1/recyclings/?end_date={end_date}
+        - GET /api/v1/recyclings/?min_points={min_points}
+        - GET /api/v1/recyclings/?max_points={max_points}
+        - Optional filters:
+            - start_date: ISO format (YYYY-MM-DDTHH:MM:SS) date string to filter records from this date onwards
+            - end_date: ISO format (YYYY-MM-DDTHH:MM:SS) date string to filter records up to this date
+            - min_points: integer to filter records with points_value >= min_points
+            - max_points: integer to filter records with points_value <= max_points
         """
         queryset = super().get_queryset()
         user_id = self.request.query_params.get('user_id', None)
