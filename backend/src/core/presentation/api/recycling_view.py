@@ -99,6 +99,24 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             except (ValueError, TypeError):
                 pass  # Ignore invalid date format
         
+        # Filter by points if provided
+        min_points = self.request.query_params.get('min_points', None)
+        max_points = self.request.query_params.get('max_points', None)
+        
+        if min_points:
+            try:
+                min_points_value = int(min_points)
+                queryset = queryset.filter(points_value__gte=min_points_value)
+            except (ValueError, TypeError):
+                pass  # Ignore invalid points format
+        
+        if max_points:
+            try:
+                max_points_value = int(max_points)
+                queryset = queryset.filter(points_value__lte=max_points_value)
+            except (ValueError, TypeError):
+                pass  # Ignore invalid points format
+        
         return queryset
     
 
