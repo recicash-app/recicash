@@ -78,6 +78,27 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             return queryset.none()
         
         queryset = queryset.filter(user_id__user_id=requested_user_id)
+        
+        # Filter by date if provided
+        start_date = self.request.query_params.get('start_date', None)
+        end_date = self.request.query_params.get('end_date', None)
+        
+        if start_date:
+            try:
+                from datetime import datetime
+                start_date_obj = datetime.fromisoformat(start_date)
+                queryset = queryset.filter(date__gte=start_date_obj)
+            except (ValueError, TypeError):
+                pass  # Ignore invalid date format
+        
+        if end_date:
+            try:
+                from datetime import datetime
+                end_date_obj = datetime.fromisoformat(end_date)
+                queryset = queryset.filter(date__lte=end_date_obj)
+            except (ValueError, TypeError):
+                pass  # Ignore invalid date format
+        
         return queryset
     
 
