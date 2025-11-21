@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from core.domain.models import User
+from core.domain.models import User, PostBlog, PostImage, RecyclingPoint
 import re
 
 class UserSerializer(serializers.ModelSerializer):
@@ -134,3 +134,74 @@ class UserObtainPairSerializer(TokenObtainPairSerializer):
         }
 
         return data
+
+
+class PostImageSerializer(serializers.ModelSerializer):
+    """
+    Serializer for PostImage.
+
+    Fields:
+    - id: DB id
+    - image_url: absolute URL built from request context
+
+    Validation:
+    - Accepts files sent as multipart/form-data under field 'image'.
+    - Add validate_image() here if you want size / mime checks.
+    """
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PostImage
+        fields = ['id', 'image_url']
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(obj.image.url)
+        return obj.image.url
+
+
+class PostBlogSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='post_id', read_only=True)
+    images = PostImageSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = PostBlog
+        fields = (
+            'id',
+            'title',
+            'text',
+            'images',
+            'created_at',
+            'last_edition_date'
+        )
+        read_only_fields = (
+            'id',
+            'created_at',
+            'last_edition_date'
+        )
+
+
+class RecyclingPointSerializer(serializers.ModelSerializer):
+    """
+    Serializer for RecyclingPoint basic information.
+    
+    Fields:
+    - recycling_point_id: Unique identifier
+    - name: Name of the recycling point
+    - latitude: Geographic latitude
+    - longitude: Geographic longitude
+    - cnpj: Business registration number
+    - zip_code: Postal code
+    """
+    class Meta:
+        model = RecyclingPoint
+        fields = (
+            'recycling_point_id',
+            'name',
+            'latitude',
+            'longitude',
+            'cnpj',
+            'zip_code'
+        )
+        read_only_fields = fields
