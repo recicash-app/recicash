@@ -42,7 +42,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         if self.action in ['list', 'retrieve']:
             permission_classes = [AllowAny]
         else:
-            permission_classes = [AllowAny]  # Change to [IsAuthenticated] in production
+            permission_classes = [IsAuthenticated]  # Change to [IsAuthenticated] in production
 
         return [permission() for permission in permission_classes]
 
@@ -73,6 +73,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         Expected POST data:
         {
             "recycling_id": <integer>
+            "user_id": <integer>
         }
         
         This endpoint:
@@ -81,10 +82,17 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         3. Updates the user's wallet points_balance
         """
         recycling_id = request.data.get('recycling_id')
+        user_id = request.data.get('user_id')
         
         if not recycling_id:
             return Response(
                 {"error": "recycling_id is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not user_id:
+            return Response(
+                {"error": "user_id is required."},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -94,6 +102,13 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             return Response(
                 {"error": "Recycling record not found."},
                 status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Verify if the user_id from request matches the recycling user_id
+        if recycling.user_id.user_id != user_id:
+            return Response(
+                {"error": "Unauthorized: user_id does not match the recycling owner."},
+                status=status.HTTP_403_FORBIDDEN
             )
         
         # Verify if the recycling status is not REDEEMED
