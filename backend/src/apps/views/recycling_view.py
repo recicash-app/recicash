@@ -127,23 +127,34 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Create WalletHistory record
-        wallet_history = WalletHistory.objects.create(
-            user_id=user,
-            operation='RECYCLING',
-            value=recycling.points_value
-        )
         
         # Update user's wallet points balance
         try:
+            # Create WalletHistory record
+            wallet_history = WalletHistory.objects.create(
+                user_id=user,
+                operation='RECYCLING',
+                value=recycling.points_value
+            )
+
             wallet = user.WALLET_USER
             wallet.points_balance += recycling.points_value
             wallet.save()
+            
+            # Update recycling status to REDEEMED
+            recycling.status = 'REDEEMED'
+            recycling.save()
         except Wallet.DoesNotExist:
             return Response(
                 {"error": "Wallet not found for this user."},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        except Exception as e:
+            return Response(
+                {"error": f"An error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
         
         return Response(
             {
