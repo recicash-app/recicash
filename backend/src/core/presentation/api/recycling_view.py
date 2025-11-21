@@ -45,25 +45,173 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated]  # Change to [IsAuthenticated] in production
 
         return [permission() for permission in permission_classes]
+    
 
+    def get_queryset(self):
+        """
+        Filter recycling records to only show the authenticated user's records.
+        Prevents users from seeing recycling records of other users.
 
-    def perform_create(self, serializer):
+        API Usage: GET /api/v1/recyclings/?user_id={user_id}
         """
-        Save the recycling record to the database.
-        """
-        serializer.save()
+        queryset = super().get_queryset()
+        user_id = self.request.query_params.get('user_id', None)
+        
+        # Validate that the user_id provided matches the authenticated user
+        if not user_id:
+            return queryset.none()
+        
+        try:
+            requested_user_id = int(user_id)
+        except (ValueError, TypeError):
+            return queryset.none()
+        
+        # Get the authenticated user's ID from the request
+        if self.request.user and self.request.user.is_authenticated:
+            # Assuming the user object has a user_id attribute
+            authenticated_user_id = self.request.user.user_id
+            
+            # Only allow users to see their own recycling records
+            if authenticated_user_id != requested_user_id:
+                return queryset.none()
+        else:
+            return queryset.none()
+        
+        queryset = queryset.filter(user_id__user_id=requested_user_id)
+        return queryset
+    
 
-    def perform_update(self, serializer):
+    def retrieve(self, request, *args, **kwargs):
         """
-        Update a recycling record.
+        Retrieve a single recycling record.
+        Only allow users to see their own recycling records.
         """
-        serializer.save()
+        instance = self.get_object()
+        user_id = request.query_params.get('user_id', None)
+        
+        # Validate that the user_id provided matches the authenticated user
+        if not user_id:
+            return Response(
+                {"error": "user_id parameter is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            requested_user_id = int(user_id)
+        except (ValueError, TypeError):
+            return Response(
+                {"error": "Invalid user_id format."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get the authenticated user's ID from the request
+        if request.user and request.user.is_authenticated:
+            authenticated_user_id = request.user.user_id
+            
+            # Only allow users to see their own recycling records
+            if authenticated_user_id != requested_user_id or instance.user_id.user_id != requested_user_id:
+                return Response(
+                    {"error": "Unauthorized: You cannot access this recycling record."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        else:
+            return Response(
+                {"error": "Authentication required."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+    
 
-    def perform_destroy(self, instance):
+    def create(self, request, *args, **kwargs):
         """
-        Delete a recycling record.
+        Create a new recycling record.
+        
+        Expected POST data:
+        {
+            "user_id": <integer>,
+            "recycling_point_id": <integer>,
+            "recycling_value_id": <integer>,
+            "weight": <float>,
+            "validation_hash": "<string>"
+        }
+        
+        Note: points_value is automatically calculated from recycling_value.points_value * weight
         """
-        instance.delete()
+        # Validate that user, recycling_point, and recycling_value exist
+        user_id = request.data.get('user_id')
+        recycling_point_id = request.data.get('recycling_point_id')
+        recycling_value_id = request.data.get('recycling_value_id')
+        weight = request.data.get('weight')
+        validation_hash = request.data.get('validation_hash')
+        
+        try:
+            user = User.objects.get(user_id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        try:
+            recycling_point = RecyclingPoint.objects.get(recycling_point_id=recycling_point_id)
+        except RecyclingPoint.DoesNotExist:
+            return Response(
+                {"error": "RecyclingPoint not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        try:
+            recycling_value = RecyclingValue.objects.get(recycling_value_id=recycling_value_id)
+        except RecyclingValue.DoesNotExist:
+            return Response(
+                {"error": "RecyclingValue not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        if not weight:
+            return Response(
+                {"error": "Weight is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not validation_hash:
+            return Response(
+                {"error": "Validation hash is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if validation_hash already exists
+        if Recycling.objects.filter(validation_hash=validation_hash).exists():
+            return Response(
+                {"error": "Validation hash already exists. Cannot create duplicate recycling record."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Calculate points_value: recycling_value.points_value * weight
+        points_value = int(recycling_value.points_value * float(weight))
+        
+        # Prepare data for serializer
+        data = request.data.copy()
+        data['points_value'] = points_value
+        
+        serializer = self.get_serializer(data=data)
+        
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            
+            # Create a WalletHistory record
+            WalletHistory.objects.create(
+                user_id=user,
+                operation='RECYCLING',
+                value=points_value
+            )
+            
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def record_wallet_history(self, request):
@@ -166,3 +314,22 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_201_CREATED
         )
+    
+
+    def perform_create(self, serializer):
+        """
+        Save the recycling record to the database.
+        """
+        serializer.save()
+
+    def perform_update(self, serializer):
+        """
+        Update a recycling record.
+        """
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        """
+        Delete a recycling record.
+        """
+        instance.delete()
