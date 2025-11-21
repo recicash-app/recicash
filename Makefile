@@ -12,3 +12,6 @@ docker-down:
 
 access-data-base:
 	docker exec -it postgres_container psql -U ${DB_USER} -d ${DB_NAME}
+
+tests:
+	docker exec -it django_backend sh -c "python manage.py test"
