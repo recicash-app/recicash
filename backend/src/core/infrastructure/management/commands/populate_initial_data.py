@@ -9,6 +9,8 @@ from faker import Faker
 import logging
 import random
 import requests
+import csv
+import os
 
 from core.domain.models import *
 
@@ -17,6 +19,88 @@ logger = logging.getLogger(__name__)
 
 # Initializes Faker, defining brazilian language
 fake = Faker('pt_BR')
+
+def load_recycling_points_from_csv_with_managers(manager_users):
+    """
+    Load RecyclingPoints from CSV file and associate with manager users.
+    """
+    logger.info("Loading RecyclingPoints from CSV and associating with managers...")
+    
+    # Get the path to the CSV file (same directory as manage.py)
+    csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), 'RECYCLING_POINT.csv')
+    
+    if not os.path.exists(csv_path):
+        logger.error(f"CSV file not found at {csv_path}")
+        return
+    
+    if not manager_users:
+        logger.error("No manager users provided. Aborting recycling points creation.")
+        return
+    
+    try:
+        recycling_points_to_create = []
+        created_count = 0
+        skipped_count = 0
+        manager_index = 0
+        
+        with open(csv_path, 'r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            
+            for row in reader:
+                try:
+                    recycling_point_id = row.get('recycling_point_id', '').strip('"')
+                    name = row.get('name', '').strip('"')
+                    cnpj = row.get('cnpj', '').strip('"')
+                    zip_code = row.get('zip_code', '').strip('"')
+                    latitude = float(row.get('latitude', '0').strip('"'))
+                    longitude = float(row.get('longitude', '0').strip('"'))
+                    address = row.get('address', '').strip('"')
+                    
+                    # Validate required fields
+                    if not all([recycling_point_id, name, latitude, longitude]):
+                        logger.warning(f"Skipping row with missing required fields: {row}")
+                        skipped_count += 1
+                        continue
+                    
+                    # Check if already exists
+                    if RecyclingPoint.objects.filter(recycling_point_id=recycling_point_id).exists():
+                        logger.info(f"RecyclingPoint already exists: {name}")
+                        skipped_count += 1
+                        continue
+                    
+                    # Assign manager user using round-robin distribution
+                    assigned_manager = manager_users[manager_index % len(manager_users)]
+                    manager_index += 1
+                    
+                    # Create RecyclingPoint object
+                    recycling_point = RecyclingPoint(
+                        recycling_point_id=recycling_point_id,
+                        name=name,
+                        cnpj=cnpj,
+                        zip_code=zip_code,
+                        latitude=latitude,
+                        longitude=longitude,
+                        address=address,
+                        user_id=assigned_manager  # Associate with manager user
+                    )
+                    
+                    recycling_points_to_create.append(recycling_point)
+                    created_count += 1
+                    
+                except ValueError as e:
+                    logger.error(f"Error parsing row: {row}. Error: {str(e)}")
+                    skipped_count += 1
+                    continue
+        
+        # Bulk create all RecyclingPoints
+        if recycling_points_to_create:
+            RecyclingPoint.objects.bulk_create(recycling_points_to_create, ignore_conflicts=True)
+            logger.info(f"RecyclingPoints created successfully: {len(recycling_points_to_create)} points associated with managers")
+        
+        logger.info(f"CSV Import Summary: Created={created_count}, Skipped={skipped_count}")
+        
+    except Exception as e:
+        logger.error(f"An error occurred while loading RecyclingPoints from CSV: {e}")
 
 def create_data(number_of_users=10):
     
@@ -63,49 +147,47 @@ def create_data(number_of_users=10):
         logger.error(f"An unexpected error occurred while creating users: {e}")
         return
 
-    # Create Recycling Points and its managers
-    logger.info(f"Creating Recycling Points...")
-    created_managers = []
-
-    for i in range(1, 11):
-        try:
-            with django_transaction.atomic():
-                manager_full_name = fake.name()
-                name_parts = manager_full_name.split()
-                first_name = name_parts[0]
-                last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
-                
-                manager_username = f'manager_{first_name.lower()}{i}'
-                manager_email = f'{manager_username}@recicash.point'
-                
-                new_manager = User(
-                    username=manager_username,
-                    first_name=first_name,
-                    last_name=last_name,
-                    email=manager_email,
-                    cpf=fake.cpf(),
-                    zip_code=fake.postcode(),
-                    access_level='M'
-                )
-                new_manager.set_password('senha123')
-                new_manager.save()
-                created_managers.append(new_manager)
-
-                RecyclingPoint.objects.create(
-                    user_id=new_manager,
-                    name=f"Ecoponto {fake.city()}",
-                    cnpj=fake.cnpj(),
-                    zip_code=fake.postcode(),
-                    latitude=float(fake.latitude()),
-                    longitude=float(fake.longitude())
-                )
-            logger.info(f"Recycling Point {i} and manager created successfully")
+    # Create Recycling Point Managers
+    logger.info('Creating Recycling Point Managers...')
+    managers_to_insert = []
+    
+    try:
+        for i in range(1, 11):
+            manager_full_name = fake.name()
+            name_parts = manager_full_name.split()
+            first_name = name_parts[0]
+            last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
+            
+            cpf = fake.cpf()
+            username = f'manager_{i}'
+            email = f'{username}@recicash.fake'
+            zip_code = fake.postcode()
+            
+            manager = User(
+                username=username,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                cpf=cpf,
+                zip_code=zip_code,
+                access_level='M'  # Recycling Point Manager
+            )
+            manager.set_password('senha123')
+            managers_to_insert.append(manager)
         
-        except Exception as e:
-            logger.error(f"Error creating Recycling Point {i} and its manager: {e}")
-            continue
-
-    logger.info(f"Total Recycling Points created: {RecyclingPoint.objects.count()}")
+        created_managers = User.objects.bulk_create(managers_to_insert)
+        logger.info(f"Managers created successfully: {len(created_managers)} managers")
+    
+    except Exception as e:
+        logger.error(f"An error occurred while creating managers: {e}")
+        created_managers = []
+    
+    # Load RecyclingPoints from CSV and associate with managers
+    logger.info("Loading RecyclingPoints from CSV and associating with managers...")
+    if created_managers:
+        load_recycling_points_from_csv_with_managers(created_managers)
+    else:
+        logger.error("No managers created. Skipping recycling points association.")
 
     # Create Recycling Value
     logger.info(f"Creating Recycling value...")
@@ -360,6 +442,7 @@ def create_data(number_of_users=10):
     logger.info("Initial data creation completed successfully!")
     logger.info(f"Summary:")
     logger.info(f"  - Users: {User.objects.count()}")
+    logger.info(f"  - Managers: {User.objects.filter(access_level='M').count()}")
     logger.info(f"  - Recycling Points: {RecyclingPoint.objects.count()}")
     logger.info(f"  - Recyclings: {Recycling.objects.count()}")
     logger.info(f"  - Partner Companies: {PartnerCompany.objects.count()}")
