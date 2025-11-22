@@ -6,7 +6,7 @@ class RecyclingPoint(models.Model):
     Represents a recycling point (ecoponto).
     References a representative User (optional).
     """
-    recycling_point_id = models.BigAutoField(primary_key=True)
+    recycling_point_id = models.CharField(max_length=255, primary_key=True)
     user_id = models.ForeignKey(
         'User',
         on_delete=models.SET_NULL,
@@ -18,6 +18,7 @@ class RecyclingPoint(models.Model):
 
     name = models.CharField(max_length=100, unique=True)
     cnpj = models.CharField(max_length=20, unique=True)
+    address = models.CharField(max_length=255, default='')
     zip_code = models.CharField(max_length=10)
     latitude = models.FloatField()
     longitude = models.FloatField()
