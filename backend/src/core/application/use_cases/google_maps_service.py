@@ -4,11 +4,13 @@ Service for integrating with Google Maps API.
 Provides functionality to:
 - Retrieve RecyclingPoint locations using Google Maps
 - Search for nearby recycling points in the database
+- Geocode addresses to coordinates using Google Geocoding API
 """
 
 import logging
 import math
-from typing import Dict, Optional, List
+import requests
+from typing import Dict, Optional, List, Tuple
 from urllib.parse import quote
 from django.conf import settings
 from apps.entities.models import RecyclingPoint
@@ -58,6 +60,62 @@ class GoogleMapsService:
             return None
         except Exception as e:
             logger.error(f"Error retrieving RecyclingPoint details: {str(e)}")
+            return None
+    
+    def geocode_address(self, address: str) -> Optional[Tuple[float, float]]:
+        """
+        Convert an address string to latitude and longitude using Google Geocoding API.
+        
+        Args:
+            address: Address string to geocode (e.g., "Rua Augusta, São Paulo, SP")
+            
+        Returns:
+            Tuple of (latitude, longitude) or None if geocoding fails
+        """
+        if not self.api_key:
+            logger.error("Google Maps API key is not configured")
+            return None
+        
+        try:
+            GEOCODING_API_URL = "https://maps.googleapis.com/maps/api/geocode/json"
+            
+            params = {
+                'address': address,
+                'key': self.api_key
+            }
+            
+            logger.info(f"Geocoding address: {address}")
+            
+            response = requests.get(GEOCODING_API_URL, params=params, timeout=10)
+            response.raise_for_status()
+            
+            data = response.json()
+            
+            if data.get('status') != 'OK':
+                logger.warning(f"Geocoding failed. Status: {data.get('status')}. Message: {data.get('error_message', 'No error message')}")
+                return None
+            
+            if not data.get('results'):
+                logger.warning(f"No results found for address: {address}")
+                return None
+            
+            # Get the first result
+            location = data['results'][0]['geometry']['location']
+            latitude = location['lat']
+            longitude = location['lng']
+            
+            logger.info(f"Geocoded address '{address}' to coordinates: ({latitude}, {longitude})")
+            
+            return (latitude, longitude)
+            
+        except requests.exceptions.Timeout:
+            logger.error("Timeout while geocoding address")
+            return None
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Error geocoding address: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error in geocode_address: {str(e)}")
             return None
     
     def search_nearby_recycling_points(
@@ -132,6 +190,69 @@ class GoogleMapsService:
         except Exception as e:
             logger.error(f"Error searching nearby recycling points: {str(e)}")
             return []
+    
+    def search_nearby_recycling_points_by_address(
+        self,
+        address: str,
+        radius_meters: int = 5000
+    ) -> Dict:
+        """
+        Search for nearby RecyclingPoints from an address string.
+        
+        Combines Google Geocoding API to convert address to coordinates,
+        then searches for recycling points nearby.
+        
+        Args:
+            address: Address string (e.g., "Rua Augusta 1000, São Paulo, SP")
+            radius_meters: Search radius in meters (default 5000)
+            
+        Returns:
+            Dictionary with geocoding info and nearby recycling points
+        """
+        try:
+            logger.info(f"Searching nearby recycling points for address: {address}")
+            
+            # Step 1: Geocode the address
+            coordinates = self.geocode_address(address)
+            
+            if not coordinates:
+                logger.warning(f"Could not geocode address: {address}")
+                return {
+                    'success': False,
+                    'error': 'Could not geocode the provided address',
+                    'address': address,
+                    'recycling_points': []
+                }
+            
+            latitude, longitude = coordinates
+            
+            # Step 2: Search for nearby recycling points using the coordinates
+            nearby_points = self.search_nearby_recycling_points(
+                latitude=latitude,
+                longitude=longitude,
+                radius_meters=radius_meters
+            )
+            
+            return {
+                'success': True,
+                'address': address,
+                'geocoded_location': {
+                    'latitude': latitude,
+                    'longitude': longitude
+                },
+                'search_radius_meters': radius_meters,
+                'total_found': len(nearby_points),
+                'recycling_points': nearby_points
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in search_nearby_recycling_points_by_address: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e),
+                'address': address,
+                'recycling_points': []
+            }
 
 
 

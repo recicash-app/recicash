@@ -189,3 +189,87 @@ class RecyclingPointViewSet(viewsets.ReadOnlyModelViewSet):
                 {'error': 'An error occurred while searching for nearby recycling points'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+    
+    @action(detail=False, methods=['get'], url_path='nearby-address')
+    def nearby_address(self, request):
+        """
+        Search for nearby recycling points using an address string.
+        
+        Uses Google Geocoding API to convert address to coordinates,
+        then searches for registered recycling points nearby.
+        
+        Query Parameters:
+        - address (required): Address string (e.g., "Rua Augusta 1000, São Paulo, SP")
+        - radius (optional): Search radius in meters (default: 5000, max: 50000)
+        
+        Example:
+            GET /api/v1/recycling-points/nearby-address/?address=Rua+Augusta+1000,+São+Paulo,+SP&radius=10000
+            
+        Response:
+        {
+            "success": true,
+            "address": "Rua Augusta 1000, São Paulo, SP",
+            "geocoded_location": {
+                "latitude": -23.5478,
+                "longitude": -46.6521
+            },
+            "search_radius_meters": 10000,
+            "total_found": 3,
+            "recycling_points": [
+                {
+                    "recycling_point_id": "rp_001",
+                    "name": "Ecoponto Centro",
+                    "latitude": -23.5480,
+                    "longitude": -46.6520,
+                    "address": "Rua X, São Paulo - SP",
+                    "distance_meters": 125.5,
+                    "maps_url": "..."
+                },
+                ...
+            ]
+        }
+        """
+        try:
+            logger.info(f"nearby_address request received with params: {dict(request.query_params)}")
+            
+            # Get and validate address
+            address = request.query_params.get('address')
+            if not address or not address.strip():
+                logger.warning("Missing required parameter: address")
+                return Response(
+                    {'error': 'Missing required parameter: address'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Get optional radius (default 5000 meters = 5km)
+            try:
+                radius = int(request.query_params.get('radius', 5000))
+            except ValueError:
+                logger.warning(f"Invalid radius value: {request.query_params.get('radius')}")
+                return Response(
+                    {'error': 'Parameter radius must be a valid integer'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Enforce maximum radius of 50km
+            if radius > 50000:
+                radius = 50000
+            
+            logger.info(f"Geocoding and searching nearby: address={address}, radius={radius}")
+            
+            # Search using address
+            result = self.maps_service.search_nearby_recycling_points_by_address(
+                address=address,
+                radius_meters=radius
+            )
+            
+            logger.info(f"Found {result.get('total_found', 0)} recycling points for address: {address}")
+            
+            return Response(result)
+            
+        except Exception as e:
+            logger.error(f"Error in nearby_address: {str(e)}", exc_info=True)
+            return Response(
+                {'error': 'An error occurred while searching by address'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
