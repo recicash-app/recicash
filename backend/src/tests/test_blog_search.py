@@ -9,8 +9,8 @@ from django.test import TransactionTestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
-from apps.entities.models import PostBlog
-from apps.services.blog_service import BlogSearchService
+from core.domain.entities import PostBlog
+from core.application.use_cases import BlogSearchService
 from unittest.mock import patch
 import logging
 
@@ -18,7 +18,6 @@ import logging
 logging.disable(logging.CRITICAL)
 
 User = get_user_model()
-
 
 class BlogSearchServiceTestCase(TransactionTestCase):
     """

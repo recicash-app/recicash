@@ -9,7 +9,7 @@ import logging
 from typing import List
 from django.db.models import Q, QuerySet
 from django.contrib.postgres.search import TrigramSimilarity
-from apps.entities.models import PostBlog
+from core.domain.models import PostBlog
 
 
 logger = logging.getLogger(__name__)

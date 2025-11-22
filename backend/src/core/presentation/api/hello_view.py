@@ -1,10 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from apps.services.hello_service import HelloService
 
+from core.application.use_cases import HealthCheckService
 
 class HelloView(APIView):
     def get(self, request):
-        message = HelloService.get_message()
+        message = HealthCheckService.status()
         return Response({"message": message.text}, status=status.HTTP_200_OK)

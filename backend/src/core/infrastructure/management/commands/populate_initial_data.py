@@ -1,4 +1,4 @@
-from apps.entities.models import *
+from core.domain.entities import *
 from collections import defaultdict
 from datetime import timedelta
 from django.core.management.base import BaseCommand

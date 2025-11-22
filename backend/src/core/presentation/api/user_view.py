@@ -1,5 +1,3 @@
-from apps.entities.models import User
-from apps.entities.serializers import UserSerializer, UserObtainPairSerializer
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from rest_framework import viewsets, status
@@ -9,6 +7,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.views import TokenObtainPairView
+
+from core.domain.models import User
+from core.infrastructure.serializers.user_serializers import UserSerializer, UserObtainPairSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')

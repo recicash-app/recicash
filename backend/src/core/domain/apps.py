@@ -2,8 +2,9 @@ from django.apps import AppConfig
 
 class EntitiesConfig(AppConfig):
     # App name, used internally
-    name = 'apps.entities' 
+    name = 'core.domain'
+    label = 'domain'
     verbose_name = "Data Entity"
 
     def ready(self):
-        import apps.entities.signals
+        import core.infrastructure.signals

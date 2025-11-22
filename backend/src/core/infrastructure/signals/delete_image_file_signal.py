@@ -1,6 +1,6 @@
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
-from .models import PostImage
+from core.domain.entities.blog import PostImage
 
 @receiver(post_delete, sender=PostImage)
 def delete_image_file(sender, instance, **kwargs):

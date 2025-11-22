@@ -4,12 +4,10 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from apps.entities.models import PostBlog, PostImage
-from apps.entities.serializers import User, PostBlogSerializer, PostImageSerializer
-from apps.entities.permissions import IsAppAdminUser
-from apps.services.blog_service import BlogSearchService
-from apps.services.paginator_service import PaginatorService
-
+from core.infrastructure.permissions import IsAppAdminUser
+from core.domain.models import User, PostBlog, PostImage
+from core.infrastructure.serializers.blog_serializers import PostBlogSerializer, PostImageSerializer
+from core.application.use_cases import BlogSearchService, PaginatorService
 
 class PostBlogViewSet(viewsets.ModelViewSet):
     """
