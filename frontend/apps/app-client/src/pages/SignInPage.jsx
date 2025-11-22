@@ -99,7 +99,7 @@ function Form() {
     if (error) return;
     
     try {
-        const response = await fetch(`http://api.docker.localhost:${import.meta.env.VITE_HTTP_PORT}/api/v1/token/`, {
+        const response = await fetch(`http://api.docker.localhost/api/v1/token/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
