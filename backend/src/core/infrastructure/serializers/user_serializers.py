@@ -206,19 +206,3 @@ class RecyclingPointSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
-
-class GooglePlacesResultSerializer(serializers.Serializer):
-    """
-    Serializer for Google Places API nearby search results.
-    """
-    place_id = serializers.CharField()
-    name = serializers.CharField()
-    latitude = serializers.FloatField()
-    longitude = serializers.FloatField()
-    address = serializers.CharField()
-    rating = serializers.FloatField(allow_null=True)
-    user_ratings_total = serializers.IntegerField(allow_null=True)
-    open_now = serializers.BooleanField(allow_null=True)
-    types = serializers.ListField(child=serializers.CharField())
-    source = serializers.CharField()
-
