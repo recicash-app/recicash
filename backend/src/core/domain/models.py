@@ -18,7 +18,7 @@ __all__ = [
     # blog
     'PostBlog', 'PostImage',
     # coupons
-    'PartnerCompany', 'Coupon', 'CouponTransaction',
+    'PartnerCompany', 'Coupon', 'CouponsTransactions',
     # message
     'Message',
     # recycling

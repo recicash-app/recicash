@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from core.infrastructure.permissions import IsAppAdminUser
 from core.domain.models import User, PostBlog, PostImage
-from core.infrastructure.serializers.blog_serializers import PostBlogSerializer, PostImageSerializer
+from core.infrastructure.serializers import PostBlogSerializer, PostImageSerializer
 from core.application.use_cases import BlogSearchService, PaginatorService
 
 class PostBlogViewSet(viewsets.ModelViewSet):

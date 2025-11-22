@@ -9,7 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from core.domain.models import User
-from core.infrastructure.serializers.user_serializers import UserSerializer, UserObtainPairSerializer
+from core.infrastructure.serializers import UserSerializer, UserObtainPairSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')

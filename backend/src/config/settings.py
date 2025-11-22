@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'core.domain',
+    'core.infrastructure',
 ]
 
 MIDDLEWARE = [
@@ -121,6 +122,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+MIGRATION_MODULES = {
+    "domain": "core.infrastructure.migrations",
+}
 
 DATABASES = {
     'default': {

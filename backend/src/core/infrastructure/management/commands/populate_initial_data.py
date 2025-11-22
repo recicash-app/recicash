@@ -10,6 +10,8 @@ import logging
 import random
 import requests
 
+from core.domain.models import *
+
 # Logging basic configuration
 logger = logging.getLogger(__name__)
 

@@ -1,1 +1,3 @@
-from .permissions import *
+from .permissions import IsAppAdminUser
+
+__all__ = ["IsAppAdminUser"]
