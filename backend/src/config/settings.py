@@ -230,7 +230,4 @@ LOGGING = {
 }
 
 # Google Maps API Configuration
-try:
-    GOOGLE_MAPS_API_KEY = os.environ['GOOGLE_MAPS_API_KEY']
-except KeyError:
-    GOOGLE_MAPS_API_KEY = None  # Will be None in development/testing without the env var
+GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY')
