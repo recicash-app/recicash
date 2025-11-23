@@ -51,7 +51,6 @@ function Header() {
 	const handleLogoClick = () => {
 		setActiveItem(isAuth ? 0 : null);
 	};
-	const logoPath = isAuth ? privateOptions[0].path : '/';
 
 	return (
 		<AppBar sx={{ position: 'static', boxShadow: 0, backgroundColor: 'transparent' }}>
@@ -60,7 +59,7 @@ function Header() {
 
 					{/* Logo on the left */}
 					  <Box sx={{ display: 'flex', alignItems: 'center'}}>
-						<Link to={logoPath} style={{ textDecoration: 'none' }} onClick={handleLogoClick}>
+						<Link to={'/'} style={{ textDecoration: 'none' }} onClick={handleLogoClick}>
 							<Logo asLink={false} sx={{mt:0}}/>
 						</Link>
 					</Box>
