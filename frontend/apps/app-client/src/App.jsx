@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { Box } from '@mui/material';
 
-import Header from '@shared/ui/navigation/Header';
+import Header from './components/navigation/Header';
 import Test from './Test';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
