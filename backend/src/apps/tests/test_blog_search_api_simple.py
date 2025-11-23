@@ -4,6 +4,7 @@ Tests the complete flow: HTTP Request → View → Service → Database
 """
 
 from django.test import TestCase, Client
+from django.urls import reverse
 from apps.entities.models import PostBlog, User
 import json
 

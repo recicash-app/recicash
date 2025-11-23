@@ -37,7 +37,7 @@ function ImageBlock({ content, isEditing, onChange, sx }) {
         <Box sx={{ width: "100%", boxSizing: "border-box" }}>
           <img
             src={content?.preview || content}
-            alt=""
+            alt="Blog post image"
             style={{
               display: "block",
               width: "100%",
