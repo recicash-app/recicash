@@ -34,6 +34,12 @@ Antes de rodar o projeto, é necessário preencher o arquivo `.env` com as vari�
     make access-data-base
     ```
 
+4. Para rodar os testes, faça:
+
+    ```bash
+    make tests
+    ```
+
 ## Acessando a Aplicação
 
 Após subir os containers, acesse cada serviço pelos seguintes endereços:
