@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Box, AppBar, Toolbar } from '@mui/material';
-import Logo from '../../atoms/Logo';
+import Logo from '../../../../../shared/atoms/Logo';
 import DesktopToolbar from './DesktopToolbar';
 import MobileToolbar from './MobileToolbar';
 
