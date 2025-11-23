@@ -19,7 +19,7 @@ Cada microfrontend está localizado em `frontend/apps/`:
 Os recursos compartilhados (componentes, estilos, assets) ficam em `frontend/shared/`.
 
 O roteamento e o acesso externo a cada microfrontend são gerenciados pelo **Traefik** no ambiente Docker, utilizando diferentes subdomínios locais:
-- Client: [http://web.docker.localhost](http://client.docker.localhost)
+- Client: [http://web.docker.localhost](http://web.docker.localhost)
 - Admin: [http://admin.docker.localhost](http://admin.docker.localhost)
 - Ecoponto: [http://ecoponto.docker.localhost](http://ecoponto.docker.localhost)
 
