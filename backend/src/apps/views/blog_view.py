@@ -1,49 +1,180 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
+
 from apps.entities.models import PostBlog, PostImage
-from apps.entities.serializers import PostBlogSerializer, PostImageSerializer
+from apps.entities.serializers import User, PostBlogSerializer, PostImageSerializer
 from apps.entities.permissions import IsAppAdminUser
 from apps.services.blog_service import BlogSearchService
+from apps.services.paginator_service import PaginatorService
 
 
 class PostBlogViewSet(viewsets.ModelViewSet):
-    # Gets all posts from blog
-    queryset = PostBlog.objects.all()
-    serializer_class = PostBlogSerializer
+    """
+    CRUD endpoints for PostBlog.
 
-    # Deal with diffent formats of files and inputs
+    Supported endpoints (mounted under router, e.g. /api/v1/posts/):
+    - GET /           -> list posts (paginated if page & page_size provided)
+    - GET /{id}/      -> retrieve a single post
+    - POST /          -> create a post (expects multipart/form-data for file uploads)
+    - PATCH /{id}/    -> partial update
+    - DELETE /{id}/   -> delete
+
+    Extra actions:
+    - GET /search/?q=...             -> search posts by title
+    - GET /search_suggestions/?q=... -> get title suggestions
+
+    Notes:
+    - parser_classes include MultiPartParser and FormParser so the view accepts multipart/form-data uploads.
+    - perform_create currently saves a test author (User(pk=1)) and stores a single uploaded file in PostImage.
+    """
+
+    queryset = PostBlog.objects.all().order_by('-created_at')
+    serializer_class = PostBlogSerializer
     parser_classes = [MultiPartParser, FormParser]
 
     def get_permissions(self):
-        if self.action == 'list' or self.action == 'retrieve':
-            permission_classes = [AllowAny]
-        else:
-            permission_classes = [IsAuthenticated, IsAppAdminUser]
-        
-        return [permission() for permission in permission_classes]
+        """
+        Return permission objects depending on action.
+
+        Current behavior:
+        - list, retrieve, search, search_suggestions -> AllowAny (public)
+        - other actions (create/update/delete) -> AllowAny (for local testing)
+
+        To require authentication and admin role in production, replace the final return with:
+            return [IsAuthenticated(), IsAppAdminUser()]
+
+        For quick local testing without admin permissions leave AllowAny enabled.
+        """
+        if self.action in ["list", "retrieve", "search", "search_suggestions"]:
+            return [AllowAny()]
+        return [AllowAny()]
+        # production: return [IsAuthenticated(), IsAppAdminUser()]
 
     def perform_create(self, serializer):
-        serializer.save(author_id=self.request.user)
+        """
+        Create a new PostBlog and attach an uploaded image (if provided).
+
+        Notes:
+        - For local/testing convenience this uses a fixed user:
+            author = User.objects.get(pk=1)
+            In production you would normally use:
+            author = self.request.user
+        - Expects a single uploaded file under the form field name "image".
+        - Renames the uploaded file to "<post.post_id>.<ext>" before saving.
+        """
+        author = User.objects.get(pk=1)
+        post = serializer.save(author_id=author)
+
+        image_file = self.request.FILES.get("image")
+        if image_file:
+            # Preserve original extension and rename to use the post's identifier.
+            extension = image_file.name.split(".")[-1]
+            image_file.name = f"{post.post_id}.{extension}"
+            PostImage.objects.create(post=post, image=image_file)
+
+    def perform_update(self, serializer):
+        """
+        Update a PostBlog instance and optionally replace its image.
+
+        Behavior:
+        - Saves provided fields via serializer.
+        - If a new image is uploaded (field "image"), deletes the existing image
+            (if any) and creates a new PostImage with the renamed file.
+        """
+        post = serializer.save()
+        image_file = self.request.FILES.get("image")
+
+        # If a new image was uploaded, replace the existing one.
+        if image_file:
+            # Delete the existing image object, if present.
+            old_img = post.images.first()
+            if old_img:
+                old_img.delete()
+
+            extension = image_file.name.split(".")[-1]
+            image_file.name = f"{post.post_id}.{extension}"
+
+            PostImage.objects.create(post=post, image=image_file)
+
+    @action(detail=True, methods=["delete"])
+    def delete_image(self, request, pk=None):
+        """
+        Delete the image associated with a post.
+
+        Returns:
+        - 200: image deleted successfully
+        - 404: no image associated with the post
+        - 500: failed to delete due to server error
+        """
+        try:
+            post = self.get_object()
+            image_obj = post.images.first()  # currently support only one image per post
+
+            if not image_obj:
+                return Response(
+                    {"message": "No image is associated with this post."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            image_obj.delete()
+            return Response(
+                {"message": "Image deleted successfully."},
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            return Response(
+                {"message": f"Failed to delete image: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def list(self, request, *args, **kwargs):
+        """
+        List posts. Supports optional pagination via query params:
+          - page (int)
+          - page_size (int)
+
+        When pagination params are provided, uses PaginatorService and returns
+        a paginated dict with 'results' replaced by serialized posts (absolute image URLs).
+        """
+        queryset = self.get_queryset()
+        page = request.query_params.get("page")
+        page_size = request.query_params.get("page_size")
+
+        if page and page_size:
+            paginator = PaginatorService(
+                queryset=queryset,
+                page=int(page),
+                page_size=int(page_size)
+            )
+            data = paginator.get_paginated_data()
+            # Pass request in context so PostBlogSerializer can build absolute image URLs
+            data["results"] = PostBlogSerializer(
+                data["results"], many=True, context={"request": request}
+            ).data
+            return Response(data, status=status.HTTP_200_OK)
+
+        serializer = PostBlogSerializer(queryset, many=True, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def search(self, request):
         """
         Search posts by title keywords.
-        
+
         Query Parameters:
-            q (str): Search query to look for in post titles
-            
-        Returns:
-            Response: List of matching posts with their details
-            
-        Example:
-            GET /api/posts/search/?q=reciclagem
+            q (str): search query (required, min length 2)
+
+        Response:
+            200: { 'query': q, 'count': <int>, 'results': [<post objects>] }
+            400: when q is missing or too short
+            500: on server error
         """
         search_query = request.query_params.get('q', '').strip()
-        
+
         if not search_query:
             return Response(
                 {
@@ -52,7 +183,7 @@ class PostBlogViewSet(viewsets.ModelViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         if len(search_query) < 2:
             return Response(
                 {
@@ -61,11 +192,11 @@ class PostBlogViewSet(viewsets.ModelViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         try:
-            matching_posts = BlogSearchService.search_posts_by_title(search_query)            
+            matching_posts = BlogSearchService.search_posts_by_title(search_query)
             serializer = self.get_serializer(matching_posts, many=True)
-            
+
             return Response(
                 {
                     'query': search_query,
@@ -74,7 +205,7 @@ class PostBlogViewSet(viewsets.ModelViewSet):
                 },
                 status=status.HTTP_200_OK
             )
-            
+
         except Exception as e:
             return Response(
                 {
@@ -87,21 +218,18 @@ class PostBlogViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def search_suggestions(self, request):
         """
-        Get search suggestions based on existing post titles.
-        
+        Return title suggestions from existing posts.
+
         Query Parameters:
-            q (str): Partial search term
-            limit (int): Maximum number of suggestions (default: 5)
-            
-        Returns:
-            Response: List of suggested search terms
-            
-        Example:
-            GET /api/posts/search_suggestions/?q=rec&limit=3
+            q (str): partial search term (required)
+            limit (int): maximum suggestions (default 5)
+
+        Response:
+            200: { 'query': q, 'suggestions': [<strings>] }
         """
         search_query = request.query_params.get('q', '').strip()
         limit = int(request.query_params.get('limit', 5))
-        
+
         if not search_query:
             return Response(
                 {
@@ -110,10 +238,10 @@ class PostBlogViewSet(viewsets.ModelViewSet):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         try:
             suggestions = BlogSearchService.get_search_suggestions(search_query, limit)
-            
+
             return Response(
                 {
                     'query': search_query,
@@ -121,7 +249,7 @@ class PostBlogViewSet(viewsets.ModelViewSet):
                 },
                 status=status.HTTP_200_OK
             )
-            
+
         except Exception as e:
             return Response(
                 {
@@ -131,9 +259,54 @@ class PostBlogViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-class PostImageViewSet(viewsets.ModelViewSet):
+class PostImageRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+    Simple retrieve endpoint for PostImage objects.
+    """
     queryset = PostImage.objects.all()
     serializer_class = PostImageSerializer
+    permission_classes = [AllowAny]
 
-    permission_classes = [IsAuthenticated, IsAppAdminUser]
-    parser_classes = [MultiPartParser, FormParser]
+
+# ------------------------------------------------------------------
+# TESTING GUIDE (quick)
+#
+# 1) Test without admin permissions (local/dev)
+#    - The view currently allows all actions for testing (AllowAny).
+#    - To explicitly force admin-only behavior, change get_permissions to:
+#          return [IsAuthenticated(), IsAppAdminUser()]
+#      and comment out the AllowAny returns above.
+#
+#    Example swap:
+#      def get_permissions(self):
+#          if self.action in ["list", "retrieve", "search", "search_suggestions"]:
+#              return [AllowAny()]
+#          # production: enforce auth+admin
+#          return [IsAuthenticated(), IsAppAdminUser()]
+#
+# 2) Create a post (multipart/form-data) without authentication (works because perform_create uses User(pk=1)):
+#    curl -v -X POST "http://api.docker.localhost/api/v1/posts/" \
+#      -F "title=Test post from curl" \
+#      -F "text=Some content" \
+#      -F "image=@/full/path/to/image.jpg;type=image/jpeg"
+#
+#    - Note: field name for single image expected in perform_create is "image".
+#    - If you switch serializer to accept multiple files, append multiple -F "uploaded_images=@file"
+#
+# 3) List posts:
+#    curl "http://api.docker.localhost/api/v1/posts/"
+#
+# 4) Search posts:
+#    curl "http://api.docker.localhost/api/v1/posts/search/?q=term"
+#
+# 5) If you want to require authentication:
+#    - Create or use a user and obtain token (e.g. via your auth endpoint).
+#    - Call endpoints with header:
+#        -H "Authorization: Bearer <access_token>"
+#
+# 6) Troubleshooting:
+#    - If you see "Cannot assign AnonymousUser" errors, ensure perform_create uses a real User instance:
+#        author = self.request.user   # and make sure request.user is authenticated
+#    - For file upload issues, confirm client sends multipart/form-data (use -F in curl; do not send JSON).
+#
+# ------------------------------------------------------------------

@@ -10,18 +10,11 @@ O Recicash é uma plataforma que promove a conscientização ambiental e incenti
 - **Containerização:** Docker e Docker Compose para padronização e isolamento do ambiente.
 - **API:** Integração com Google Maps API para exibição de mapas e localização de ecopontos.
 
+
+
 ## Como Rodar o Projeto
 
-### Versões Utilizadas
-
-Certifique-se de ter o Docker e o Docker Compose instalados. Para garantir o funcionamento do projeto, recomenda-se utilizar as seguintes versões das ferramentas de containerização:
-
-- **Docker:** 28.5.1 (`docker --version`)
-- **Docker Compose:** 1.29.2 (`docker-compose --version`)
-
-#### Configuração do Ambiente
-
-Antes de rodar o projeto, é necessário preencher o arquivo `.env` com as variáveis de ambiente. Utilize o arquivo `.env.example` como referência, copiando e preenchendo os valores necessários.
+Antes de rodar o projeto, é necessário preencher o arquivo `.env` com as variáveis de ambiente. Utilize o arquivo `.env.example` como referência, copiando e preenchendo os valores necessários. Além disso, certifique-se de ter o Docker e o Docker Compose instalados.
 
 1. Para construir as imagens e subir os containers, faça:
 

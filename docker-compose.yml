@@ -65,6 +65,8 @@ services:
       dockerfile: Dockerfile
     container_name: react_frontend_web
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       - CHOKIDAR_USEPOLLING=true
     volumes:
@@ -81,6 +83,8 @@ services:
       dockerfile: Dockerfile
     container_name: react_frontend_admin
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       - CHOKIDAR_USEPOLLING=true
     volumes:
@@ -98,6 +102,8 @@ services:
       dockerfile: Dockerfile
     container_name: react_frontend_ecoponto
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       - CHOKIDAR_USEPOLLING=true
     volumes:

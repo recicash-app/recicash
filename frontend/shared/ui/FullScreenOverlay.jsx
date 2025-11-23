@@ -7,12 +7,12 @@ function FullScreenOverlay({ open, onClose, actions, children }) {
       open={open}
       onClose={onClose}
       closeAfterTransition
-      BackdropProps={{
+      slotProps={{ backdrop: {
         sx: {
           bgcolor: "rgba(0, 0, 0, 0.5)",
           backdropFilter: "blur(4px)",
         },
-      }}
+      }}}
     >
       {/* Centering wrapper */}
       <Box

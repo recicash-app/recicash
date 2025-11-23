@@ -1,6 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+"""
+Model definitions for the entities app.
+
+Contains:
+- User, RecyclingPoint, PostBlog, PostImage, etc.
+
+Notes:
+- PostBlog.author_id must be a User instance (see PostBlogViewSet.perform_create).
+- PostImage.image stored under MEDIA_ROOT/blog_images/.
+"""
+
 class RecyclingPoint(models.Model):
     recycling_point_id = models.BigAutoField(primary_key=True) # PK de Ecoponto
     user_id  = models.ForeignKey( # FK that references to a Recycling Point representative User
@@ -28,6 +39,7 @@ class RecyclingPoint(models.Model):
 
 class User(AbstractUser):
     user_id = models.BigAutoField(primary_key=True) # PK de Usuario
+
     fav_recycling_point_id = models.ForeignKey( # FK that references to favorite Recycling Point 
         RecyclingPoint,
         on_delete=models.SET_NULL,
@@ -36,6 +48,9 @@ class User(AbstractUser):
         db_column='FAV_RECYCLING_POINT_ID',
         related_name='favorite_recycling_point'
     )
+
+    username = models.CharField(max_length=150, default='defaultusername', unique=True)
+    password = models.CharField(max_length=128, default='defaultpassword')
 
     cpf = models.CharField(max_length=14, unique=True)
     zip_code = models.CharField(max_length=10)
@@ -60,22 +75,6 @@ class User(AbstractUser):
     
     def __str__(self):
         return self.email
-
-
-class Password(models.Model):
-    user_id = models.OneToOneField(
-        User,
-        primary_key=True,
-        on_delete=models.CASCADE,
-        db_column='USER_ID',
-        related_name='user_password'
-    )
-    password = models.CharField(max_length=30)
-
-    class Meta:
-        db_table = 'PASSWORD'
-        verbose_name = 'User password'
-        verbose_name_plural = 'User passwords'
 
 
 class Wallet(models.Model):
@@ -142,7 +141,7 @@ class RecyclingValue(models.Model):
         verbose_name_plural = 'Recycling values'
     
     def __str__(self):
-        return self.id_valor_reciclagem
+        return self.recycling_value_id
     
 
 class Recycling(models.Model):
@@ -182,7 +181,7 @@ class Recycling(models.Model):
         verbose_name_plural = 'Recyclings'
     
     def __str__(self):
-        return self.id_reciclagem
+        return self.recycling_id
 
 
 class PartnerCompany(models.Model):
@@ -216,7 +215,7 @@ class Coupon(models.Model):
         ('GIFT', 'Gift')
     ]
 
-    type = models.CharField(max_length=255,
+    coupon_type = models.CharField(max_length=255,
                                      choices=COUPON_TYPES,
                                      default='PERCENTAGE_DISCOUNT',
                                      db_column='COUPON_TYPE'
@@ -266,7 +265,7 @@ class PostBlog(models.Model):
     author_id = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
-        null=False,
+        null=True,
         blank=False,
         db_column='AUTHOR_ID',
         related_name='author_user'

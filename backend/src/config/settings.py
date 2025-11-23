@@ -16,6 +16,9 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Paths for media storage
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -45,8 +48,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 
     # My apps
     'apps.entities.apps.EntitiesConfig'
@@ -62,6 +68,39 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# CORS configs
+
+# List of sources that can make requests.
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React app door
+    "http://127.0.0.1:3000",
+    f"http://web.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
+    f"http://ecoponto.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
+    f"http://admin.docker.localhost:{os.environ.get('HTTP_PORT', '80')}"
+]
+
+# Allow browser to send cookies
+CORS_ALLOW_CREDENTIALS = True
+
+# CSRF configs
+
+# guarantees that CSRF cookie is sent
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    f"http://web.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
+    f"http://ecoponto.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
+    f"http://admin.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
+    "http://api.docker.localhost"
+]
+
+# Allow React to read CSRF cookie
+CSRF_COOKIE_HTTPONLY = False 
+
+# Cookie configs
+CSRF_COOKIE_SECURE = False  # It is False because we are testing in HTTP
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 ROOT_URLCONF = 'config.urls'
 
@@ -122,7 +161,13 @@ CORS_ALLOW_ALL_ORIGINS = True
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
-    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.TokenAuthentication"]
+    "DEFAULT_AUTHENTICATION_CLASSES": ["apps.entities.authentication.CustomJWTAuthentication",
+                                       "rest_framework_simplejwt.authentication.JWTAuthentication",
+                                       "rest_framework.authentication.TokenAuthentication"]
+}
+
+SIMPLE_JWT = {
+    "USER_ID_FIELD": "user_id"
 }
 
 
@@ -147,7 +192,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 # Logging definitions
 LOGGING = {
@@ -177,7 +221,7 @@ LOGGING = {
         'apps.entities.scripts.populate_initial_data': { 
             'handlers': ['console'],
             'level': 'INFO',
-            'propagate': False, # Para não duplicar com o root logger
+            'propagate': False, # Prevent duplication with root logger
         },
     },
 }
