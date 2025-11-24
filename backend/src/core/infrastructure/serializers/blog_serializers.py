@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.domain.entities.blog import PostBlog, PostImage
+from core.domain.models import PostBlog, PostImage
 
 class PostImageSerializer(serializers.ModelSerializer):
     """

@@ -11,7 +11,6 @@ O Recicash é uma plataforma que promove a conscientização ambiental e incenti
 - **API:** Integração com Google Maps API para exibição de mapas e localização de ecopontos.
 
 
-
 ## Como Rodar o Projeto
 
 Antes de rodar o projeto, é necessário preencher o arquivo `.env` com as variáveis de ambiente. Utilize o arquivo `.env.example` como referência, copiando e preenchendo os valores necessários. Além disso, certifique-se de ter o Docker e o Docker Compose instalados.
@@ -32,6 +31,12 @@ Antes de rodar o projeto, é necessário preencher o arquivo `.env` com as vari�
 
     ```bash
     make access-data-base
+    ```
+
+4. Para rodar os testes, faça:
+
+    ```bash
+    make tests
     ```
 
 ## Acessando a Aplicação

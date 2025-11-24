@@ -53,6 +53,13 @@ class Recycling(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     validation_hash = models.CharField(max_length=255)
 
+    status = models.CharField(max_length=255,
+                                choices=[('ACTIVE', 'Active'),
+                                         ('REDEEMED', 'Redeemed')],
+                                default='ACTIVE',
+                                db_column='STATUS'
+                            )
+
     class Meta:
         db_table = 'RECYCLING'
         verbose_name = 'Recycling'
