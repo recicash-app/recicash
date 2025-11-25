@@ -86,7 +86,7 @@ function Home() {
       <img
         src={shapeTopRight}
         alt=""
-        style={{ position: 'fixed', top: 0, right: 0, width: '50vw', zIndex: -1, pointerEvents: 'none', objectFit: 'scale-down' }}
+        style={{ position: 'fixed', top: 0, right: 0, width: '50vw', zIndex: -1, pointerEvents: 'none', objectFit: 'scale-down', objectPosition: 'top right' }}
       />
       
       <Box sx={{ position: 'relative', zIndex: 2 }}>
