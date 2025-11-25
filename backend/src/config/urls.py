@@ -18,14 +18,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from apps.views.hello_view import HelloView
+from core.presentation.api import HelloView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', HelloView.as_view(), name='root'),
 
     # Path to personalized URLs
-    path('api/v1/', include('apps.entities.urls'))
+    path('api/v1/', include('core.presentation.routers'))
 ]
 
 # media files while in dev env

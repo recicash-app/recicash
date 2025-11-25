@@ -37,7 +37,6 @@ ALLOWED_HOSTS = [
     'localhost',           
 ]
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -53,9 +52,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-
-    # My apps
-    'apps.entities.apps.EntitiesConfig'
+    'core.infrastructure',
+    'core.domain'
 ]
 
 MIDDLEWARE = [
@@ -75,9 +73,9 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React app door
     "http://127.0.0.1:3000",
-    f"http://web.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
-    f"http://ecoponto.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
-    f"http://admin.docker.localhost:{os.environ.get('HTTP_PORT', '80')}"
+    "http://web.docker.localhost",
+    "http://ecoponto.docker.localhost",
+    "http://admin.docker.localhost"
 ]
 
 # Allow browser to send cookies
@@ -89,9 +87,9 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    f"http://web.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
-    f"http://ecoponto.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
-    f"http://admin.docker.localhost:{os.environ.get('HTTP_PORT', '80')}",
+    "http://web.docker.localhost",
+    "http://ecoponto.docker.localhost",
+    "http://admin.docker.localhost",
     "http://api.docker.localhost"
 ]
 
@@ -125,6 +123,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+MIGRATION_MODULES = {
+    "domain": "core.infrastructure.migrations",
+    "infrastructure": None,
+}
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
@@ -136,7 +139,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = 'entities.User'
+AUTH_USER_MODEL = 'domain.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -161,7 +164,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
-    "DEFAULT_AUTHENTICATION_CLASSES": ["apps.entities.authentication.CustomJWTAuthentication",
+    "DEFAULT_AUTHENTICATION_CLASSES": ["core.domain.entities.authentication.CustomJWTAuthentication",
                                        "rest_framework_simplejwt.authentication.JWTAuthentication",
                                        "rest_framework.authentication.TokenAuthentication"]
 }
@@ -218,7 +221,7 @@ LOGGING = {
             'level': 'INFO',  # INFO or superior level messages must be processed
         },
         # Specific loggers
-        'apps.entities.scripts.populate_initial_data': { 
+        'core.infrastructure.management.commands.populate_initial_data': { 
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': False, # Prevent duplication with root logger

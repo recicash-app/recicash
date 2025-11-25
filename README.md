@@ -11,7 +11,6 @@ O Recicash é uma plataforma que promove a conscientização ambiental e incenti
 - **API:** Integração com Google Maps API para exibição de mapas e localização de ecopontos.
 
 
-
 ## Como Rodar o Projeto
 
 Antes de rodar o projeto, é necessário preencher o arquivo `.env` com as variáveis de ambiente. Utilize o arquivo `.env.example` como referência, copiando e preenchendo os valores necessários. Além disso, certifique-se de ter o Docker e o Docker Compose instalados.
@@ -52,12 +51,12 @@ Após subir os containers, acesse cada serviço pelos seguintes endereços:
 
 ## Aplicando Migrações do Banco de Dados
 
-Este passo traduz os Models Python (definidos em [models.py](./backend/src/apps/entities/models.py)) para tabelas reais no banco de dados PostgreSQL.
+Este passo traduz os Models Python (definidos em [models.py](./backend/src/core/domain/models.py)) para tabelas reais no banco de dados PostgreSQL.
 
-1. **Criando arquivos de migração**: para gerar os arquivos .py em [migrations/](./backend/src/apps/entities/migrations/), faça:
+1. **Criando arquivos de migração**: para gerar os arquivos .py em [migrations/](./backend/src/core/infrastructure/migrations/), faça:
 
     ```bash
-    docker-compose exec backend python manage.py makemigrations entities
+    docker-compose exec backend python manage.py makemigrations domain
     ```
 
 2. **Aplicando as Migrações**: para aplicar as alterações ao banco de dados, criando todas as tabelas e relacionamentos definidos nos Models, faça:
