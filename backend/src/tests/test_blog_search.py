@@ -9,7 +9,7 @@ from django.test import TransactionTestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
-from core.domain.entities import PostBlog
+from core.domain.models import PostBlog
 from core.application.use_cases import BlogSearchService
 from unittest.mock import patch
 import logging
@@ -150,11 +150,11 @@ class BlogSearchServiceTestCase(TransactionTestCase):
         # Should respect the limit parameter
         self.assertLessEqual(len(suggestions), 2)
 
-    @patch('apps.services.blog_service.logger')
+    @patch('core.application.use_cases.blog_search_service.logger')
     def test_search_with_database_error_fallback(self, mock_logger):
         """Test fallback behavior when advanced search fails."""
         # This test ensures the fallback mechanism works
-        with patch('apps.entities.models.PostBlog.objects.annotate') as mock_annotate:
+        with patch('core.domain.models.PostBlog.objects.annotate') as mock_annotate:
             # Make annotate raise an exception to trigger fallback
             mock_annotate.side_effect = Exception("Database error")
             
@@ -269,7 +269,7 @@ class BlogSearchAPITestCase(APITestCase):
         data = response.json()
         self.assertIn('error', data)
 
-    @patch('apps.services.blog_service.BlogSearchService.search_posts_by_title')
+    @patch('core.application.use_cases.blog_search_service.BlogSearchService.search_posts_by_title')
     def test_search_api_internal_error(self, mock_search):
         """Test search API handles internal errors gracefully."""
         # Make the service raise an exception

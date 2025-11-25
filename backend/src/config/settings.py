@@ -52,8 +52,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'core.domain',
     'core.infrastructure',
+    'core.domain'
 ]
 
 MIDDLEWARE = [
@@ -125,6 +125,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 MIGRATION_MODULES = {
     "domain": "core.infrastructure.migrations",
+    "infrastructure": None,
 }
 
 DATABASES = {
@@ -220,7 +221,7 @@ LOGGING = {
             'level': 'INFO',  # INFO or superior level messages must be processed
         },
         # Specific loggers
-        'apps.entities.scripts.populate_initial_data': { 
+        'core.infrastructure.management.commands.populate_initial_data': { 
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': False, # Prevent duplication with root logger

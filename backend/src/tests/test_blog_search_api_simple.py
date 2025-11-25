@@ -4,7 +4,7 @@ Tests the complete flow: HTTP Request → View → Service → Database
 """
 
 from django.test import TestCase, Client
-from core.domain.entities import PostBlog, User
+from core.domain.models import User, PostBlog
 import json
 
 
