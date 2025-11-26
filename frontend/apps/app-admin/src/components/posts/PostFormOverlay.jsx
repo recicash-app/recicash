@@ -2,11 +2,9 @@ import { useEffect, useState } from "react";
 import { Box, Tooltip, IconButton } from "@mui/material";
 import { Edit, Save, Preview } from "@mui/icons-material";
 
-import TextBlock from "@shared/ui/TextBlock";
-import TitleBlock from "@shared/ui/TitleBlock";
-import ImageBlock from "@shared/ui/ImageBlock";
-import FullScreenOverlay from "@shared/ui/FullScreenOverlay";
+import PostLayout from "@shared/ui/PostLayout";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import FullScreenOverlay from "@shared/ui/FullScreenOverlay";
 
 function PostFormOverlay({ open, post = {}, onClose, onSave }) {
   const [formData, setFormData] = useState({ title: "", text: "", image: null });
@@ -26,14 +24,6 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
   const confirmCloseDialog = () => {
     setConfirmClose(false);
     onClose?.();
-  };
-
-  // Image change handler
-  const handleImageChange = (val) => {
-    setFormData((prev) => ({
-      ...prev,
-      image: val, // null | URL string | { file, preview }
-    }));
   };
 
   return (
@@ -59,42 +49,11 @@ function PostFormOverlay({ open, post = {}, onClose, onSave }) {
           </Box>
         }
       >
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
-            gap: "24px",
-            p: 3,
-            minHeight: "60vh",
-            width: "100%",
-            alignItems: "start",
-          }}
-        >
-          {/* Left Column */}
-          <Box sx={{ gridColumn: "1", display: "flex", flexDirection: "column", gap: "2vh", width: "2fr" }}>
-            <TitleBlock
-              sx={{ minHeight: "10vh" }}
-              isEditing={editingMode}
-              content={formData.title}
-              onChange={(val) => setFormData((prev) => ({ ...prev, title: val }))}
-            />
-            <TextBlock
-              sx={{ flex: 1, minHeight: "58vh", mb: 2 }}
-              isEditing={editingMode}
-              content={formData.text}
-              onChange={(val) => setFormData((prev) => ({ ...prev, text: val }))}
-            />
-          </Box>
-
-          {/* Right Column */}
-          <ImageBlock
-            key={post?.id || "new"}
-            isEditing={editingMode}
-            content={formData.image}
-            sx={{ gridColumn: "2", width: "33vw", mb: 2 }}
-            onChange={handleImageChange}
-          />
-        </Box>
+        <PostLayout
+          data={formData}
+          isEditing={editingMode}
+          onChange={setFormData}
+        />
       </FullScreenOverlay>
 
       {/* Confirm Close Popup */}

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Box, AppBar, Toolbar } from '@mui/material';
-import Logo from '../../../../../shared/atoms/Logo';
+import Logo from '../../atoms/Logo';
 import DesktopToolbar from './DesktopToolbar';
 import MobileToolbar from './MobileToolbar';
 
@@ -21,21 +21,20 @@ const ToolbarContent = styled(Box)(({ theme }) => ({
   justifyContent: 'space-between',
   gap: 40,
   width: '100%',
-  paddingLeft: theme.spacing(0),
-  paddingRight: theme.spacing(0),
+  px: theme.spacing(3),
 }));
 
 function Header() {
 
 	const [isAuth, setIsAuth] = useState(true);
-	//const user = { username: 'usuario' };
+	const user = { username: 'usuario' };
 
 	const publicOptions = [];
 	const privateOptions = [
-		{ name: 'Início', path: `/inicio` },
-		{ name: 'Mapa', path: `/mapa` },
-		{ name: 'Recompensas', path: `/recompensas` },
-		{ name: 'Carteira', path: `/carteira` },
+		{ name: 'Início', path: `/${user.username}/inicio` },
+		{ name: 'Mapa', path: `/${user.username}/mapa` },
+		{ name: 'Recompensas', path: `/${user.username}/recompensas` },
+		{ name: 'Carteira', path: `/${user.username}/carteira` },
 		{ name: 'Informações', path: `/blog` }
 	];
 
@@ -43,7 +42,7 @@ function Header() {
 	const handleLogin = () => {
 		setIsAuth(true);
 		setActiveItem(0);
-	};
+	}
 	const handleLogout = () => {
 		setIsAuth(false);
 		setActiveItem(null);
@@ -51,6 +50,7 @@ function Header() {
 	const handleLogoClick = () => {
 		setActiveItem(isAuth ? 0 : null);
 	};
+	const logoPath = isAuth ? privateOptions[0].path : '/';
 
 	return (
 		<AppBar sx={{ position: 'static', boxShadow: 0, backgroundColor: 'transparent' }}>
@@ -59,7 +59,7 @@ function Header() {
 
 					{/* Logo on the left */}
 					  <Box sx={{ display: 'flex', alignItems: 'center'}}>
-						<Link to={'/'} style={{ textDecoration: 'none' }} onClick={handleLogoClick}>
+						<Link to={logoPath} style={{ textDecoration: 'none' }} onClick={handleLogoClick}>
 							<Logo asLink={false} sx={{mt:0}}/>
 						</Link>
 					</Box>

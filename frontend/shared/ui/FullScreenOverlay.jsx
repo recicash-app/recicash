@@ -35,7 +35,8 @@ function FullScreenOverlay({ open, onClose, actions, children }) {
             display: "flex",
             flexDirection: "column",
             overflowY: "auto",
-            p: { xs: 3, md: 6 },
+            px: { xs: 3, md: 6 },
+            py: { xs: 2, md: 4 },
           }}
         >
           <Box
