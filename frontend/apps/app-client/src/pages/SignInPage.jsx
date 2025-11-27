@@ -7,6 +7,8 @@ import React, { useState } from 'react';
 import { Stack, Button, Divider, Box, Typography, Alert } from '@mui/material'
 import { styled } from '@mui/system'
 
+//import api from '../utils/api';
+
 function SignUpOption() { 
 
   const ButtonText = styled(Button)({
@@ -99,31 +101,53 @@ function Form() {
     if (error) return;
     
     try {
-      const response = await fetch(`http://api.docker.localhost/api/v1/token/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        }),
-      });
+        const response = await fetch(`http://api.docker.localhost/api/v1/token/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                email: formData.email,
+                password: formData.password
+            }),
+        });
 
-      if (response.ok) {
-        console.log('Login feito com sucesso :)');
-        setSuccess(true);
-        setFormData({ email: '', password: '' });
-        setFormError({ email: '', password: '' });
-        // window.location.href = '/inicio';
-      } 
-      else {
-        throw new Error('Credenciais inválidas');
-      }
+        const data = await response.json();
+        if (response.ok) {
+            
 
-      const data = await response.json();
-      //console.log('Tokens recebidos:', data);
+            console.log('Login feito com sucesso :)');
+
+            // SALVA O ID DO USUÁRIO PARA USAR DEPOIS NA CARTEIRA E HISTÓRICO
+            if (data.user_id) {
+                localStorage.setItem('user_id', data.user_id);
+                // Opcional: Salvar o nome para mostrar "Olá, Fulano" depois
+                if (data.first_name) localStorage.setItem('user_name', data.first_name);
+                
+                console.log("ID SALVO COM SUCESSO:", data.user_id);
+            } else {
+                console.warn("Atenção: user_id não encontrado na resposta:", data);
+            }
+
+
+            setSuccess(true);
+            setFormData({ email: '', password: '' });
+            setFormError({ email: '', password: '' });
+            // window.location.href = '/inicio';
+
+            // Redireciona para o início
+            setTimeout(() => {
+                window.location.href = '/inicio'; 
+            }, 1000);
+        } 
+        else {
+            throw new Error('Credenciais inválidas');
+        }
+
+        //const data = await response.json();
+        //console.log('Tokens recebidos:', data);
+    }
     } 
     
     catch (error) {
