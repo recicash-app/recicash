@@ -1,51 +1,9 @@
+import React, { useState } from 'react';
+import { Stack, Alert } from '@mui/material'
 import InputField from '@shared/ui/InputField'
 import SendFormButton from '@shared/ui/SendFormButton'
-import GreenSpot from '@shared/assets/shape-bottom-right.svg'
-import Tree from '@shared/assets/tree.svg'
-
-import React, { useState } from 'react';
-import { Stack, Button, Divider, Box, Typography, Alert } from '@mui/material'
-import { styled } from '@mui/system'
-
-function SignUpOption() { 
-
-    const ButtonText = styled(Button)({
-        boxShadow: 'none',
-        textTransform: 'none',
-        color: '#3A5B22',
-        fontWeight: 'bold',
-        fontFamily: 'Poppins',
-        fontSize: '14px',
-
-        "& .MuiTouchRipple-root": {
-            display: "none",
-        },
-
-        '&:hover': {
-            textDecoration: 'underline',
-            backgroundColor: 'transparent',
-            boxShadow: 'none',
-        },
-
-        '&:focus': {
-            outline: 'none',
-        },
-    });
-
-    const handleClick = () => {
-        console.log("Redirecionando para a página de cadastro");
-        window.location.href = '/cadastro';
-    };
-
-    return(
-        <ButtonText variant='text' onClick={handleClick}>
-            Cadastrar-se
-        </ButtonText>
-    )
-}
 
 function Form() {
-
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -143,30 +101,4 @@ function Form() {
   );
 }
 
-function SignInPage() {
-    return(
-        <Box>
-            <img src={GreenSpot} alt="Green Spot" style={{ position: 'fixed', bottom: '0vw', right: '0vw', width: "47vw", transform: "scaleX(1.2)", indexZ: '-1' }} />
-            <img src={Tree} alt="Tree" style={{ position: 'fixed', bottom: '0vw', right: '0vw', width: "45vw", indexZ: '-1' }} />
-            <Stack spacing={8} style={{ position: 'absolute', left: '8vw', top: '25vh' }}>
-                <Typography variant='h4' fontFamily='Poppins' fontWeight='bold' > Login </Typography>
-                <Stack spacing={4}>
-                    <Form />
-                    <Divider>ou</Divider>
-                    <Stack spacing={4} style={{ alignItems:'center' }}>
-                        <Box display="flex" alignItems="center">
-                            <Typography fontFamily="Poppins" fontSize="14px"> Não tem conta?</Typography>
-                            <SignUpOption />
-                        </Box>
-                    </Stack>
-                </Stack>
-            </Stack>
-
-            
-
-        </Box>
-    )
-}
-  
-export default SignInPage;
-  
+export default Form;

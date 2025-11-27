@@ -75,7 +75,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://web.docker.localhost",
     "http://ecoponto.docker.localhost",
-    "http://admin.docker.localhost"
+    "http://admin.docker.localhost",
+    "http://auth.docker.localhost"
 ]
 
 # Allow browser to send cookies
@@ -90,7 +91,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://web.docker.localhost",
     "http://ecoponto.docker.localhost",
     "http://admin.docker.localhost",
-    "http://api.docker.localhost"
+    "http://api.docker.localhost",
+    "http://auth.docker.localhost"
 ]
 
 # Allow React to read CSRF cookie
