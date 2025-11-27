@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "npm run dev:web",
     "dev:web": "vite --host --port 3000 --config apps/app-client/vite.config.client.js",
+    "dev:auth": "vite --host --port 3000 --config apps/app-auth/vite.config.auth.js",
     "dev:admin": "vite --host --port 3000 --config apps/app-admin/vite.config.admin.js",
     "dev:ecoponto": "vite --host --port 3000 --config apps/app-ecoponto/vite.config.ecoponto.js",
     "build": "vite build",

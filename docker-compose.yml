@@ -115,5 +115,24 @@ services:
       - "traefik.http.services.ecoponto.loadbalancer.server.port=3000"
       - "traefik.http.routers.ecoponto.entrypoints=web"
 
+  auth:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react_frontend_auth
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: ["npm", "run", "dev:auth"]
+    labels:
+      - "traefik.http.routers.auth.rule=Host(`auth.docker.localhost`)"
+      - "traefik.http.services.auth.loadbalancer.server.port=3000"
+      - "traefik.http.routers.auth.entrypoints=web"
+
 volumes:
   db_data:
