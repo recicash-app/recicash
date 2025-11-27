@@ -3,8 +3,6 @@ import { Box } from '@mui/material';
 
 import Test from './Test';
 import Home from './pages/Home';
-import SignInPage from './pages/SignInPage';
-import SignUpPage from './pages/SignUpPage';
 import Header from './components/navigation/Header';
 import BlogPage from './pages/BlogPage';  
 
@@ -16,8 +14,6 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/test" element={<Test />} />
-          <Route path="/cadastro" element={<SignUpPage />} />
-          <Route path="/login" element={<SignInPage />} />
           <Route path="/blog" element={<BlogPage />} />
         </Routes>
       </Box>
