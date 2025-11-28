@@ -30,3 +30,34 @@ class RecyclingSerializer(serializers.ModelSerializer):
             'validation_hash'
         )
         read_only_fields = ('id', 'date')
+
+
+class EcopontoDisposalSerializer(serializers.Serializer):
+    """
+    Serializer for ecoponto disposal registration.
+    
+    Used when recycling points register disposals without
+    associating them to specific users.
+    
+    Fields:
+    - recycling_point_id: ID of the recycling point (required)
+    - weight: Weight of disposed material (required)
+    - recycling_value_id: ID of recycling value (optional, uses latest if not provided)
+    """
+    recycling_point_id = serializers.IntegerField(
+        help_text="ID of the recycling point registering the disposal"
+    )
+    weight = serializers.FloatField(
+        min_value=0.01,
+        help_text="Weight of the disposed material in kg"
+    )
+    recycling_value_id = serializers.IntegerField(
+        required=False,
+        allow_null=True,
+        help_text="Optional ID of recycling value configuration (uses latest if not provided)"
+    )
+    
+    def validate_weight(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Weight must be greater than 0")
+        return value
