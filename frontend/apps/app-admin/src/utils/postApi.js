@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "@shared/utils/api";
 import { fetchPaginated } from "./services";
 
 export async function fetchPosts({ page, page_size }) {

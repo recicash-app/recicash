@@ -14,7 +14,7 @@ const StyledMenuItem = styled(MenuItem)(({
   padding: '6px 3px',
 }));
 
-function MobileToolbar({ options, isAuth, onLogin, onLogout }) {
+function MobileToolbar({ options, isAuth, onLogin, onRegister, onLogout }) {
 
   const [open, setOpen] = useState(false);
 
@@ -47,12 +47,12 @@ function MobileToolbar({ options, isAuth, onLogin, onLogout }) {
             </Box>
           </Box>
 					
-          {!isAuth && (
-            <React.Fragment>
-              <StyledMenuItem onClick={onLogin}> Login </StyledMenuItem>
-              <StyledMenuItem onClick={onLogin}> Cadastro </StyledMenuItem>
-            </React.Fragment>
-          )}
+					{!isAuth && (
+						<React.Fragment>
+							<StyledMenuItem onClick={onLogin}> Login </StyledMenuItem>
+							<StyledMenuItem onClick={onRegister}> Cadastro </StyledMenuItem>
+						</React.Fragment>
+					)}
 					
           {options.map((option, index) => (
             <React.Fragment key={option.name}>

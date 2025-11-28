@@ -3,9 +3,11 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Box, AppBar, Toolbar } from '@mui/material';
-import Logo from '../../../../../shared/atoms/Logo';
 import DesktopToolbar from './DesktopToolbar';
 import MobileToolbar from './MobileToolbar';
+
+import Logo from '@shared/atoms/Logo';
+import { useAuth } from '@shared/utils/AuthProvider';
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: 'flex',
@@ -26,9 +28,7 @@ const ToolbarContent = styled(Box)(({ theme }) => ({
 }));
 
 function Header() {
-
-  const [isAuth, setIsAuth] = useState(true);
-  //const user = { username: 'usuario' };
+	const { isAuth, signInRedirect, signOutRedirect, signUpRedirect } = useAuth();
 
   const publicOptions = [];
   const privateOptions = [
@@ -39,18 +39,26 @@ function Header() {
     { name: 'Informações', path: `/blog` }
   ];
 
-  const [activeItem, setActiveItem] = useState(null);
-  const handleLogin = () => {
-    setIsAuth(true);
-    setActiveItem(0);
-  };
-  const handleLogout = () => {
-    setIsAuth(false);
-    setActiveItem(null);
-  };
-  const handleLogoClick = () => {
-    setActiveItem(isAuth ? 0 : null);
-  };
+	const [activeItem, setActiveItem] = useState(null);
+	
+	const handleLogoClick = () => {
+    	setActiveItem(isAuth ? 0 : null);
+  	};
+
+	const handleLogin = () => {
+		signInRedirect();
+		setActiveItem(0);
+	};
+
+	const handleRegister = () => {
+		signUpRedirect();
+		setActiveItem(0);
+	};
+
+	const handleLogout = () => {
+		signOutRedirect();
+		setActiveItem(null);
+	};
 
   return (
     <AppBar sx={{ position: 'static', boxShadow: 0, backgroundColor: 'transparent' }}>
@@ -64,25 +72,27 @@ function Header() {
             </Link>
           </Box>
 
-          {/* Desktop Navigation */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 2, mt:'20px', justifyContent: 'flex-end' }}>
-            <DesktopToolbar
-              options={isAuth ? privateOptions : publicOptions}
-              isAuth={isAuth}
-              onLogin={handleLogin}
-              onLogout={handleLogout}
-              activeItem={activeItem}
-              onOptionClick={setActiveItem}
-            />
-          </Box>
+					{/* Desktop Navigation */}
+					<Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 2, mt:'20px', justifyContent: 'flex-end' }}>
+						<DesktopToolbar
+							options={isAuth ? privateOptions : publicOptions}
+							isAuth={isAuth}
+							onLogin={handleLogin}
+							onLogout={handleLogout}
+							onRegister={handleRegister}
+							activeItem={activeItem}
+							onOptionClick={setActiveItem}
+						/>
+					</Box>
 
-          {/* Mobile Navigation */}
-          <Box sx={{  display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1 }}>
-            <MobileToolbar
-              options={isAuth ? privateOptions : publicOptions}
-              isAuth={isAuth}
-              onLogin={handleLogin}
-              onLogout={handleLogout}
+					{/* Mobile Navigation */}
+					<Box sx={{  display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1 }}>
+						<MobileToolbar
+							options={isAuth ? privateOptions : publicOptions}
+							isAuth={isAuth}
+							onLogin={handleLogin}
+							onLogout={handleLogout}
+							onRegister={handleRegister}
 							
             />
           </Box>
