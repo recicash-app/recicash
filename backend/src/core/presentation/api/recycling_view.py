@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from core.domain.models import Recycling, WalletHistory, Wallet
-from core.infrastructure.serializers import RecyclingSerializer
+from core.infrastructure.serializers import RecyclingSerializer, EcopontoDisposalSerializer
+from core.application.use_cases.ecoponto_disposal_service import EcopontoDisposalService
 
 
 class RecyclingViewSet(viewsets.ModelViewSet):
@@ -17,9 +18,15 @@ class RecyclingViewSet(viewsets.ModelViewSet):
     - POST /          -> create a new recycling record
     - PATCH /{id}/    -> partial update (only specific fields)
     - DELETE /{id}/   -> delete a recycling record
+    - POST /register_disposal/ -> register disposal by ecoponto
+
+    Custom Actions:
+    - POST /record_wallet_history/ -> update wallet after recycling validation
+    - POST /register_disposal/ -> register disposal by recycling point without user
 
     Notes:
-    - POST requires: user_id, recycling_point_id, recycling_value_id, weight, validation_hash
+    - Standard POST requires: user_id, recycling_point_id, recycling_value_id, weight, validation_hash
+    - register_disposal requires: recycling_point_id, weight (recycling_value_id optional)
     - points_value is automatically calculated from recycling_value_id
     - date is automatically set on creation
     - A WalletHistory record is created with operation='RECYCLING' and value=points_value
@@ -166,3 +173,56 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_201_CREATED
         )
+
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def register_disposal(self, request):
+        """
+        Register a disposal by a recycling point (ecoponto).
+        
+        This endpoint allows recycling points to register disposals
+        without associating them to specific users.
+        
+        Expected POST data:
+        {
+            "recycling_point_id": <integer>,
+            "weight": <float>,
+            "recycling_value_id": <integer> (optional)
+        }
+        
+        Returns:
+        {
+            "recycling_id": <integer>,
+            "validation_hash": <string>,
+            "points_value": <integer>,
+            "weight": <float>,
+            "date": <datetime>,
+            "recycling_point_id": <integer>
+        }
+        """
+        serializer = EcopontoDisposalSerializer(data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(
+                {"error": "Invalid data", "details": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            disposal_data = EcopontoDisposalService.register_disposal(
+                recycling_point_id=serializer.validated_data['recycling_point_id'],
+                weight=serializer.validated_data['weight'],
+                recycling_value_id=serializer.validated_data.get('recycling_value_id')
+            )
+            
+            return Response(disposal_data, status=status.HTTP_201_CREATED)
+            
+        except ValueError as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"An unexpected error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
