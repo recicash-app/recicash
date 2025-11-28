@@ -315,13 +315,13 @@ def create_data(number_of_users=10):
                 last_edition_date=timezone.now()
             )
 
-            image_url = "https://placehold.co/800x400/22c55e/ffffff?text=Recicash+Blog"
+            image_url = "https://placehold.co/800x400/22c55e/ffffff.png?text=Recicash+Blog"
     
             # Download image and attach to PostImage
             response = requests.get(image_url)
-            
+
             image_name = f"blog_image_{i}.png"
-            image_file = ContentFile(response.content)
+            image_file = ContentFile(response.content, name=image_name)
 
             image_instance = PostImage(post=post)
             image_instance.image.save(image_name, image_file, save=True)
