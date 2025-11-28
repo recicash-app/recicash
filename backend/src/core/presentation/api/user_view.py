@@ -1,6 +1,7 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -27,6 +28,14 @@ class UserViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAuthenticated]
             
         return [permission() for permission in permission_classes]
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        """
+        Return the authenticated user's serialized data.
+        """
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
 
 
 class UserObtainPairView(TokenObtainPairView):
@@ -91,7 +100,6 @@ class LogoutView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
-    @method_decorator(csrf_protect) # Guarantee that X-CSRFToken header is verified
     def post(self, request, *args, **kwargs):
         
         # Get refresh token from cookie

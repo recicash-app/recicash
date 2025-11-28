@@ -3,9 +3,11 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Box, AppBar, Toolbar } from '@mui/material';
-import Logo from '../../../../../shared/atoms/Logo';
 import DesktopToolbar from './DesktopToolbar';
 import MobileToolbar from './MobileToolbar';
+
+import Logo from '@shared/atoms/Logo';
+import { useAuth } from '@shared/utils/AuthProvider';
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 	display: 'flex',
@@ -26,9 +28,7 @@ const ToolbarContent = styled(Box)(({ theme }) => ({
 }));
 
 function Header() {
-
-	const [isAuth, setIsAuth] = useState(true);
-	//const user = { username: 'usuario' };
+	const { isAuth, signInRedirect, signOutRedirect, signUpRedirect } = useAuth();
 
 	const publicOptions = [];
 	const privateOptions = [
@@ -40,16 +40,24 @@ function Header() {
 	];
 
 	const [activeItem, setActiveItem] = useState(null);
+	
+	const handleLogoClick = () => {
+    	setActiveItem(isAuth ? 0 : null);
+  	};
+
 	const handleLogin = () => {
-		setIsAuth(true);
+		signInRedirect();
 		setActiveItem(0);
 	};
-	const handleLogout = () => {
-		setIsAuth(false);
-		setActiveItem(null);
+
+	const handleRegister = () => {
+		signUpRedirect();
+		setActiveItem(0);
 	};
-	const handleLogoClick = () => {
-		setActiveItem(isAuth ? 0 : null);
+
+	const handleLogout = () => {
+		signOutRedirect();
+		setActiveItem(null);
 	};
 
 	return (
@@ -71,6 +79,7 @@ function Header() {
 							isAuth={isAuth}
 							onLogin={handleLogin}
 							onLogout={handleLogout}
+							onRegister={handleRegister}
 							activeItem={activeItem}
 							onOptionClick={setActiveItem}
 						/>
@@ -83,6 +92,7 @@ function Header() {
 							isAuth={isAuth}
 							onLogin={handleLogin}
 							onLogout={handleLogout}
+							onRegister={handleRegister}
 							
 						/>
 					</Box>

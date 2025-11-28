@@ -22,7 +22,7 @@ const menuSx = {
 };
 
 
-function DesktopToolbar({ options, isAuth, onLogin, onLogout, activeItem, onOptionClick }) {
+function DesktopToolbar({ options, isAuth, onLogin, onRegister, onLogout, activeItem, onOptionClick }) {
 
 	const navigate = useNavigate();
 	const theme = useTheme();
@@ -53,7 +53,7 @@ function DesktopToolbar({ options, isAuth, onLogin, onLogout, activeItem, onOpti
 				<Button variant="recicashSelectHeader" sx={buttonSx} onClick={onLogin}>
 					Login
 				</Button>
-				<Button variant="recicashSelectHeader" sx={buttonSx} onClick={onLogin}>
+				<Button variant="recicashSelectHeader" sx={buttonSx} onClick={onRegister}>
 					Cadastro
 				</Button>
 			</Box>

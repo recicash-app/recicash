@@ -1,95 +1,65 @@
 import React, { useState } from 'react';
-import { Stack, Alert } from '@mui/material'
-import InputField from '@shared/ui/InputField'
-import SendFormButton from '@shared/ui/SendFormButton'
+import { Stack, Alert } from '@mui/material';
+import InputField from '@shared/ui/InputField';
+import SendFormButton from '@shared/ui/SendFormButton';
+import { login, handleLoginSuccess } from '@shared/utils/auth';
 
 function Form() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formError, setFormError] = useState({ email: '', password: '' });
 
-  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const [formError, setFormError] = useState({
-    email: '',
-    password: '',
-  })
-
   const handleChange = (e) => {
-    setFormData({
-        ...formData,
-        [e.target.name]: e.target.value
-    });
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
   };
 
   const validateForm = () => {
-    let localFormError = { email: '', password: '' };
-    let hasError = false;
+    const errors = {};
+    let isValid = true;
 
     if (!formData.email.trim()) {
-        localFormError.email = 'Email é obrigatório';
-        hasError = true;
-    } 
-    else {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.email)) {
-            localFormError.email = 'Email inválido';
-            hasError = true;
-        }
+      errors.email = 'Email é obrigatório';
+      isValid = false;
+    } else {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!regex.test(formData.email)) {
+        errors.email = 'Email inválido';
+        isValid = false;
+      }
     }
 
     if (!formData.password.trim()) {
-        localFormError.password = 'Senha é obrigatória';
-        hasError = true;
+      errors.password = 'Senha é obrigatória';
+      isValid = false;
     }
 
-    setFormError(localFormError);
-    setError(hasError);
+    setFormError(errors);
+    return isValid;
   };
 
-  const handleSubmit = async (e) => { 
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(false);
+    setErrorMessage('');
     setSuccess(false);
-    validateForm();
-    if (error) return;
-    
+
+    const isValid = validateForm();
+    if (!isValid) return;
+
     try {
-        const response = await fetch(`http://api.docker.localhost/api/v1/token/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                email: formData.email,
-                password: formData.password
-            }),
-        });
-
-        if (response.ok) {
-            console.log('Login feito com sucesso :)');
-            setSuccess(true);
-            setFormData({ email: '', password: '' });
-            setFormError({ email: '', password: '' });
-            // window.location.href = '/inicio';
-        } 
-        else {
-            throw new Error('Credenciais inválidas');
-        }
-
-        const data = await response.json();
-        //console.log('Tokens recebidos:', data);
-    } 
-    
-    catch (error) {
-        console.error('Erro:', error.message);
-        setError(error.message || 'Erro de conexão. Tente novamente.');
-    } 
-
-  };    
+      const user = await login(formData.email, formData.password);
+      setSuccess(true);
+      setFormData({ email: '', password: '' });
+      setFormError({ email: '', password: '' });
+      handleLoginSuccess(user.access_level);
+    } catch (err) {
+      setErrorMessage(err.message || 'Erro inesperado.');
+    }
+  };
 
   return (
     <Stack spacing={3}>
@@ -97,6 +67,7 @@ function Form() {
       <InputField required label="Senha" name="password" type="password" value={formData.password} onChange={handleChange} error={formError.password ? true : false} errorText={formError.password}/> 
       <SendFormButton text="Entrar" onClick={handleSubmit}/>
       {success && <Alert severity="success">Login realizado com sucesso!</Alert>}
+      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
     </Stack>
   );
 }
