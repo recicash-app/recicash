@@ -81,7 +81,7 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
 
-class UserObtainPairSerializer(TokenObtainPairSerializer):
+class LoginSerializer(TokenObtainPairSerializer):
     
     def __init__(self, *args, **kwargs):
         """
