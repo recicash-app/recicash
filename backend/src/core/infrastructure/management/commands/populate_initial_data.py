@@ -301,7 +301,15 @@ def create_data(number_of_users=10):
             "Como Separar Corretamente Seus Resíduos",
             "Materiais Recicláveis que Você Pode Não Conhecer",
             "O Impacto do Plástico nos Oceanos",
-            "Economia Circular: O Futuro da Sustentabilidade"
+            "Economia Circular: O Futuro da Sustentabilidade",
+            "Dicas para Reduzir o Lixo no Dia a Dia",
+            "Como Funciona a Logística Reversa no Brasil",
+            "Reciclagem de Eletrônicos: O Que Você Precisa Saber",
+            "Os Benefícios da Compostagem Doméstica",
+            "Reciclagem e Geração de Empregos: Uma Relação Sustentável",
+            "A Importância da Educação Ambiental nas Escolas",
+            "Como a Tecnologia Está Transformando a Reciclagem",
+            "Reciclagem de Vidro: Mitos e Verdades",
         ]
         
         created_posts = []
