@@ -67,7 +67,7 @@ function Form() {
       <InputField required label="Senha" name="password" type="password" value={formData.password} onChange={handleChange} error={formError.password ? true : false} errorText={formError.password}/> 
       <SendFormButton text="Entrar" onClick={handleSubmit}/>
       {success && <Alert severity="success">Login realizado com sucesso!</Alert>}
-      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+      {errorMessage && <Alert severity="error"> Credenciais inválidas </Alert>}
     </Stack>
   );
 }

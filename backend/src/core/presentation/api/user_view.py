@@ -1,11 +1,13 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.contrib.auth.hashers import check_password
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from core.domain.models import User, RecyclingPoint
 from core.infrastructure.permissions import IsAppAdminUser
 from core.infrastructure.serializers import UserSerializer
+from core.application.use_cases import PaginatorService
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -43,7 +45,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
 
         if self.action in [
-            'get'
+            'list'
             'set_permission', 
             'assign_recycling_point',
             'create_admin', 'create_manager'
@@ -64,6 +66,35 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
+
+    def list(self, request, *args, **kwargs):
+        """
+        List posts. Supports optional pagination via query params:
+          - page (int)
+          - page_size (int)
+
+        When pagination params are provided, uses PaginatorService and returns
+        a paginated dict with 'results' replaced by serialized users.
+        """
+        queryset = self.get_queryset()
+        page = request.query_params.get("page")
+        page_size = request.query_params.get("page_size")
+
+        if page and page_size:
+            paginator = PaginatorService(
+                queryset=queryset,
+                page=int(page),
+                page_size=int(page_size)
+            )
+            data = paginator.get_paginated_data()
+            data["results"] = UserSerializer(
+                data["results"], many=True, context={"request": request}
+            ).data
+            return Response(data, status=status.HTTP_200_OK)
+
+        serializer = UserSerializer(queryset, many=True, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
     @action(detail=False, methods=['post'], permission_classes=[IsAppAdminUser])
     def create_admin(self, request):
         """
@@ -94,7 +125,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def create_manager(self, request):
         """
         POST /users/create_manager/
-        Create a recycling point manager (access_level 'E').
+        Create a recycling point manager (access_level 'M').
 
         Payload:
           - username, password, email, cpf, zip_code, etc.
@@ -104,7 +135,7 @@ class UserViewSet(viewsets.ModelViewSet):
           400: validation errors
         """
         data = request.data.copy()
-        data['access_level'] = 'E'
+        data['access_level'] = 'M'
 
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
@@ -123,7 +154,7 @@ class UserViewSet(viewsets.ModelViewSet):
         Update a user's access_level.
 
         Payload:
-          - access_level: one of ['U','A','E']
+          - access_level: one of ['U','A','M']
 
         Responses:
           200: updated user
@@ -134,9 +165,9 @@ class UserViewSet(viewsets.ModelViewSet):
 
         new_level = request.data.get("access_level")
 
-        if new_level not in ['U', 'A', 'E']:
+        if new_level not in ['U', 'A', 'M']:
             return Response(
-                {"error": "Invalid access level. Must be U, A or E."},
+                {"error": "Invalid access level. Must be U, A or M."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -155,7 +186,7 @@ class UserViewSet(viewsets.ModelViewSet):
         Assign a recycling point to a manager user.
 
         Requirements:
-          - target user must have manager access_level ('E')
+          - target user must have manager access_level ('M')
           - payload: {"recycling_point_id": <id>}
 
         Responses:
@@ -165,9 +196,9 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         user = self.get_object()
 
-        if user.access_level != 'E':
+        if user.access_level != 'M':
             return Response(
-                {"error": "Only users with level E can be assigned to a recycling point."},
+                {"error": "Only users with level M can be assigned to a recycling point."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -189,3 +220,32 @@ class UserViewSet(viewsets.ModelViewSet):
             {"message": "Recycling point assigned to manager.", "recycling_point": rp_id},
             status=status.HTTP_200_OK
         )
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def change_password(self, request, pk=None):
+        """
+        POST /users/{pk}/change_password/
+        Payload:
+            current_password
+            new_password
+            confirm_password
+        """
+        user = self.get_object()
+
+        current = request.data.get("current_password")
+        new = request.data.get("new_password")
+        confirm = request.data.get("confirm_password")
+
+        if not user.check_password(current):
+            return Response({"error": "Current password is incorrect."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if new != confirm:
+            return Response({"error": "New password and confirmation do not match."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not new or len(new) < 6:
+            return Response({"error": "New password must be at least 6 characters long."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(new)
+        user.save()
+
+        return Response({"message": "Password changed successfully."}, status=status.HTTP_200_OK)

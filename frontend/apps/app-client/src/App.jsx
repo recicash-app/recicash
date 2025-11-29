@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 
 import Test from './Test';
@@ -7,6 +7,8 @@ import Header from './components/navigation/Header';
 import BlogPage from './pages/BlogPage';  
 import ProtectedRoute from "@shared/utils/ProtectedRoute";
 
+const SETTINGS_URL = "http://auth.docker.localhost/dados"
+
 function App() {
   return (
     <>
@@ -14,11 +16,13 @@ function App() {
       <Box sx={{ mt: 4, pb: 4, px: 3, maxWidth: '100vw', overflowX: 'hidden' }}>
         <Routes>
           <Route path="/" element={<Home />} />
-
+          <Route path="/test" element={<Test />} />
+          
           {/* Protected Routes */}
           <Route element={<ProtectedRoute roles={['U']} />}>
             <Route path="/test" element={<Test />} />
             <Route path="/blog" element={<BlogPage />} />
+            <Route path="/perfil" element={<Navigate to={SETTINGS_URL} />} />
           </Route>
         </Routes>
       </Box>

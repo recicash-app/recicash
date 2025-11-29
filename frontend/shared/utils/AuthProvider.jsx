@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import api from "./api";
+import { getAuthUser } from "./auth";
 
 const AuthContext = createContext(null);
 
@@ -11,7 +11,7 @@ export function AuthProvider({ children }) {
 
   async function loadUser() {
     try {
-      const res = await api.get("/users/me/");
+      const res = await getAuthUser();
       setUser(res.data);
     } catch (err) {
       setUser(null);
