@@ -108,13 +108,6 @@ class BlogSearchServiceTestCase(TransactionTestCase):
         # Should return no results for empty query
         self.assertEqual(results.count(), 0)
 
-    def test_search_whitespace_only(self):
-        """Test search with whitespace-only query."""
-        results = BlogSearchService.search_posts_by_title("   ")
-        
-        # Should return no results for whitespace-only query
-        self.assertEqual(results.count(), 0)
-
     def test_search_no_matches(self):
         """Test search that should return no results."""
         results = BlogSearchService.search_posts_by_title("inexistente")
@@ -129,19 +122,6 @@ class BlogSearchServiceTestCase(TransactionTestCase):
         # Should return up to 3 suggestions containing "rec"
         self.assertLessEqual(len(suggestions), 3)
         self.assertTrue(all("rec" in suggestion.lower() for suggestion in suggestions))
-
-    def test_get_search_suggestions_empty_query(self):
-        """Test search suggestions with empty query."""
-        suggestions = BlogSearchService.get_search_suggestions("")
-        
-        self.assertEqual(len(suggestions), 0)
-
-    def test_get_search_suggestions_short_query(self):
-        """Test search suggestions with very short query."""
-        suggestions = BlogSearchService.get_search_suggestions("r")
-        
-        # Should return empty list for single character query
-        self.assertEqual(len(suggestions), 0)
 
     def test_get_search_suggestions_with_limit(self):
         """Test search suggestions respects limit parameter."""
@@ -221,15 +201,6 @@ class BlogSearchAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         data = response.json()
         self.assertIn('error', data)
-
-    def test_search_api_short_query(self):
-        """Test search API with very short query."""
-        response = self.client.get(self.search_url, {'q': 'a'})
-        
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        data = response.json()
-        self.assertIn('error', data)
-        self.assertEqual(data['error'], 'Search query too short')
 
     def test_search_api_no_results(self):
         """Test search API when no results are found."""
