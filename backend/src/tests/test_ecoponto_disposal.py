@@ -6,6 +6,7 @@ disposal records by recycling points without associating them to specific users.
 """
 
 from django.test import TransactionTestCase
+from rest_framework.test import APIClient
 from core.domain.models import RecyclingPoint, RecyclingValue, Recycling, User
 from core.application.use_cases.ecoponto_disposal_service import EcopontoDisposalService
 import logging
@@ -144,3 +145,149 @@ class EcopontoDisposalServiceTestCase(TransactionTestCase):
         self.assertEqual(disposal.validation_hash, result['validation_hash'])
         self.assertEqual(disposal.status, 'ACTIVE')
         self.assertIsNotNone(disposal.date)
+
+
+class EcopontoDisposalAPITestCase(TransactionTestCase):
+    """
+    API-level test cases for the register_disposal endpoint.
+    
+    Tests authentication and authorization requirements.
+    """
+
+    def setUp(self):
+        """Set up test data before each test method."""
+        self.client = APIClient()
+        
+        # Create a regular user (access_level='U')
+        self.regular_user = User.objects.create_user(
+            username='regularuser',
+            password='testpass123',
+            cpf='11111111111',
+            zip_code='12345000',
+            access_level='U'
+        )
+        
+        # Create a manager user (access_level='M')
+        self.manager_user = User.objects.create_user(
+            username='manageruser',
+            password='testpass123',
+            cpf='22222222222',
+            zip_code='12345000',
+            access_level='M'
+        )
+        
+        # Create a representative user (access_level='U' but linked to recycling point)
+        self.representative_user = User.objects.create_user(
+            username='representativeuser',
+            password='testpass123',
+            cpf='33333333333',
+            zip_code='12345000',
+            access_level='U'
+        )
+        
+        # Create recycling point with representative user
+        self.recycling_point = RecyclingPoint.objects.create(
+            name="Ecoponto Teste API",
+            cnpj="12345678901234",
+            zip_code="12345000",
+            latitude=-23.5505,
+            longitude=-46.6333,
+            user_id=self.representative_user
+        )
+        
+        # Create recycling point without representative user
+        self.recycling_point_no_rep = RecyclingPoint.objects.create(
+            name="Ecoponto Sem Representante",
+            cnpj="98765432109876",
+            zip_code="12345000",
+            latitude=-23.5510,
+            longitude=-46.6340,
+            user_id=None
+        )
+        
+        self.recycling_value = RecyclingValue.objects.create(
+            points_value=500.0
+        )
+
+    def test_register_disposal_unauthenticated_returns_401(self):
+        """Test that unauthenticated requests are rejected."""
+        response = self.client.post('/api/v1/recyclings/register_disposal/', {
+            'recycling_point_id': self.recycling_point.recycling_point_id,
+            'weight': 2.5
+        })
+        
+        self.assertEqual(response.status_code, 401)
+
+    def test_register_disposal_regular_user_unauthorized_returns_403(self):
+        """Test that regular users cannot register disposals for unrelated recycling points."""
+        self.client.force_authenticate(user=self.regular_user)
+        
+        response = self.client.post('/api/v1/recyclings/register_disposal/', {
+            'recycling_point_id': self.recycling_point.recycling_point_id,
+            'weight': 2.5
+        })
+        
+        self.assertEqual(response.status_code, 403)
+        self.assertIn('not authorized', response.data.get('error', ''))
+
+    def test_register_disposal_representative_user_success(self):
+        """Test that the representative user of a recycling point can register disposals."""
+        self.client.force_authenticate(user=self.representative_user)
+        
+        response = self.client.post('/api/v1/recyclings/register_disposal/', {
+            'recycling_point_id': self.recycling_point.recycling_point_id,
+            'weight': 2.5
+        })
+        
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('recycling_id', response.data)
+        self.assertIn('validation_hash', response.data)
+
+    def test_register_disposal_manager_user_success(self):
+        """Test that manager users (access_level='M') can register disposals for any recycling point."""
+        self.client.force_authenticate(user=self.manager_user)
+        
+        response = self.client.post('/api/v1/recyclings/register_disposal/', {
+            'recycling_point_id': self.recycling_point.recycling_point_id,
+            'weight': 2.5
+        })
+        
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('recycling_id', response.data)
+        self.assertIn('validation_hash', response.data)
+
+    def test_register_disposal_manager_can_access_any_recycling_point(self):
+        """Test that manager users can register disposals for recycling points without representatives."""
+        self.client.force_authenticate(user=self.manager_user)
+        
+        response = self.client.post('/api/v1/recyclings/register_disposal/', {
+            'recycling_point_id': self.recycling_point_no_rep.recycling_point_id,
+            'weight': 3.0
+        })
+        
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('recycling_id', response.data)
+
+    def test_register_disposal_representative_cannot_access_other_recycling_points(self):
+        """Test that representative users cannot register disposals for other recycling points."""
+        self.client.force_authenticate(user=self.representative_user)
+        
+        response = self.client.post('/api/v1/recyclings/register_disposal/', {
+            'recycling_point_id': self.recycling_point_no_rep.recycling_point_id,
+            'weight': 2.5
+        })
+        
+        self.assertEqual(response.status_code, 403)
+        self.assertIn('not authorized', response.data.get('error', ''))
+
+    def test_register_disposal_invalid_recycling_point_returns_404(self):
+        """Test that requests with non-existent recycling point ID return 404."""
+        self.client.force_authenticate(user=self.manager_user)
+        
+        response = self.client.post('/api/v1/recyclings/register_disposal/', {
+            'recycling_point_id': 99999,
+            'weight': 2.5
+        })
+        
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('not found', response.data.get('error', ''))

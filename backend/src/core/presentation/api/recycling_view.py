@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from core.domain.models import Recycling, WalletHistory, Wallet
+from core.domain.models import Recycling, WalletHistory, Wallet, RecyclingPoint
 from core.infrastructure.serializers import RecyclingSerializer, EcopontoDisposalSerializer
 from core.application.use_cases.ecoponto_disposal_service import EcopontoDisposalService
 
@@ -173,13 +173,17 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED
         )
 
-    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def register_disposal(self, request):
         """
         Register a disposal by a recycling point (ecoponto).
         
         This endpoint allows recycling points to register disposals
         without associating them to specific users.
+        
+        Requires authentication. The authenticated user must be either:
+        - The representative user of the recycling point (user_id matches), or
+        - A user with 'M' (Recycling Point Manager) access level
         
         Expected POST data:
         {
@@ -204,6 +208,27 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             return Response(
                 {"error": "Invalid data", "details": serializer.errors},
                 status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        recycling_point_id = serializer.validated_data['recycling_point_id']
+        
+        # Verify the authenticated user is authorized to register disposals for this recycling point
+        try:
+            recycling_point = RecyclingPoint.objects.get(recycling_point_id=recycling_point_id)
+        except RecyclingPoint.DoesNotExist:
+            return Response(
+                {"error": f"Recycling point with ID {recycling_point_id} not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        user = request.user
+        is_representative = recycling_point.user_id == user
+        is_manager = user.access_level == 'M'
+        
+        if not is_representative and not is_manager:
+            return Response(
+                {"error": "You are not authorized to register disposals for this recycling point."},
+                status=status.HTTP_403_FORBIDDEN
             )
         
         try:
