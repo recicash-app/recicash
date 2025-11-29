@@ -57,7 +57,3 @@ class EcopontoDisposalSerializer(serializers.Serializer):
         help_text="Optional ID of recycling value configuration (uses latest if not provided)"
     )
     
-    def validate_weight(self, value):
-        if value <= 0:
-            raise serializers.ValidationError("Weight must be greater than 0")
-        return value
