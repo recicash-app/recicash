@@ -214,7 +214,7 @@ class EcopontoDisposalAPITestCase(TransactionTestCase):
         response = self.client.post('/api/v1/recyclings/register_disposal/', {
             'recycling_point_id': self.recycling_point.recycling_point_id,
             'weight': 2.5
-        })
+        }, format='json')
         
         self.assertEqual(response.status_code, 401)
 
@@ -225,7 +225,7 @@ class EcopontoDisposalAPITestCase(TransactionTestCase):
         response = self.client.post('/api/v1/recyclings/register_disposal/', {
             'recycling_point_id': self.recycling_point.recycling_point_id,
             'weight': 2.5
-        })
+        }, format='json')
         
         self.assertEqual(response.status_code, 403)
         self.assertIn('not authorized', response.data.get('error', ''))
@@ -237,7 +237,7 @@ class EcopontoDisposalAPITestCase(TransactionTestCase):
         response = self.client.post('/api/v1/recyclings/register_disposal/', {
             'recycling_point_id': self.recycling_point.recycling_point_id,
             'weight': 2.5
-        })
+        }, format='json')
         
         self.assertEqual(response.status_code, 201)
         self.assertIn('recycling_id', response.data)
@@ -250,7 +250,7 @@ class EcopontoDisposalAPITestCase(TransactionTestCase):
         response = self.client.post('/api/v1/recyclings/register_disposal/', {
             'recycling_point_id': self.recycling_point.recycling_point_id,
             'weight': 2.5
-        })
+        }, format='json')
         
         self.assertEqual(response.status_code, 201)
         self.assertIn('recycling_id', response.data)
@@ -263,7 +263,7 @@ class EcopontoDisposalAPITestCase(TransactionTestCase):
         response = self.client.post('/api/v1/recyclings/register_disposal/', {
             'recycling_point_id': self.recycling_point_no_rep.recycling_point_id,
             'weight': 3.0
-        })
+        }, format='json')
         
         self.assertEqual(response.status_code, 201)
         self.assertIn('recycling_id', response.data)
@@ -275,7 +275,7 @@ class EcopontoDisposalAPITestCase(TransactionTestCase):
         response = self.client.post('/api/v1/recyclings/register_disposal/', {
             'recycling_point_id': self.recycling_point_no_rep.recycling_point_id,
             'weight': 2.5
-        })
+        }, format='json')
         
         self.assertEqual(response.status_code, 403)
         self.assertIn('not authorized', response.data.get('error', ''))
@@ -287,7 +287,7 @@ class EcopontoDisposalAPITestCase(TransactionTestCase):
         response = self.client.post('/api/v1/recyclings/register_disposal/', {
             'recycling_point_id': 99999,
             'weight': 2.5
-        })
+        }, format='json')
         
         self.assertEqual(response.status_code, 404)
         self.assertIn('not found', response.data.get('error', ''))
