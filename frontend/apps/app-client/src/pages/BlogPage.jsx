@@ -78,7 +78,7 @@ function PostCard({ post }) {
                     <CardImage component="img" height="10vh" image={post.images[0].image_url} />
                     <CardText>
                         <Typography gutterBottom component="div">
-                            {post.title}
+                            {post.title.length > 50 ? `${post.title.substring(0, 50)}...` : post.title}
                         </Typography>
                     </CardText>
                 </InteractiveArea>
