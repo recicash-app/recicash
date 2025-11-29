@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 
 from core.domain.models import Recycling, RecyclingPoint, RecyclingValue, User, WalletHistory, Wallet
-from core.infrastructure.serializers import RecyclingSerializer
+from core.infrastructure.serializers import RecyclingSerializer, EcopontoDisposalSerializer
+from core.application.use_cases.ecoponto_disposal_service import EcopontoDisposalService
 
 
 class RecyclingViewSet(viewsets.ModelViewSet):
@@ -20,11 +21,16 @@ class RecyclingViewSet(viewsets.ModelViewSet):
     - PATCH /{id}/    -> partial update (only specific fields)
     - DELETE /{id}/   -> delete a recycling record
 
+    Custom Actions:
+    - POST /record_wallet_history/ -> update wallet after recycling validation
+    - POST /register_disposal/ -> register disposal by recycling point without user
+
     Notes:
-    - POST requires: user_id, recycling_point_id, recycling_value_id, weight, validation_hash
+    - Standard POST requires: user_id, recycling_point_id, recycling_value_id, weight, validation_hash
+    - register_disposal requires: recycling_point_id, weight (recycling_value_id optional)
     - points_value is automatically calculated from recycling_value_id
     - date is automatically set on creation
-    - A WalletHistory record is created with operation='RECYCLING' and value=points_value
+    - A WalletHistory record is created with operation='RECYCLING' and value=points_value only for recycling records associated with a user (i.e., when user_id is not NULL). For ecoponto disposals (registered via the register_disposal endpoint), no WalletHistory record is created.
     """
 
     queryset = Recycling.objects.all().order_by('-date')
@@ -381,7 +387,6 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_201_CREATED
         )
-    
 
     def perform_create(self, serializer):
         """
@@ -400,3 +405,81 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         Delete a recycling record.
         """
         instance.delete()
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    def register_disposal(self, request):
+        """
+        Register a disposal by a recycling point (ecoponto).
+        
+        This endpoint allows recycling points to register disposals
+        without associating them to specific users.
+        
+        Requires authentication. The authenticated user must be either:
+        - The representative user of the recycling point (user_id matches), or
+        - A user with 'M' (Recycling Point Manager) access level
+        
+        Expected POST data:
+        {
+            "recycling_point_id": <integer>,
+            "weight": <float>,
+            "recycling_value_id": <integer> (optional)
+        }
+        
+        Returns:
+        {
+            "recycling_id": <integer>,
+            "validation_hash": <string>,
+            "points_value": <integer>,
+            "weight": <float>,
+            "date": <datetime>,
+            "recycling_point_id": <integer>
+        }
+        """
+        serializer = EcopontoDisposalSerializer(data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(
+                {"error": "Invalid data", "details": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        recycling_point_id = serializer.validated_data['recycling_point_id']
+        
+        # Verify the authenticated user is authorized to register disposals for this recycling point
+        try:
+            recycling_point = RecyclingPoint.objects.get(recycling_point_id=recycling_point_id)
+        except RecyclingPoint.DoesNotExist:
+            return Response(
+                {"error": f"Recycling point with ID {recycling_point_id} not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        user = request.user
+        is_representative = recycling_point.user_id == user
+        is_manager = user.access_level == 'M'
+        
+        if not is_representative and not is_manager:
+            return Response(
+                {"error": "You are not authorized to register disposals for this recycling point."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        try:
+            disposal_data = EcopontoDisposalService.register_disposal(
+                recycling_point_id=serializer.validated_data['recycling_point_id'],
+                weight=serializer.validated_data['weight'],
+                recycling_value_id=serializer.validated_data.get('recycling_value_id')
+            )
+            
+            return Response(disposal_data, status=status.HTTP_201_CREATED)
+            
+        except ValueError as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"An unexpected error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
