@@ -93,6 +93,8 @@ function PostCard({ post }) {
 function BlogPage() {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredPosts, setFilteredPosts] = useState([]);
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -109,6 +111,29 @@ function BlogPage() {
 
         fetchPosts();
     }, []);
+    
+    useEffect(() => {
+        const handleSearch = async () => {
+            if (searchTerm.trim() === '') {
+                setFilteredPosts([]);
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://api.docker.localhost:81/api/v1/posts/search/?q=${searchTerm}`);
+                const data = await response.json();
+                setFilteredPosts(data.results);
+            } catch (error) {
+                console.error('Erro ao buscar posts:', error);
+            }
+        };
+
+        const delayDebounceFn = setTimeout(() => {
+            handleSearch();
+        }, 500); // debounce delay
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm]);
 
     if (loading) {
         return <Typography>Carregando posts...</Typography>;
@@ -116,8 +141,17 @@ function BlogPage() {
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+            <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+                <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Buscar posts..."
+                    style={{ padding: '10px', width: '30vw', borderRadius: '5px', border: '1px solid #ccc' }}
+                />
+            </div>
             <Grid container spacing={3} justifyContent="center">
-                {posts.map((post) => (
+                {(filteredPosts.length > 0 ? filteredPosts : posts).map((post) => (
                     <Grid item key={post.id}>
                         <PostCard post={post} />
                     </Grid>
