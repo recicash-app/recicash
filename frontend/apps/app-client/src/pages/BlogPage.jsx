@@ -115,8 +115,8 @@ function BlogPage() {
     }
 
     return (
-        <div>
-            <Grid container spacing={3}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+            <Grid container spacing={3} justifyContent="center">
                 {posts.map((post) => (
                     <Grid item key={post.id}>
                         <PostCard post={post} />
