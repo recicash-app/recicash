@@ -29,7 +29,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
     - register_disposal requires: recycling_point_id, weight (recycling_value_id optional)
     - points_value is automatically calculated from recycling_value_id
     - date is automatically set on creation
-    - A WalletHistory record is created with operation='RECYCLING' and value=points_value
+    - A WalletHistory record is created with operation='RECYCLING' and value=points_value only for recycling records associated with a user (i.e., when user_id is not NULL). For ecoponto disposals (registered via the register_disposal endpoint), no WalletHistory record is created.
     """
 
     queryset = Recycling.objects.all().order_by('-date')
