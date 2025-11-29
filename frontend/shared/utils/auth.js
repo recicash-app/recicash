@@ -1,5 +1,10 @@
 import api from "./api";
 
+export async function getAuthUser() {
+  const response = await api.get("/users/me/");
+  return response;
+} 
+
 export async function getCSRFToken() {
   await api.get("/token/csrf/");
 }
@@ -40,7 +45,7 @@ export function handleRedirect(role) {
     window.location.href = 'http://admin.docker.localhost';
   } else if (role === 'U') {
     window.location.href = 'http://web.docker.localhost';
-  } else if (role === 'E') {
+  } else if (role === 'M') {
     window.location.href = 'http://ecoponto.docker.localhost';
   } else {
     window.location.href = 'http://web.docker.localhost';

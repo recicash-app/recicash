@@ -35,11 +35,11 @@ function DesktopToolbar({ options, isAuth, onLogin, onRegister, onLogout, active
     setAnchorEl(null);
   };
 
-  const handleEdit = () => {
-    handleMenuClose();
-    onOptionClick(null);
-    navigate('/configurações');
-  };
+	const handleEdit = () => {
+		handleMenuClose();
+		onOptionClick(null);
+		navigate("/perfil");
+	};
 
   const handleLogout = () => {
     handleMenuClose();

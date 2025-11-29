@@ -19,7 +19,7 @@ function LogoutPage() {
         setStatus("success");
         setTimeout(() => {
           window.location.href = LANDING_URL;
-        }, 2500);
+        }, 1500);
       } catch (err) {
         setStatus("error");
       }
