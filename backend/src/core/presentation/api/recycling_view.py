@@ -269,16 +269,19 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         
         Expected POST data:
         {
-            "recycling_id": <integer>
+            "recycling_id": <string>,
+            "validation_hash": "<string>",
             "user_id": <integer>
         }
         
         This endpoint:
         1. Finds the Recycling record by recycling_id
-        2. Creates a WalletHistory record with operation='RECYCLING'
-        3. Updates the user's wallet points_balance
+        2. Verifies the validation_hash matches
+        3. Creates a WalletHistory record with operation='RECYCLING'
+        4. Updates the user's wallet points_balance
         """
         recycling_id = request.data.get('recycling_id')
+        validation_hash = request.data.get('validation_hash')
         user_id = request.data.get('user_id')
         
         if not recycling_id:
@@ -293,6 +296,12 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        if not validation_hash:
+            return Response(
+                {"error": "validation_hash is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         try:
             recycling = Recycling.objects.get(recycling_id=recycling_id)
         except Recycling.DoesNotExist:
@@ -301,10 +310,10 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        # Verify if the user_id from request matches the recycling user_id
-        if recycling.user_id.user_id != user_id:
+        # Verify if the validation_hash matches
+        if recycling.validation_hash != validation_hash:
             return Response(
-                {"error": "Unauthorized: user_id does not match the recycling owner."},
+                {"error": "Unauthorized: validation_hash does not match."},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -315,8 +324,17 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Get the user from the recycling record
-        user = recycling.user_id
+        # Get the user from the request and update the recycling record
+        try:
+            user = User.objects.get(user_id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Update the recycling record with the user_id from the request
+        recycling.user_id = user
         
         if not user:
             return Response(
