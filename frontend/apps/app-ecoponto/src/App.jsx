@@ -8,7 +8,7 @@ function App() {
   return (
     <Box sx={{ mt: 4, pb: 4, px: 3, maxWidth: '100vw' }}>
       <Routes>
-        <Route element={<ProtectedRoute roles={['E']} />}>
+        <Route element={<ProtectedRoute roles={['M']} />}>
           <Route path="/test" element={<Test />} />
         </Route>
       </Routes>

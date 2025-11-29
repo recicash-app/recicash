@@ -38,7 +38,7 @@ function DesktopToolbar({ options, isAuth, onLogin, onRegister, onLogout, active
 	const handleEdit = () => {
 		handleMenuClose();
 		onOptionClick(null);
-		navigate('/configurações');
+		navigate("/perfil");
 	};
 
 	const handleLogout = () => {

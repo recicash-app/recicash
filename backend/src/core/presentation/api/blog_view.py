@@ -5,7 +5,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from core.infrastructure.permissions import IsAppAdminUser
-from core.domain.models import User, PostBlog, PostImage
+from core.domain.models import PostBlog, PostImage
 from core.infrastructure.serializers import PostBlogSerializer, PostImageSerializer
 from core.application.use_cases import BlogSearchService, PaginatorService
 
