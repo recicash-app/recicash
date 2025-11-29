@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -95,7 +97,6 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         
         if start_date:
             try:
-                from datetime import datetime
                 start_date_obj = datetime.fromisoformat(start_date)
                 queryset = queryset.filter(date__gte=start_date_obj)
             except (ValueError, TypeError):
@@ -103,7 +104,6 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         
         if end_date:
             try:
-                from datetime import datetime
                 end_date_obj = datetime.fromisoformat(end_date)
                 queryset = queryset.filter(date__lte=end_date_obj)
             except (ValueError, TypeError):
