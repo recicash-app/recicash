@@ -7,7 +7,7 @@ without associating them to specific users.
 
 from django.test import TransactionTestCase
 from rest_framework.test import APIClient
-from core.domain.models import RecyclingPoint, RecyclingValue, Recycling
+from core.domain.models import RecyclingPoint, RecyclingValue, Recycling, User
 from core.application.use_cases.ecoponto_disposal_service import EcopontoDisposalService
 import logging
 
