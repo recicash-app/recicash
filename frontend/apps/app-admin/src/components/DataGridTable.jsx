@@ -48,6 +48,8 @@ function DataGridTable({
     flex: col.flex || 1,
     width: col.width,
     sortable: col.sortable ?? false,
+    align: col.align ?? 'left',
+    headerAlign: col.headerAlign ?? 'left',
     renderCell: col.render
       ? (params) => col.render(params.value, params.row)
       : undefined,
@@ -59,8 +61,9 @@ function DataGridTable({
       headerName: "Ações",
       sortable: false,
       filterable: false,
-      width: 120,
-      align: "right",
+      width: 240,
+      align: "center",
+      headerAlign: 'center',
       renderCell: (params) => actionsColumn(params.row),
     });
   }
@@ -73,7 +76,7 @@ function DataGridTable({
         rowCount={rowCount}
         loading={loading}
         pageSizeOptions={pageSizes}
-        getRowId={(row) => row.id}
+        getRowId={(row) => row?.user_id || row.id}
         pagination
         paginationMode="server"
         disableRowSelectionOnClick

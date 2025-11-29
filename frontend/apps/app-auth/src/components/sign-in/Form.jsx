@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Stack, Alert } from '@mui/material';
 import InputField from '@shared/ui/InputField';
 import SendFormButton from '@shared/ui/SendFormButton';
-import { login, handleLoginSuccess } from '@shared/utils/auth';
+import { login, handleRedirect } from '@shared/utils/auth';
 
 function Form() {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -55,7 +55,7 @@ function Form() {
       setSuccess(true);
       setFormData({ email: '', password: '' });
       setFormError({ email: '', password: '' });
-      handleLoginSuccess(user.access_level);
+      handleRedirect(user.access_level);
     } catch (err) {
       setErrorMessage(err.message || 'Erro inesperado.');
     }

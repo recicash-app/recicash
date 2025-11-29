@@ -1,6 +1,5 @@
 import { Box, Typography, Button } from "@mui/material";
-
-const LANDING_URL = "http://web.docker.localhost";
+import { handleRedirect } from "@shared/utils/auth";
 
 function ForbiddenPage() {
   return (
@@ -23,7 +22,7 @@ function ForbiddenPage() {
       <Button 
         variant="recicashCTA"
         sx={{ boxShadow: 1 }}
-        onClick={() => (window.location.href = LANDING_URL)}
+        onClick={() => handleRedirect(null)}
       >
         Voltar ao início
       </Button>
