@@ -5,7 +5,7 @@ Tests the EcopontoDisposalService class and related API endpoints for registerin
 disposal records by recycling points without associating them to specific users.
 """
 
-from django.test import TransactionTestCase, Client
+from django.test import TransactionTestCase
 from rest_framework.test import APIClient
 from core.domain.models import RecyclingPoint, RecyclingValue, Recycling, User
 from core.application.use_cases.ecoponto_disposal_service import EcopontoDisposalService

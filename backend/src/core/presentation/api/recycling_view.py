@@ -223,10 +223,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             )
         
         user = request.user
-        is_representative = (
-            recycling_point.user_id is not None and 
-            recycling_point.user_id.user_id == user.user_id
-        )
+        is_representative = recycling_point.user_id == user
         is_manager = user.access_level == 'M'
         
         if not is_representative and not is_manager:
