@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from core.domain.models import Recycling, WalletHistory, Wallet
+from core.domain.models import Recycling, RecyclingPoint, RecyclingValue, User, WalletHistory, Wallet
 from core.infrastructure.serializers import RecyclingSerializer
 
 
@@ -40,7 +40,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             return [IsAuthenticated()]
         """
         if self.action in ['list', 'retrieve']:
-            permission_classes = [AllowAny]
+            permission_classes = [IsAuthenticated]
         else:
             permission_classes = [IsAuthenticated]  # Change to [IsAuthenticated] in production
 
