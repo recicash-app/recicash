@@ -20,8 +20,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
     Custom actions:
       - GET  /users/me/                       : return current authenticated user (auth required)
-      - POST /users/create_admin/             : create an admin user (AllowAny)
-      - POST /users/create_manager/           : create a recycling point manager (AllowAny)
+      - POST /users/create_admin/             : create an admin user (admin only)
+      - POST /users/create_manager/           : create a recycling point manager (admin only)
       - PATCH /users/{pk}/set_permission/     : set access_level for a user (admin only)
       - POST  /users/{pk}/assign_recycling_point/ : assign recycling point to manager (admin only)
     """
@@ -43,14 +43,12 @@ class UserViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
 
         if self.action in [
+            'get'
             'set_permission', 
             'assign_recycling_point',
             'create_admin', 'create_manager'
         ]:
             return [IsAuthenticated(), IsAppAdminUser()]
-
-        if self.action == 'me':
-            return [IsAuthenticated()]
 
         return [IsAuthenticated()]
 
@@ -66,7 +64,7 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    @action(detail=False, methods=['post'], permission_classes=[IsAppAdminUser])
     def create_admin(self, request):
         """
         POST /users/create_admin/
@@ -92,7 +90,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    @action(detail=False, methods=['post'], permission_classes=[IsAppAdminUser])
     def create_manager(self, request):
         """
         POST /users/create_manager/

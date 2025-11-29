@@ -9,6 +9,7 @@ import Header from './components/navigation/Header';
 import BlogPage from './pages/BlogPage';
 import History from './pages/History';
 import Wallet from './pages/Wallet';
+import ProtectedRoute from "@shared/utils/ProtectedRoute";
 
 function App() {
   return (
@@ -17,10 +18,14 @@ function App() {
       <Box sx={{ mt: 4, pb: 4, px: 3, maxWidth: '100vw', overflowX: 'hidden' }}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/test" element={<Test />} />
+
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute roles={['U']} />}>
+            <Route path="/test" element={<Test />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/historico" element={<History />} /> 
           <Route path="/carteira" element={<Wallet />} />
+          </Route>
         </Routes>
       </Box>
     </LocalizationProvider>
