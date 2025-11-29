@@ -10,6 +10,7 @@ import BlogPage from './pages/BlogPage';
 import History from './pages/History';
 import Wallet from './pages/Wallet';
 import ProtectedRoute from "@shared/utils/ProtectedRoute";
+import ProtectedRoute from "@shared/utils/ProtectedRoute";
 
 function App() {
   return (
@@ -21,10 +22,14 @@ function App() {
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute roles={['U']} />}>
+  
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute roles={['U']} />}>
             <Route path="/test" element={<Test />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/historico" element={<History />} /> 
           <Route path="/carteira" element={<Wallet />} />
+          </Route>
           </Route>
         </Routes>
       </Box>
