@@ -18,7 +18,6 @@ class RecyclingViewSet(viewsets.ModelViewSet):
     - POST /          -> create a new recycling record
     - PATCH /{id}/    -> partial update (only specific fields)
     - DELETE /{id}/   -> delete a recycling record
-    - POST /register_disposal/ -> register disposal by ecoponto
 
     Custom Actions:
     - POST /record_wallet_history/ -> update wallet after recycling validation
