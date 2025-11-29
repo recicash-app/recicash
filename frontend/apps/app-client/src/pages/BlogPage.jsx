@@ -51,8 +51,10 @@ function PostCard({ post }) {
                 {post.title}
             </Typography>
             <Typography variant="subtitle1" gutterBottom>
-                {new Date(post.created_at).toLocaleDateString()}
+                Publicação: {new Date(post.created_at).toLocaleDateString()} - 
+                Ultima atualização: {new Date(post.last_edition_date).toLocaleDateString()}
             </Typography>
+            
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '10px', margin: '30px' }}>
                 {post.images.map((image, index) => (
                     <img
