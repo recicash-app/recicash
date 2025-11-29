@@ -35,12 +35,14 @@ export async function logout() {
 }
 
 
-export function handleLoginSuccess(role) {
+export function handleRedirect(role) {
   if (role === 'A') {
     window.location.href = 'http://admin.docker.localhost';
   } else if (role === 'U') {
     window.location.href = 'http://web.docker.localhost';
   } else if (role === 'E') {
     window.location.href = 'http://ecoponto.docker.localhost';
+  } else {
+    window.location.href = 'http://web.docker.localhost';
   }
 }

@@ -48,8 +48,8 @@ class PostBlogViewSet(viewsets.ModelViewSet):
         """
         if self.action in ["list", "retrieve", "search", "search_suggestions"]:
             return [AllowAny()]
-        return [AllowAny()]
-        # production: return [IsAuthenticated(), IsAppAdminUser()]
+        # development: return [AllowAny()]
+        return [IsAuthenticated(), IsAppAdminUser()]
 
     def perform_create(self, serializer):
         """
@@ -63,7 +63,8 @@ class PostBlogViewSet(viewsets.ModelViewSet):
         - Expects a single uploaded file under the form field name "image".
         - Renames the uploaded file to "<post.post_id>.<ext>" before saving.
         """
-        author = User.objects.get(pk=1)
+        # development: author = User.objects.get(pk=1)
+        author = self.request.user
         post = serializer.save(author_id=author)
 
         image_file = self.request.FILES.get("image")

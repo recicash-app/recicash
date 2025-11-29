@@ -3,6 +3,8 @@ import { Box } from "@mui/material";
 
 import Sidebar from "./components/sidebar/Sidebar";
 import PostManagementPage from "./pages/PostManagementPage";
+import UserManagementPage from "./pages/UserManagementPage";
+import ProtectedRoute from "@shared/utils/ProtectedRoute";
 
 const drawerWidth = 260;
 
@@ -24,7 +26,10 @@ function App() {
       >
         {/* Page routes */}
         <Routes>
-          <Route path="/" element={<PostManagementPage />} />
+          <Route element={<ProtectedRoute roles={['A']} />}>
+            <Route path="/" element={<PostManagementPage />} />
+            <Route path="/users" element={<UserManagementPage />} />
+          </Route>
         </Routes>
       </Box>
     </Box>
