@@ -1,8 +1,8 @@
 """
 Unit tests for Ecoponto Disposal functionality.
 
-Tests the EcopontoDisposalService class and related API endpoints for registering
-disposal records by recycling points without associating them to specific users.
+Tests the EcopontoDisposalService class for registering disposal records by recycling points
+without associating them to specific users.
 """
 
 from django.test import TransactionTestCase
