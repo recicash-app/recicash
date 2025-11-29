@@ -13,7 +13,7 @@ import requests
 from typing import Dict, Optional, List, Tuple
 from urllib.parse import quote
 from django.conf import settings
-from apps.entities.models import RecyclingPoint
+from core.domain.models import RecyclingPoint
 
 logger = logging.getLogger(__name__)
 

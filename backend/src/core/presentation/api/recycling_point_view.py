@@ -13,9 +13,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import JSONParser
 
-from apps.entities.models import RecyclingPoint
-from apps.entities.serializers import RecyclingPointSerializer
-from apps.services.google_maps_service import GoogleMapsService
+from core.domain.models import RecyclingPoint
+from core.infrastructure.serializers.user_serializers import RecyclingPointSerializer
+from core.application.use_cases.google_maps_service import GoogleMapsService
 
 import logging
 
