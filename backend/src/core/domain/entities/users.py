@@ -7,6 +7,7 @@ class RecyclingPoint(models.Model):
     References a representative User (optional).
     """
     recycling_point_id = models.BigAutoField(primary_key=True)
+    maps_id = models.CharField(max_length=255, unique=True, null=True, blank=True)
     user_id = models.ForeignKey(
         'User',
         on_delete=models.SET_NULL,
