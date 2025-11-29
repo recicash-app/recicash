@@ -187,7 +187,8 @@ class RecyclingPointSerializer(serializers.ModelSerializer):
     Serializer for RecyclingPoint basic information.
     
     Fields:
-    - recycling_point_id: Unique identifier
+    - recycling_point_id: Unique auto-incrementing identifier
+    - maps_id: Google Maps identifier (unique)
     - name: Name of the recycling point
     - latitude: Geographic latitude
     - longitude: Geographic longitude
@@ -198,6 +199,7 @@ class RecyclingPointSerializer(serializers.ModelSerializer):
         model = RecyclingPoint
         fields = (
             'recycling_point_id',
+            'maps_id',
             'name',
             'latitude',
             'longitude',
