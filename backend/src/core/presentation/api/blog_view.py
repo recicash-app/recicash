@@ -182,15 +182,6 @@ class PostBlogViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if len(search_query) < 2:
-            return Response(
-                {
-                    'error': 'Search query too short',
-                    'message': 'Please provide at least 2 characters for search'
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         try:
             matching_posts = BlogSearchService.search_posts_by_title(search_query)
             serializer = self.get_serializer(matching_posts, many=True)
