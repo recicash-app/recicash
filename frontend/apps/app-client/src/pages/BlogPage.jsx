@@ -122,7 +122,7 @@ function BlogPage() {
       }
 
       try {
-        const response = await fetch(`http://api.docker.localhost:81/api/v1/posts/search/?q=${encodeURIComponent(searchTerm)}`);        const data = await response.json();
+        const response = await fetch(`http://api.docker.localhost:${apiPort}/api/v1/posts/search/?q=${encodeURIComponent(searchTerm)}`);        const data = await response.json();
         setFilteredPosts(data.results);
       } catch (error) {
         console.error('Erro ao buscar posts:', error);
