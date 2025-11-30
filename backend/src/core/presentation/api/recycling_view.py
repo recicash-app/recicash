@@ -48,7 +48,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             return [IsAuthenticated()]
         """
         if self.action in ['list', 'retrieve']:
-            permission_classes = [IsAuthenticated]
+            permission_classes = [AllowAny]
         else:
             permission_classes = [IsAuthenticated]  # Change to [IsAuthenticated] in production
 
@@ -84,6 +84,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         except (ValueError, TypeError):
             return queryset.none()
         
+        # [CHANGE] Temporarily comment out security for local testing purposes
         # Get the authenticated user's ID from the request
         if self.request.user and self.request.user.is_authenticated:
             # Assuming the user object has a user_id attribute
@@ -94,8 +95,14 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                 return queryset.none()
         else:
             return queryset.none()
+        # [/CHANGE]
         
         queryset = queryset.filter(user_id__user_id=requested_user_id)
+
+        # Filter by status if provided
+        status_param = self.request.query_params.get('status', None)
+        if status_param:
+            queryset = queryset.filter(status=status_param)
         
         # Filter by date if provided
         start_date = self.request.query_params.get('start_date', None)
@@ -275,7 +282,6 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         
         Expected POST data:
         {
-            "recycling_id": <string>,
             "validation_hash": "<string>",
             "user_id": <integer>
         }
@@ -287,12 +293,12 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         4. Updates the user's wallet points_balance
         """
         recycling_id = request.data.get('recycling_id')
-        validation_hash = request.data.get('validation_hash')
+        code = request.data.get('validation_hash')
         user_id = request.data.get('user_id')
-        
-        if not recycling_id:
+
+        if not code:
             return Response(
-                {"error": "recycling_id is required."},
+                {"error": "validation_hash is required."},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -302,14 +308,8 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        if not validation_hash:
-            return Response(
-                {"error": "validation_hash is required."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
         try:
-            recycling = Recycling.objects.get(recycling_id=recycling_id)
+            recycling = Recycling.objects.get(validation_hash=code)
         except Recycling.DoesNotExist:
             return Response(
                 {"error": "Recycling record not found."},
@@ -317,7 +317,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             )
         
         # Verify if the validation_hash matches
-        if recycling.validation_hash != validation_hash:
+        if recycling.validation_hash != code:
             return Response(
                 {"error": "Unauthorized: validation_hash does not match."},
                 status=status.HTTP_403_FORBIDDEN
