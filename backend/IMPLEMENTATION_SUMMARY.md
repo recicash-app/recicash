@@ -17,11 +17,12 @@ Foi implementada uma integração completa com a API do Google Maps para recuper
 ### Base URL: `/api/v1/recycling-points/`
 
 | Método | Endpoint | Descrição |
-|--------|----------|-----------|
+|--------|----------|----------|
 | GET | `/` | Lista todos os ecopontos |
-| GET | `/{id}/` | Recupera um ecoponto específico |
-| GET | `/nearby/?latitude=X&longitude=Y` | Encontra pontos próximos usando coordenadas |
-| GET | `/nearby/?latitude=X&longitude=Y&radius=R` | Busca com raio customizado (padrão: 5000m) |
+| GET | `/{id}/` | Recupera um ecoponto específico por ID ou maps_id |
+| GET | `/{id}/location/` | Obtém localização detalhada com link do Google Maps |
+| GET | `/nearby/?lat=X&lon=Y` | Encontra pontos próximos usando coordenadas |
+| GET | `/nearby/?lat=X&lon=Y&radius=R` | Busca com raio customizado (padrão: 5000m, máx: 50000m) |
 | GET | `/nearby-address/?address=...` | Encontra pontos próximos a um endereço |
 | GET | `/nearby-address/?address=...&radius=R` | Busca por endereço com raio customizado |
 
@@ -29,12 +30,12 @@ Foi implementada uma integração completa com a API do Google Maps para recuper
 
 Buscar pontos próximos usando coordenadas (5 km padrão):
 ```bash
-curl "http://localhost:8000/api/v1/recycling-points/nearby/?latitude=-23.5505&longitude=-46.6333"
+curl "http://localhost:8000/api/v1/recycling-points/nearby/?lat=-23.5505&lon=-46.6333"
 ```
 
 Buscar pontos próximos com raio customizado (10 km):
 ```bash
-curl "http://localhost:8000/api/v1/recycling-points/nearby/?latitude=-23.5505&longitude=-46.6333&radius=10000"
+curl "http://localhost:8000/api/v1/recycling-points/nearby/?lat=-23.5505&lon=-46.6333&radius=10000"
 ```
 
 Buscar pontos próximos a um endereço:
@@ -69,7 +70,34 @@ GOOGLE_MAPS_API_KEY=sua_chave_api_do_google_maps
 
 ---
 
-## Características Técnicas
+## Modelo RecyclingPoint
+
+### Campos
+- `recycling_point_id`: BigAutoField (chave primária auto-incrementada, inteiro)
+- `maps_id`: CharField único (identificador do Google Maps, ex: "ChIJ0efZB5xjzpQRR18Y0KOa9Qw")
+- `name`: Nome do ecoponto (único)
+- `cnpj`: Número de registro empresarial (único)
+- `latitude`: Coordenada de latitude (float)
+- `longitude`: Coordenada de longitude (float)
+- `zip_code`: Código postal
+- `address`: Endereço completo (padrão vazio)
+- `user_id`: FK para usuário representante (opcional)
+
+### Exemplo de Response
+```json
+{
+  "recycling_point_id": 1,
+  "maps_id": "ChIJ0efZB5xjzpQRR18Y0KOa9Qw",
+  "name": "Ecoponto Centro",
+  "latitude": -15.7942,
+  "longitude": -48.0766,
+  "cnpj": "12.345.678/0001-90",
+  "zip_code": "70000-000",
+  "address": "Rua Mariano de Sousa, 331"
+}
+```
+
+---
 
 ### Validação de Parâmetros
 - Validação de latitude (-90 a 90)
@@ -105,7 +133,7 @@ navigator.geolocation.getCurrentPosition(
     
     // Fazer requisição ao backend
     fetch(
-      `/api/v1/recycling-points/nearby/?latitude=${latitude}&longitude=${longitude}&radius=5000`
+      `/api/v1/recycling-points/nearby/?lat=${latitude}&lon=${longitude}&radius=5000`
     )
       .then(res => res.json())
       .then(data => console.log('Pontos próximos:', data))
