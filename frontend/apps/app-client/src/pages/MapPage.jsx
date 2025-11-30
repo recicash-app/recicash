@@ -185,7 +185,7 @@ function MapPage() {
     const styles = {
         wrapper: {
             display: "flex",
-            height: "100vh",
+            height: "80vh",
             width: "100%",
             overflow: "hidden",
             fontFamily: "Inter, sans-serif",
