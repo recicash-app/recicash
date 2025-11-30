@@ -23,7 +23,7 @@ function Form() {
   const [success, setSuccess] = useState(false);
 
   const handleChange = (e) => {
-    const { name, type, checked, value } = e.target;
+    const { name, checked, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: name === 'policy' ? checked : value
@@ -57,7 +57,7 @@ function Form() {
       }
     }
 
-    if (formData.password.trim() && formData.password.length < 8 && !/[A-Z]/.test(formData.password)) {
+    if (formData.password.trim() && (formData.password.length < 8 || !/[A-Z]/.test(formData.password))) {
       errors.password = 'A senha deve conter no mínimo 8 caracteres e pelo menos uma letra maiúscula';
       isValid = false;
     }
@@ -101,7 +101,7 @@ function Form() {
     if (!isValid) return;
 
     try {
-      const response = await register({
+      await register({
         first_name: formData.first_name,
         last_name: formData.last_name,
         username: formData.username,

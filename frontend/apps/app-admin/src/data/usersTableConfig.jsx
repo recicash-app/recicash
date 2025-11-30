@@ -1,5 +1,5 @@
 import { IconButton } from "@mui/material";
-import { EditRounded, DeleteRounded, LocationOn } from "@mui/icons-material";
+import { EditRounded, DeleteRounded } from "@mui/icons-material";
 
 export const usersColumns = [
   { 
@@ -23,8 +23,6 @@ export const usersColumns = [
 export const usersActions = (onEdit, onDelete) => (row) => {
     const buttons = [];
     const isUserRow = row.access_level === "U";
-    const isAdminRow = row.access_level === "A";
-    const isManagerRow = row.access_level === "E";
     
     if (isUserRow) return buttons;
 
