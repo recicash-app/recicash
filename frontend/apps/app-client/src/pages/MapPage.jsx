@@ -238,20 +238,24 @@ function MapPage() {
                     {/* marcadores dos pontos */}
                     {results.map((point) => (
                         <Marker
-                            key={point.recycling_point_id}
-                            position={[point.latitude, point.longitude]}
-                            icon={
-                                selectedId === point.recycling_point_id
-                                    ? SelectedIcon
-                                    : DefaultIcon
-                            }
-                        >
-                            <Popup>
-                                <strong>{point.name}</strong><br />
-                                {point.address}<br />
-                                {point.distance_meters}m de distância
-                            </Popup>
-                        </Marker>
+                        key={point.recycling_point_id}
+                        position={[point.latitude, point.longitude]}
+                        icon={
+                            selectedId === point.recycling_point_id
+                                ? SelectedIcon
+                                : DefaultIcon
+                        }
+                        eventHandlers={{
+                            click: () => setSelectedId(point.recycling_point_id)
+                        }}
+                    >
+                        <Popup>
+                            <strong>{point.name}</strong><br />
+                            {point.address}<br />
+                            {point.distance_meters}m de distância
+                        </Popup>
+                    </Marker>
+                    
                     ))}
                 </MapContainer>
             </div>
