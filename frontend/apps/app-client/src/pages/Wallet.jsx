@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Box, Grid, Snackbar, Alert } from "@mui/material";
 
 import LeafBox from "@shared/ui/LeafBox";
+import { useAuth } from "@shared/utils/AuthProvider";
 
 import WalletDivider from "../components/wallet/WalletDivider";
 import WalletPointsDisplay from "../components/wallet/WalletPointsDisplay";
@@ -23,6 +24,7 @@ function Wallet() {
 
   // Initialization of states
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [noteCode, setNoteCode] = useState("");
   const [totalPoints, setTotalPoints] = useState(0);
@@ -35,15 +37,13 @@ function Wallet() {
   // handle total points 
   const handleGetPoints = async () => {
 
-    const userId = localStorage.getItem('user_id');
-
-    if (!userId) {
+    if (!user || !user.user_id) {
         setLoading(false);
         return;
     }
 
     try {
-        const response = await getPoints({ userId });
+        const response = await getPoints({ userId: user.user_id });
         const dataList = Array.isArray(response.data) ? response.data : (response.data.results || []);
       
         const points = dataList.reduce((acc, item) => acc + (item.points_value || 0), 0);

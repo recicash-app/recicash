@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Box, Grid, CircularProgress } from "@mui/material";
 
+import { useAuth } from "@shared/utils/AuthProvider";
+
 import {
   HistoryHeader,
   HistoryFilter,
@@ -13,6 +15,7 @@ import { getRecyclings } from "../services/history.js"
 function History() {
 
     // Initialization of states    
+    const { user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [historyRows, setHistoryRows] = useState([]);
     const [selectedMonths, setSelectedMonths] = useState([]);
@@ -22,15 +25,13 @@ function History() {
 
     useEffect(() => {
         const fetchHistory = async () => {
-            const userId = localStorage.getItem('user_id');
-            
-            if (!userId) {
+            if (!user || !user.user_id) {
                 setLoading(false);
                 return;
             }
 
             try {
-                const response = await getRecyclings({ userId });
+                const response = await getRecyclings({ userId: user.user_id });
                 const dataList = Array.isArray(response.data) ? response.data : (response.data.results || []);
 
                 // Graphics and Table Data Processing
