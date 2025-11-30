@@ -50,7 +50,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         if self.action in ['list', 'retrieve']:
             permission_classes = [AllowAny]
         else:
-            permission_classes = [IsAuthenticated]  # Change to [IsAuthenticated] in production
+            permission_classes = [AllowAny]  # Change to [IsAuthenticated] in production
 
         return [permission() for permission in permission_classes]
     
@@ -302,12 +302,6 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        if not user_id:
-            return Response(
-                {"error": "user_id is required."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
         try:
             recycling = Recycling.objects.get(validation_hash=code)
         except Recycling.DoesNotExist:
@@ -330,24 +324,23 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Get the user from the request and update the recycling record
-        try:
-            user = User.objects.get(user_id=user_id)
-        except User.DoesNotExist:
-            return Response(
-                {"error": "User not found."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        
-        # Update the recycling record with the user_id from the request
-        recycling.user_id = user
-        
-        if not user:
-            return Response(
-                {"error": "User not found for this recycling record."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
+        # Get the user: from request if provided, otherwise use the recycling's user
+        if user_id:
+            try:
+                user = User.objects.get(user_id=user_id)
+            except User.DoesNotExist:
+                return Response(
+                    {"error": "User not found."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        else:
+            # Use the user already associated with the recycling record
+            user = recycling.user_id
+            if not user:
+                return Response(
+                    {"error": "No user associated with this recycling record and user_id not provided."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         
         # Update user's wallet points balance
         try:
