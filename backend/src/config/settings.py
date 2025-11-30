@@ -164,8 +164,7 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
-    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework.authentication.SessionAuthentication",
-                                       "core.domain.entities.authentication.CustomJWTAuthentication",
+    "DEFAULT_AUTHENTICATION_CLASSES": ["core.domain.entities.authentication.CustomJWTAuthentication",
                                        "rest_framework_simplejwt.authentication.JWTAuthentication",
                                        "rest_framework.authentication.TokenAuthentication"]
 }

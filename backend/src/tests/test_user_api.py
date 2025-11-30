@@ -87,22 +87,22 @@ class UserViewTests(CleanDBTestCase):
 
         # non-admin should be forbidden
         self.client.force_authenticate(user=non_admin)
-        resp = self.client.patch(url, {"access_level": "E"}, format="json")
+        resp = self.client.patch(url, {"access_level": "M"}, format="json")
         self.assertIn(resp.status_code, (status.HTTP_403_FORBIDDEN, status.HTTP_401_UNAUTHORIZED))
 
         # admin can change permission
         self.client.force_authenticate(user=admin)
-        resp = self.client.patch(url, {"access_level": "E"}, format="json")
+        resp = self.client.patch(url, {"access_level": "M"}, format="json")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         target.refresh_from_db()
-        self.assertEqual(target.access_level, "E")
+        self.assertEqual(target.access_level, "M")
 
     def test_assign_recycling_point_to_manager(self):
         # create manager user (must have access_level 'E')
         manager = User.objects.create_user(
             username="manager", password="pw", email="m@example.com", cpf="666.666.666-66", zip_code="66666-666"
         )
-        manager.access_level = "E"
+        manager.access_level = "M"
         manager.save()
 
         # use super admin created by migrations
