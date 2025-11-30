@@ -5,37 +5,37 @@ import FullScreenOverlay from '@shared/ui/FullScreenOverlay';
 
 const apiPort = import.meta.env.VITE_API_PORT;
 
+const CardComponent = styled(Card)({
+  width: '300px',
+  height: '184px',
+  maxWidth: '25vw',
+  maxHeight: '25vh',
+  borderRadius: '0px',
+  cursor: 'pointer',
+      
+  // removes the ripple effect on click
+  '& .MuiTouchRipple-root': {
+    display: 'none !important', 
+  },
+});
+
+const InteractiveArea = CardComponent.withComponent(CardActionArea);
+
+const CardImage = styled(CardMedia)({
+  height: '65%',
+  width: '100%',
+  margin: 'auto',
+  objectFit: 'cover',
+});
+
+const CardText = styled(CardContent)({
+  height: '35%',
+  display: 'flex',
+  alignItems: 'center',
+  textAlign: 'center',
+});
+
 function PostCard({ post }) {
-
-  const CardComponent = styled(Card)({
-    width: '300px',
-    height: '184px',
-    maxWidth: '25vw',
-    maxHeight: '25vh',
-    borderRadius: '0px',
-    cursor: 'pointer',
-        
-    // removes the ripple effect on click
-    '& .MuiTouchRipple-root': {
-      display: 'none !important', 
-    },
-  });
-
-  const InteractiveArea = CardComponent.withComponent(CardActionArea);
-
-  const CardImage = styled(CardMedia)({
-    height: '65%',
-    width: '100%',
-    margin: 'auto',
-    objectFit: 'cover',
-  });
-
-  const CardText = styled(CardContent)({
-    height: '35%',
-    display: 'flex',
-    alignItems: 'center',
-    textAlign: 'center',
-  });
 
   const [openPost, setOpenPost] = React.useState(false);
 
