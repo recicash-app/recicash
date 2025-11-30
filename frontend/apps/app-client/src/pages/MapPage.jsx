@@ -246,8 +246,12 @@ function MapPage() {
                                 : DefaultIcon
                         }
                         eventHandlers={{
-                            click: () => setSelectedId(point.recycling_point_id)
-                        }}
+                            click: () => {
+                                setSelectedId(prev =>
+                                    prev === point.recycling_point_id ? null : point.recycling_point_id
+                                );
+                            }
+                        }}                        
                     >
                         <Popup>
                             <strong>{point.name}</strong><br />
