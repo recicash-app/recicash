@@ -54,7 +54,7 @@ function PostCard({ post }) {
       </Typography>
       <Typography variant="subtitle1" gutterBottom>
                 Publicação: {new Date(post.created_at).toLocaleDateString()} - 
-                Ultima atualização: {new Date(post.last_edition_date).toLocaleDateString()}
+                Última atualização: {new Date(post.last_edition_date).toLocaleDateString()}
       </Typography>
             
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '10px', margin: '30px' }}>
