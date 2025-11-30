@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -59,6 +61,7 @@ function MapPage() {
     const [location, setLocation] = useState('');
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [useLocation, setUseLocation] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
     const [searchCoords, setSearchCoords] = useState(null);
 
@@ -82,6 +85,7 @@ function MapPage() {
                 const sorted = (data.recycling_points || []).sort(
                     (a, b) => a.distance_meters - b.distance_meters
                 );
+
                 setResults(sorted);
 
                 if (data.geocoded_location) {
@@ -106,11 +110,14 @@ function MapPage() {
     /* =====================================================
        ========== BUSCAR USANDO LOCALIZAÇÃO REAL ===========
        ===================================================== */
-    const handleUseMyLocation = () => {
+    const triggerRealLocationSearch = () => {
         if (!navigator.geolocation) {
             alert("Geolocalização não é suportada neste navegador.");
             return;
         }
+
+        setLoading(true);
+        setSelectedId(null);
 
         navigator.geolocation.getCurrentPosition(
             async (pos) => {
@@ -119,7 +126,6 @@ function MapPage() {
 
                 setSearchCoords([lat, lon]);
                 setLocation("");
-                setLoading(true);
 
                 try {
                     const response = await fetch(
@@ -147,11 +153,28 @@ function MapPage() {
             (err) => {
                 console.error(err);
                 alert("Não foi possível obter sua localização.");
+                setUseLocation(false);
+                setLoading(false);
             },
             {
                 enableHighAccuracy: true,
             }
         );
+    };
+
+    /* =====================================================
+       ============== QUANDO CLICA NO CHECKBOX =============
+       ===================================================== */
+    const handleToggleCheckbox = () => {
+        const newValue = !useLocation;
+        setUseLocation(newValue);
+
+        if (newValue) {
+            triggerRealLocationSearch();
+        } else {
+            setSearchCoords(null);
+            setResults([]);
+        }
     };
 
     const defaultCenter = [-23.5505, -46.6333];
@@ -233,26 +256,29 @@ function MapPage() {
                     onChange={handleLocationChange}
                     variant="outlined"
                     fullWidth
+                    disabled={useLocation}
+                />
+
+                {/* CHECKBOX USAR LOCALIZAÇÃO ATUAL */}
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={useLocation}
+                            onChange={handleToggleCheckbox}
+                        />
+                    }
+                    label="Usar minha localização atual"
+                    style={{ marginTop: "10px" }}
                 />
 
                 <Button
                     fullWidth
                     variant="contained"
+                    disabled={loading || useLocation}
                     onClick={handleSearch}
-                    disabled={loading}
                     style={styles.searchButton}
                 >
                     {loading ? "Buscando..." : "Buscar"}
-                </Button>
-
-                {/* BOTÃO: USAR MINHA LOCALIZAÇÃO */}
-                <Button
-                    fullWidth
-                    variant="outlined"
-                    onClick={handleUseMyLocation}
-                    style={{ marginTop: "10px", borderRadius: "10px", height: "48px" }}
-                >
-                    Usar minha localização
                 </Button>
 
                 <h2 style={{ marginTop: "20px", fontWeight: "600" }}>Resultados</h2>
@@ -291,20 +317,14 @@ function MapPage() {
                 >
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-                    {/* componente que ajusta o zoom */}
-                    <FitBoundsHandler
-                        searchCoords={searchCoords}
-                        results={results}
-                    />
+                    <FitBoundsHandler searchCoords={searchCoords} results={results} />
 
-                    {/* marcador do endereço buscado OU localização do usuário */}
                     {searchCoords && (
                         <Marker position={searchCoords} icon={SearchIcon}>
                             <Popup>Localização inicial</Popup>
                         </Marker>
                     )}
 
-                    {/* marcadores dos pontos */}
                     {results.map((point) => (
                         <Marker
                             key={point.recycling_point_id}
