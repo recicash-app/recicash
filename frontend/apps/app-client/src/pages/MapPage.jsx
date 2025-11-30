@@ -64,6 +64,9 @@ function MapPage() {
 
     const handleLocationChange = (event) => setLocation(event.target.value);
 
+    /* =====================================================
+       ============== BUSCA POR ENDEREÇO ==================
+       ===================================================== */
     const handleSearch = async () => {
         setLoading(true);
         setSelectedId(null);
@@ -97,6 +100,58 @@ function MapPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+
+    /* =====================================================
+       ========== BUSCAR USANDO LOCALIZAÇÃO REAL ===========
+       ===================================================== */
+    const handleUseMyLocation = () => {
+        if (!navigator.geolocation) {
+            alert("Geolocalização não é suportada neste navegador.");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+
+                setSearchCoords([lat, lon]);
+                setLocation("");
+                setLoading(true);
+
+                try {
+                    const response = await fetch(
+                        `http://api.docker.localhost:${apiPort}/api/v1/recycling-points/nearby/?lat=${lat}&lon=${lon}`
+                    );
+
+                    if (response.ok) {
+                        const data = await response.json();
+
+                        const sorted = (data || []).sort(
+                            (a, b) => a.distance_meters - b.distance_meters
+                        );
+
+                        setResults(sorted);
+                    } else {
+                        console.error("Erro na busca:", response.statusText);
+                    }
+                } catch (err) {
+                    console.error("Erro ao buscar ecopontos:", err);
+                } finally {
+                    setLoading(false);
+                }
+            },
+
+            (err) => {
+                console.error(err);
+                alert("Não foi possível obter sua localização.");
+            },
+            {
+                enableHighAccuracy: true,
+            }
+        );
     };
 
     const defaultCenter = [-23.5505, -46.6333];
@@ -190,6 +245,16 @@ function MapPage() {
                     {loading ? "Buscando..." : "Buscar"}
                 </Button>
 
+                {/* BOTÃO: USAR MINHA LOCALIZAÇÃO */}
+                <Button
+                    fullWidth
+                    variant="outlined"
+                    onClick={handleUseMyLocation}
+                    style={{ marginTop: "10px", borderRadius: "10px", height: "48px" }}
+                >
+                    Usar minha localização
+                </Button>
+
                 <h2 style={{ marginTop: "20px", fontWeight: "600" }}>Resultados</h2>
 
                 <div style={{ marginTop: "10px" }}>
@@ -207,7 +272,6 @@ function MapPage() {
                                         prev === point.recycling_point_id ? null : point.recycling_point_id
                                     )
                                 }
-                                
                             >
                                 <strong>{point.name}</strong><br />
                                 {point.address}<br />
@@ -233,38 +297,37 @@ function MapPage() {
                         results={results}
                     />
 
-                    {/* marcador do endereço buscado */}
+                    {/* marcador do endereço buscado OU localização do usuário */}
                     {searchCoords && (
                         <Marker position={searchCoords} icon={SearchIcon}>
-                            <Popup>Local buscado</Popup>
+                            <Popup>Localização inicial</Popup>
                         </Marker>
                     )}
 
                     {/* marcadores dos pontos */}
                     {results.map((point) => (
                         <Marker
-                        key={point.recycling_point_id}
-                        position={[point.latitude, point.longitude]}
-                        icon={
-                            selectedId === point.recycling_point_id
-                                ? SelectedIcon
-                                : DefaultIcon
-                        }
-                        eventHandlers={{
-                            click: () => {
-                                setSelectedId(prev =>
-                                    prev === point.recycling_point_id ? null : point.recycling_point_id
-                                );
+                            key={point.recycling_point_id}
+                            position={[point.latitude, point.longitude]}
+                            icon={
+                                selectedId === point.recycling_point_id
+                                    ? SelectedIcon
+                                    : DefaultIcon
                             }
-                        }}                        
-                    >
-                        <Popup>
-                            <strong>{point.name}</strong><br />
-                            {point.address}<br />
-                            {point.distance_meters}m de distância
-                        </Popup>
-                    </Marker>
-                    
+                            eventHandlers={{
+                                click: () => {
+                                    setSelectedId(prev =>
+                                        prev === point.recycling_point_id ? null : point.recycling_point_id
+                                    );
+                                }
+                            }}
+                        >
+                            <Popup>
+                                <strong>{point.name}</strong><br />
+                                {point.address}<br />
+                                {point.distance_meters}m de distância
+                            </Popup>
+                        </Marker>
                     ))}
                 </MapContainer>
             </div>
