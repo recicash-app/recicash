@@ -24,14 +24,21 @@ logger = logging.getLogger(__name__)
 
 class RecyclingPointViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Endpoints for RecyclingPoint locations.
+    Read-only ViewSet for RecyclingPoint locations.
+    
+    Provides endpoints for querying recycling points with location-based features.
     
     Supported endpoints (mounted under router, e.g. /api/v1/recycling-points/):
-    - GET /                        -> list all recycling points
-    - GET /{id}/                   -> retrieve a specific recycling point
-    - GET /{id}/location/          -> get location of a specific recycling point
+    - GET /                        -> list all recycling points (paginated)
+    - GET /{id}/                   -> retrieve a specific recycling point by ID
+    - GET /{id}/location/          -> get detailed location of a recycling point
+    - GET /nearby/?lat=X&lon=Y     -> find recycling points near coordinates
+    - GET /nearby-address/?address -> find recycling points near an address
     
-    All endpoints are publicly accessible (AllowAny).
+    Notes:
+    - recycling_point_id: Auto-incrementing database primary key (integer)
+    - maps_id: Google Maps identifier (string, unique)
+    - All endpoints are publicly accessible (no authentication required)
     """
     
     queryset = RecyclingPoint.objects.all().order_by('name')
@@ -46,21 +53,28 @@ class RecyclingPointViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=['get'], url_path='location')
     def get_location(self, request, pk=None):
         """
-        Get the exact location of a specific recycling point.
+        Get detailed location information for a specific recycling point.
         
-        Includes a direct Google Maps link with the recycling point name displayed.
+        Retrieves comprehensive location data including coordinates, address,
+        CNPJ, and a direct Google Maps URL for navigation.
+        
+        URL Parameters:
+        - id: recycling_point_id (integer) or maps_id (string)
         
         Example:
-            GET /api/v1/recycling-points/{id}/location/
+            GET /api/v1/recycling-points/1/location/
+            GET /api/v1/recycling-points/ChIJ0efZB5xjzpQRR18Y0KOa9Qw/location/
             
         Response:
         {
             "recycling_point_id": 1,
+            "maps_id": "ChIJ0efZB5xjzpQRR18Y0KOa9Qw",
             "name": "Ecoponto Centro",
             "latitude": -15.7942,
             "longitude": -48.0766,
             "cnpj": "12.345.678/0001-90",
             "zip_code": "70000-000",
+            "address": "Rua Mariano de Sousa, 331 - São Paulo, SP",
             "maps_url": "https://www.google.com/maps?q=-15.7942,-48.0766&q=Ecoponto%20Centro"
         }
         """
@@ -86,26 +100,30 @@ class RecyclingPointViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'], url_path='nearby')
     def nearby(self, request):
         """
-        Search for nearby recycling points registered in the database.
+        Search for recycling points near specific coordinates.
+        
+        Uses the Haversine formula to calculate distances and returns all
+        recycling points within the specified radius, sorted by distance.
         
         Query Parameters:
-        - lat (required): User's latitude (float)
-        - lon (required): User's longitude (float)
+        - lat (required): User's latitude (float, range: -90 to 90)
+        - lon (required): User's longitude (float, range: -180 to 180)
         - radius (optional): Search radius in meters (default: 5000, max: 50000)
         
         Example:
             GET /api/v1/recycling-points/nearby/?lat=-15.7942&lon=-48.0766&radius=10000
             
-        Response:
+        Response: Array of nearby recycling points
         [
             {
-                "recycling_point_id": "rp_001",
+                "recycling_point_id": 1,
+                "maps_id": "ChIJ0efZB5xjzpQRR18Y0KOa9Qw",
                 "name": "Ecoponto Centro",
                 "latitude": -15.7938,
                 "longitude": -48.0750,
                 "cnpj": "12.345.678/0001-90",
                 "zip_code": "70000-000",
-                "address": "Rua X, Brasília - DF",
+                "address": "Rua Mariano de Sousa, 331 - São Paulo, SP",
                 "distance_meters": 125.5,
                 "maps_url": "https://www.google.com/maps?q=-15.7938,-48.0750&q=Ecoponto%20Centro"
             },
@@ -193,10 +211,11 @@ class RecyclingPointViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'], url_path='nearby-address')
     def nearby_address(self, request):
         """
-        Search for nearby recycling points using an address string.
+        Search for recycling points near a given address.
         
-        Uses Google Geocoding API to convert address to coordinates,
-        then searches for registered recycling points nearby.
+        Uses Google Geocoding API to convert the address string to coordinates,
+        then searches the database for recycling points within the specified radius.
+        Results are sorted by distance from the geocoded location.
         
         Query Parameters:
         - address (required): Address string (e.g., "Rua Augusta 1000, São Paulo, SP")
@@ -217,13 +236,16 @@ class RecyclingPointViewSet(viewsets.ReadOnlyModelViewSet):
             "total_found": 3,
             "recycling_points": [
                 {
-                    "recycling_point_id": "rp_001",
+                    "recycling_point_id": 1,
+                    "maps_id": "ChIJ0efZB5xjzpQRR18Y0KOa9Qw",
                     "name": "Ecoponto Centro",
                     "latitude": -23.5480,
                     "longitude": -46.6520,
-                    "address": "Rua X, São Paulo - SP",
+                    "cnpj": "12.345.678/0001-90",
+                    "zip_code": "01305-100",
+                    "address": "Rua Augusta, 1000 - Centro, São Paulo, SP",
                     "distance_meters": 125.5,
-                    "maps_url": "..."
+                    "maps_url": "https://www.google.com/maps?q=-23.5480,-46.6520&q=Ecoponto%20Centro"
                 },
                 ...
             ]
