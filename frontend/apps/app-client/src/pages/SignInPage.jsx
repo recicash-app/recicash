@@ -9,39 +9,39 @@ import { styled } from '@mui/system'
 
 function SignUpOption() { 
 
-    const ButtonText = styled(Button)({
-        boxShadow: 'none',
-        textTransform: 'none',
-        color: '#3A5B22',
-        fontWeight: 'bold',
-        fontFamily: 'Poppins',
-        fontSize: '14px',
+  const ButtonText = styled(Button)({
+    boxShadow: 'none',
+    textTransform: 'none',
+    color: '#3A5B22',
+    fontWeight: 'bold',
+    fontFamily: 'Poppins',
+    fontSize: '14px',
 
-        "& .MuiTouchRipple-root": {
-            display: "none",
-        },
+    "& .MuiTouchRipple-root": {
+      display: "none",
+    },
 
-        '&:hover': {
-            textDecoration: 'underline',
-            backgroundColor: 'transparent',
-            boxShadow: 'none',
-        },
+    '&:hover': {
+      textDecoration: 'underline',
+      backgroundColor: 'transparent',
+      boxShadow: 'none',
+    },
 
-        '&:focus': {
-            outline: 'none',
-        },
-    });
+    '&:focus': {
+      outline: 'none',
+    },
+  });
 
-    const handleClick = () => {
-        console.log("Redirecionando para a página de cadastro");
-        window.location.href = '/cadastro';
-    };
+  const handleClick = () => {
+    console.log("Redirecionando para a página de cadastro");
+    window.location.href = '/cadastro';
+  };
 
-    return(
-        <ButtonText variant='text' onClick={handleClick}>
+  return(
+    <ButtonText variant='text' onClick={handleClick}>
             Cadastrar-se
-        </ButtonText>
-    )
+    </ButtonText>
+  )
 }
 
 function Form() {
@@ -61,8 +61,8 @@ function Form() {
 
   const handleChange = (e) => {
     setFormData({
-        ...formData,
-        [e.target.name]: e.target.value
+      ...formData,
+      [e.target.name]: e.target.value
     });
   };
 
@@ -71,20 +71,20 @@ function Form() {
     let hasError = false;
 
     if (!formData.email.trim()) {
-        localFormError.email = 'Email é obrigatório';
-        hasError = true;
+      localFormError.email = 'Email é obrigatório';
+      hasError = true;
     } 
     else {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData.email)) {
-            localFormError.email = 'Email inválido';
-            hasError = true;
-        }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        localFormError.email = 'Email inválido';
+        hasError = true;
+      }
     }
 
     if (!formData.password.trim()) {
-        localFormError.password = 'Senha é obrigatória';
-        hasError = true;
+      localFormError.password = 'Senha é obrigatória';
+      hasError = true;
     }
 
     setFormError(localFormError);
@@ -99,36 +99,36 @@ function Form() {
     if (error) return;
     
     try {
-        const response = await fetch(`http://api.docker.localhost/api/v1/token/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                email: formData.email,
-                password: formData.password
-            }),
-        });
+      const response = await fetch(`http://api.docker.localhost/api/v1/token/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        }),
+      });
 
-        if (response.ok) {
-            console.log('Login feito com sucesso :)');
-            setSuccess(true);
-            setFormData({ email: '', password: '' });
-            setFormError({ email: '', password: '' });
-            // window.location.href = '/inicio';
-        } 
-        else {
-            throw new Error('Credenciais inválidas');
-        }
+      if (response.ok) {
+        console.log('Login feito com sucesso :)');
+        setSuccess(true);
+        setFormData({ email: '', password: '' });
+        setFormError({ email: '', password: '' });
+        // window.location.href = '/inicio';
+      } 
+      else {
+        throw new Error('Credenciais inválidas');
+      }
 
-        const data = await response.json();
-        //console.log('Tokens recebidos:', data);
+      const data = await response.json();
+      //console.log('Tokens recebidos:', data);
     } 
     
     catch (error) {
-        console.error('Erro:', error.message);
-        setError(error.message || 'Erro de conexão. Tente novamente.');
+      console.error('Erro:', error.message);
+      setError(error.message || 'Erro de conexão. Tente novamente.');
     } 
 
   };    
@@ -144,28 +144,28 @@ function Form() {
 }
 
 function SignInPage() {
-    return(
-        <Box>
-            <img src={GreenSpot} alt="Green Spot" style={{ position: 'fixed', bottom: '0vw', right: '0vw', width: "47vw", transform: "scaleX(1.2)", indexZ: '-1' }} />
-            <img src={Tree} alt="Tree" style={{ position: 'fixed', bottom: '0vw', right: '0vw', width: "45vw", indexZ: '-1' }} />
-            <Stack spacing={8} style={{ position: 'absolute', left: '8vw', top: '25vh' }}>
-                <Typography variant='h4' fontFamily='Poppins' fontWeight='bold' > Login </Typography>
-                <Stack spacing={4}>
-                    <Form />
-                    <Divider>ou</Divider>
-                    <Stack spacing={4} style={{ alignItems:'center' }}>
-                        <Box display="flex" alignItems="center">
-                            <Typography fontFamily="Poppins" fontSize="14px"> Não tem conta?</Typography>
-                            <SignUpOption />
-                        </Box>
-                    </Stack>
-                </Stack>
-            </Stack>
+  return(
+    <Box>
+      <img src={GreenSpot} alt="Green Spot" style={{ position: 'fixed', bottom: '0vw', right: '0vw', width: "47vw", transform: "scaleX(1.2)", indexZ: '-1' }} />
+      <img src={Tree} alt="Tree" style={{ position: 'fixed', bottom: '0vw', right: '0vw', width: "45vw", indexZ: '-1' }} />
+      <Stack spacing={8} style={{ position: 'absolute', left: '8vw', top: '25vh' }}>
+        <Typography variant='h4' fontFamily='Poppins' fontWeight='bold' > Login </Typography>
+        <Stack spacing={4}>
+          <Form />
+          <Divider>ou</Divider>
+          <Stack spacing={4} style={{ alignItems:'center' }}>
+            <Box display="flex" alignItems="center">
+              <Typography fontFamily="Poppins" fontSize="14px"> Não tem conta?</Typography>
+              <SignUpOption />
+            </Box>
+          </Stack>
+        </Stack>
+      </Stack>
 
             
 
-        </Box>
-    )
+    </Box>
+  )
 }
   
 export default SignInPage;
