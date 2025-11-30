@@ -18,11 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from core.presentation.api import HelloView
+from core.presentation.api import HelloViewSet
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', HelloView.as_view(), name='root'),
+    path('', HelloViewSet.as_view(), name='root'),
 
     # Path to personalized URLs
     path('api/v1/', include('core.presentation.routers'))

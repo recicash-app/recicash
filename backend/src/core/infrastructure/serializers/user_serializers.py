@@ -18,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
             'zip_code',
             'access_level'
         )
-        read_only_fields = ('user_id', 'access_level')
+        read_only_fields = ('user_id', '')
 
         # Ensures that 'password' won't be return in GET requisitions
         extra_kwargs = {
@@ -81,7 +81,7 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
 
-class UserObtainPairSerializer(TokenObtainPairSerializer):
+class LoginSerializer(TokenObtainPairSerializer):
     
     def __init__(self, *args, **kwargs):
         """
@@ -129,6 +129,7 @@ class UserObtainPairSerializer(TokenObtainPairSerializer):
         data['user'] = {
             'user_id': self.user.user_id,
             'email': self.user.email,
+            'username': self.user.username,
             'first_name': self.user.first_name,
             'access_level': self.user.access_level,
         }
