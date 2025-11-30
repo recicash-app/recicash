@@ -1,7 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.contrib.auth.hashers import check_password
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from core.domain.models import User, RecyclingPoint
@@ -45,7 +44,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return [AllowAny()]
 
         if self.action in [
-            'list'
+            'list',
             'set_permission', 
             'assign_recycling_point',
             'create_admin', 'create_manager'

@@ -110,7 +110,7 @@ function UsersManagementPage() {
         Gerenciar Usuários
       </Typography>
       <Typography variant="body2" color="text.secondary" mb={3}>
-        Ações administrativas para <b>criar admin</b>, <b>criar manager</b>, <b>promover</b> M <b>atribuir ecoponto</b>.
+        Ações administrativas para <b>criar admin</b>, <b>criar manager</b>, <b>promover usuários</b> e <b>atribuir ecoponto</b>.
       </Typography>
 
       <Stack direction="row" justifyContent="flex-end" mb={2}>
