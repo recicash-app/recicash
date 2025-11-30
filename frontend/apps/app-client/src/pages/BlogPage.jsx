@@ -37,7 +37,7 @@ const CardText = styled(CardContent)({
 
 function PostCard({ post }) {
 
-  const [openPost, setOpenPost] = React.useState(false);
+  const [openPost, setOpenPost] = useState(false);
 
   const handleOpenPost = () => {
     setOpenPost(true);
