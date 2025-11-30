@@ -275,7 +275,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def record_wallet_history(self, request):
         """
         Custom action to find a Recycling record and update WalletHistory and Wallet.
@@ -283,16 +283,15 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         Expected POST data:
         {
             "validation_hash": "<string>",
-            "user_id": <integer>
+            "user_id": <integer> (optional - if not provided, uses authenticated user)
         }
         
         This endpoint:
-        1. Finds the Recycling record by recycling_id
+        1. Finds the Recycling record by validation_hash
         2. Verifies the validation_hash matches
         3. Creates a WalletHistory record with operation='RECYCLING'
         4. Updates the user's wallet points_balance
         """
-        recycling_id = request.data.get('recycling_id')
         code = request.data.get('validation_hash')
         user_id = request.data.get('user_id')
 
@@ -324,7 +323,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Get the user: from request if provided, otherwise use the recycling's user
+        # Get the user: from request if provided, otherwise use the authenticated user
         if user_id:
             try:
                 user = User.objects.get(user_id=user_id)
@@ -334,12 +333,12 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_404_NOT_FOUND
                 )
         else:
-            # Use the user already associated with the recycling record
-            user = recycling.user_id
-            if not user:
+            # Use the authenticated user from the request
+            user = request.user
+            if not user or not user.is_authenticated:
                 return Response(
-                    {"error": "No user associated with this recycling record and user_id not provided."},
-                    status=status.HTTP_400_BAD_REQUEST
+                    {"error": "Authentication required."},
+                    status=status.HTTP_401_UNAUTHORIZED
                 )
         
         # Update user's wallet points balance
@@ -355,6 +354,8 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             wallet.points_balance += recycling.points_value
             wallet.save()
             
+            # Update the recycling record with the user_id
+            recycling.user_id = user
             # Update recycling status to REDEEMED
             recycling.status = 'REDEEMED'
             recycling.save()

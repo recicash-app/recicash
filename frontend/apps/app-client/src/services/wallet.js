@@ -9,8 +9,7 @@ export async function getPoints({ userId }) {
 export async function postNote({ noteCode, userId }) {
 
     return api.post('/recyclings/record_wallet_history/', {
-        validation_hash: noteCode, 
-        user_id: userId
+        validation_hash: noteCode
     });
 
 };

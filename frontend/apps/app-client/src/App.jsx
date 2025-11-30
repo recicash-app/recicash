@@ -5,6 +5,8 @@ import Test from './Test';
 import Home from './pages/Home';
 import Header from './components/navigation/Header';
 import ProtectedRoute from "@shared/utils/ProtectedRoute";
+import Wallet from './pages/Wallet';
+import History from './pages/History';
 
 const SETTINGS_URL = "http://auth.docker.localhost/dados"
 
@@ -16,6 +18,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/test" element={<Test />} />
+          <Route path="/carteira" element={<Wallet />} />
+          <Route path="/historico" element={<History />} />
           
           {/* Protected Routes */}
           <Route element={<ProtectedRoute roles={['U']} />}>
