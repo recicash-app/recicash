@@ -202,7 +202,12 @@ function MapPage() {
                                     ...styles.resultCard,
                                     ...(isSelected ? styles.resultCardSelected : {}),
                                 }}
-                                onClick={() => setSelectedId(point.recycling_point_id)}
+                                onClick={() =>
+                                    setSelectedId(prev =>
+                                        prev === point.recycling_point_id ? null : point.recycling_point_id
+                                    )
+                                }
+                                
                             >
                                 <strong>{point.name}</strong><br />
                                 {point.address}<br />
