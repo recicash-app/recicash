@@ -3,6 +3,8 @@ import { Grid, Card, CardContent, CardMedia, Typography, CardActionArea } from "
 import { styled } from '@mui/system';
 import FullScreenOverlay from '@shared/ui/FullScreenOverlay';
 
+const apiPort = import.meta.env.VITE_API_PORT;
+
 function PostCard({ post }) {
 
   const CardComponent = styled(Card)({
@@ -99,7 +101,7 @@ function BlogPage() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch('http://api.docker.localhost:81/api/v1/posts/');
+        const response = await fetch(`http://api.docker.localhost:${apiPort}/api/v1/posts/`);
         const data = await response.json();
         setPosts(data);
         setLoading(false);
