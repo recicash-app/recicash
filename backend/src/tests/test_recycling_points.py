@@ -164,7 +164,7 @@ class RecyclingPointListTests(TestCase):
         self.client = APIClient()
         
         self.point1 = RecyclingPoint.objects.create(
-            recycling_point_id="rp_001",
+            maps_id="ChIJ0efZB5xjzpQRR18Y0KOa9Qw",
             name="Ecoponto A",
             cnpj="11.111.111/0001-11",
             zip_code="70000-000",
@@ -174,7 +174,7 @@ class RecyclingPointListTests(TestCase):
         )
         
         self.point2 = RecyclingPoint.objects.create(
-            recycling_point_id="rp_002",
+            maps_id="ChIJ3yT6czpfzpQRZDK_gmSqLLc",
             name="Ecoponto B",
             cnpj="22.222.222/0001-22",
             zip_code="71000-000",
@@ -242,7 +242,7 @@ class RecyclingPointLocationTests(TestCase):
         self.client = APIClient()
         
         self.point = RecyclingPoint.objects.create(
-            recycling_point_id="rp_test_loc",
+            maps_id="ChIJ_52cT-pYzpQRjYjErvDcdXc",
             name="Test Ecoponto",
             cnpj="12.345.678/0001-90",
             zip_code="70000-000",
@@ -300,7 +300,7 @@ class RecyclingPointNearbyTests(TestCase):
         
         # Create recycling points in Brasília
         self.center_point = RecyclingPoint.objects.create(
-            recycling_point_id="rp_center",
+            maps_id="ChIJ58KIjsdVzpQRCFw9bL3vw30",
             name="Ecoponto Centro",
             cnpj="12.345.678/0001-90",
             zip_code="70000-000",
@@ -310,7 +310,7 @@ class RecyclingPointNearbyTests(TestCase):
         )
         
         self.norte_point = RecyclingPoint.objects.create(
-            recycling_point_id="rp_norte",
+            maps_id="ChIJ6_wXSUBRzpQRiL6152HZ7LU",
             name="Ecoponto Norte",
             cnpj="98.765.432/0001-10",
             zip_code="71000-000",
@@ -321,7 +321,7 @@ class RecyclingPointNearbyTests(TestCase):
         
         # A point far away in Rio
         self.rio_point = RecyclingPoint.objects.create(
-            recycling_point_id="rp_rio",
+            maps_id="ChIJ_8t1_RdXzpQRV-S7rNDM6gA",
             name="Ecoponto Rio",
             cnpj="55.555.555/0001-55",
             zip_code="20000-000",
@@ -488,7 +488,7 @@ class RecyclingPointNearbyAddressTests(TestCase):
         self.client = APIClient()
         
         self.point = RecyclingPoint.objects.create(
-            recycling_point_id="rp_addr_test",
+            maps_id="ChIJ8ZYXZnFTzpQRPuYsKdb9Rts",
             name="Ecoponto Teste",
             cnpj="12.345.678/0001-90",
             zip_code="70000-000",
@@ -544,7 +544,7 @@ class RecyclingPointPermissionsTests(TestCase):
         self.client = APIClient()
         
         self.point = RecyclingPoint.objects.create(
-            recycling_point_id="rp_perm_test",
+            maps_id="ChIJ96pyISRZzpQRkymUSYC95Wo",
             name="Ecoponto Permissões",
             cnpj="12.345.678/0001-90",
             zip_code="70000-000",
