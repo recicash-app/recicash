@@ -5,6 +5,7 @@ import Test from './Test';
 import Home from './pages/Home';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
+import MapPage from './pages/MapPage';
 import Header from './components/navigation/Header';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path="/test" element={<Test />} />
           <Route path="/cadastro" element={<SignUpPage />} />
           <Route path="/login" element={<SignInPage />} />
+          <Route path="/mapa" element={<MapPage />} />
         </Routes>
       </Box>
     </>
