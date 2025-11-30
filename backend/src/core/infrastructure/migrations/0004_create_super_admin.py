@@ -40,7 +40,7 @@ def delete_super_admin(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('domain', '0002_enable_pg_trgm'),
+        ('domain', '0003_recyclingpoint_maps_id'),
     ]
 
     operations = [
