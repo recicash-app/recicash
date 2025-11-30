@@ -15,7 +15,7 @@ from rest_framework.parsers import JSONParser
 
 from core.domain.models import RecyclingPoint
 from core.infrastructure.serializers.user_serializers import RecyclingPointSerializer
-from core.application.use_cases.google_maps_service import GoogleMapsService
+from core.application.use_cases.ors_service import ORSService
 
 import logging
 
@@ -41,7 +41,7 @@ class RecyclingPointViewSet(viewsets.ReadOnlyModelViewSet):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.maps_service = GoogleMapsService()
+        self.maps_service = ORSService()
     
     @action(detail=True, methods=['get'], url_path='location')
     def get_location(self, request, pk=None):

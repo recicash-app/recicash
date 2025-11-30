@@ -54,7 +54,7 @@ curl "http://localhost:8000/api/v1/recycling-points/nearby-address/?address=Rua+
 ### 1. Variável de Ambiente
 Em um arquivo `.env`:
 ```
-GOOGLE_MAPS_API_KEY=sua_chave_api_do_google_maps
+ORS_API_KEY=sua_chave_api_do_ors
 ```
 
 ### 2. Obter Chave da API (Google Cloud)

@@ -86,6 +86,7 @@ def load_recycling_points_from_csv_with_managers(manager_users):
                         address=address,
                         user_id=assigned_manager  # Associate with manager user
                     )
+
                     
                     recycling_points_to_create.append(recycling_point)
                     created_count += 1

@@ -229,5 +229,5 @@ LOGGING = {
     },
 }
 
-# Google Maps API Configuration
-GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY')
+# ORS API Configuration
+ORS_API_KEY = os.environ.get('ORS_API_KEY')

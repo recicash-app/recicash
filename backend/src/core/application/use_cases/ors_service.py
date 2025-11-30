@@ -1,5 +1,5 @@
 """
-Service for integrating with Google Maps API.
+Service for integrating with Open Route Service API.
 
 Provides functionality to:
 - Retrieve RecyclingPoint locations using Google Maps
@@ -18,21 +18,21 @@ from core.domain.models import RecyclingPoint
 logger = logging.getLogger(__name__)
 
 
-class GoogleMapsService:
+class ORSService:
     """
-    Service to interact with Google Maps API for RecyclingPoint locations.
+    Service to interact with ORS API for RecyclingPoint locations.
     
     Requires the following settings to be configured:
-    - GOOGLE_MAPS_API_KEY: Your Google Maps API key
+    - ORS_API_KEY: Your ORS API key
     """
     
     def __init__(self):
         """Initialize service with API key from settings."""
-        self.api_key = getattr(settings, 'GOOGLE_MAPS_API_KEY', None)
+        self.api_key = getattr(settings, 'ORS_API_KEY', None)
         if not self.api_key:
-            logger.warning("GOOGLE_MAPS_API_KEY is not configured in settings")
+            logger.warning("ORS_API_KEY is not configured in settings")
     
-    def get_recycling_point_details(self, recycling_point_id: int) -> Optional[Dict]:
+    def get_recycling_point_details(self, recycling_point_id: str) -> Optional[Dict]:
         """
         Get detailed information about a specific RecyclingPoint.
         
@@ -73,36 +73,45 @@ class GoogleMapsService:
             Tuple of (latitude, longitude) or None if geocoding fails
         """
         if not self.api_key:
-            logger.error("Google Maps API key is not configured")
+            logger.error("ORS API key is not configured")
             return None
         
         try:
-            GEOCODING_API_URL = "https://maps.googleapis.com/maps/api/geocode/json"
+            GEOCODING_API_URL = "https://api.openrouteservice.org/geocode/search"
             
+            headers = {
+                'Accept': 'application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8',
+            }
+
             params = {
-                'address': address,
-                'key': self.api_key
+                'text': address,
+                'api_key': self.api_key,
             }
             
-            logger.info(f"Geocoding address: {address}")
+            logger.info(f"Geocoding address using ORS: {address}")
             
-            response = requests.get(GEOCODING_API_URL, params=params, timeout=10)
-            response.raise_for_status()
+            try:
+                response = requests.get(GEOCODING_API_URL, params=params, headers=headers, timeout=100)
+                response.raise_for_status()
+            except requests.exceptions.HTTPError as http_err:
+                logger.error(f"HTTP error occurred while geocoding: {http_err}")
+                return None
+            except requests.exceptions.ConnectionError as conn_err:
+                logger.error(f"Connection error occurred while geocoding: {conn_err}")
+                return None
+            except requests.exceptions.Timeout as timeout_err:
+                logger.error(f"Timeout error occurred while geocoding: {timeout_err}")
+                return None
+            except requests.exceptions.RequestException as req_err:
+                logger.error(f"Request error occurred while geocoding: {req_err}")
+                return None
             
             data = response.json()
             
-            if data.get('status') != 'OK':
-                logger.warning(f"Geocoding failed. Status: {data.get('status')}. Message: {data.get('error_message', 'No error message')}")
-                return None
-            
-            if not data.get('results'):
-                logger.warning(f"No results found for address: {address}")
-                return None
-            
             # Get the first result
-            location = data['results'][0]['geometry']['location']
-            latitude = location['lat']
-            longitude = location['lng']
+            location = data['features'][0]['geometry']['coordinates']
+            longitude = location[0]
+            latitude = location[1]
             
             logger.info(f"Geocoded address '{address}' to coordinates: ({latitude}, {longitude})")
             
@@ -146,11 +155,11 @@ class GoogleMapsService:
             
             nearby_points = []
             
+            lat1 = math.radians(latitude)
+            lon1 = math.radians(longitude)
             for point in all_points:
                 # Haversine formula to calculate distance between two coordinates
-                lat1 = math.radians(latitude)
                 lat2 = math.radians(float(point.latitude))
-                lon1 = math.radians(longitude)
                 lon2 = math.radians(float(point.longitude))
                 
                 dlat = lat2 - lat1
@@ -199,7 +208,7 @@ class GoogleMapsService:
         """
         Search for nearby RecyclingPoints from an address string.
         
-        Combines Google Geocoding API to convert address to coordinates,
+        Combines ORS Geocoding API to convert address to coordinates,
         then searches for recycling points nearby.
         
         Args:
