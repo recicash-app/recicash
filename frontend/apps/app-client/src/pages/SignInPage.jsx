@@ -147,10 +147,7 @@ function Form() {
 
         //const data = await response.json();
         //console.log('Tokens recebidos:', data);
-    }
-    } 
-    
-    catch (error) {
+    } catch (error) {
       console.error('Erro:', error.message);
       setError(error.message || 'Erro de conexão. Tente novamente.');
     } 
