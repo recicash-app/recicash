@@ -72,12 +72,11 @@ class RecyclingPointNearbyTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
         
-        self.assertIn('count', data)
-        self.assertIn('database_points', data)
-        self.assertIn('user_location', data)
+        # Response should be a list of recycling points
+        self.assertIsInstance(data, list)
         
         # Should find nearby points
-        self.assertGreater(data['count'], 0)
+        self.assertGreater(len(data), 0)
     
     def test_nearby_missing_latitude(self):
         """Test that missing latitude returns 400 error."""
@@ -138,11 +137,13 @@ class RecyclingPointNearbyTests(TestCase):
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.json()
-        points = data['database_points']
+        
+        # Response should be a list
+        self.assertIsInstance(data, list)
         
         # Verify results are sorted by distance
-        if len(points) > 1:
-            distances = [p['distance_meters'] for p in points]
+        if len(data) > 1:
+            distances = [p['distance_meters'] for p in data]
             self.assertEqual(distances, sorted(distances))
     
     def test_nearby_radius_limit(self):
