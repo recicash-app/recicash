@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 
 // Ícones padrão
@@ -22,9 +22,38 @@ let SelectedIcon = L.icon({
     shadowUrl: iconShadow,
 });
 
+const redIconUrl =
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png";
+
+let SearchIcon = L.icon({
+        iconUrl: redIconUrl,
+        shadowUrl: iconShadow,
+});
+
 L.Marker.prototype.options.icon = DefaultIcon;
 
 const apiPort = import.meta.env.VITE_API_PORT;
+
+/* =====================================================
+   =============== FIT BOUNDS COMPONENT =================
+   ===================================================== */
+function FitBoundsHandler({ searchCoords, results }) {
+    const map = useMap();
+
+    React.useEffect(() => {
+        const points = [];
+
+        if (searchCoords) points.push(searchCoords);
+        results.forEach((p) => points.push([p.latitude, p.longitude]));
+
+        if (points.length > 0) {
+            const bounds = L.latLngBounds(points);
+            map.fitBounds(bounds, { padding: [80, 80] });
+        }
+    }, [searchCoords, results, map]);
+
+    return null;
+}
 
 function MapPage() {
     const [location, setLocation] = useState('');
@@ -47,16 +76,16 @@ function MapPage() {
             if (response.ok) {
                 const data = await response.json();
 
-                // Ordenar por distância
                 const sorted = (data.recycling_points || []).sort(
                     (a, b) => a.distance_meters - b.distance_meters
                 );
                 setResults(sorted);
-                
-                // Salvar coordenadas do endereço buscado
+
                 if (data.geocoded_location) {
-                    console.log("Coordenadas do endereço buscado:", data.geocoded_location["latitude"], data.geocoded_location["longitude"]);
-                    setSearchCoords([data.geocoded_location["latitude"], data.geocoded_location["longitude"]]);
+                    setSearchCoords([
+                        data.geocoded_location.latitude,
+                        data.geocoded_location.longitude
+                    ]);
                 } else {
                     setSearchCoords(null);
                 }
@@ -187,15 +216,21 @@ function MapPage() {
             {/* LADO DIREITO - MAPA */}
             <div style={styles.rightSide}>
                 <MapContainer
-                    center={searchCoords || defaultCenter}
+                    center={defaultCenter}
                     zoom={13}
                     style={styles.mapContainer}
                 >
                     <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
+                    {/* componente que ajusta o zoom */}
+                    <FitBoundsHandler
+                        searchCoords={searchCoords}
+                        results={results}
+                    />
+
                     {/* marcador do endereço buscado */}
                     {searchCoords && (
-                        <Marker position={searchCoords}>
+                        <Marker position={searchCoords} icon={SearchIcon}>
                             <Popup>Local buscado</Popup>
                         </Marker>
                     )}
