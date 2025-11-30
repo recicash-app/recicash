@@ -55,7 +55,7 @@ services:
       sh -c "python manage.py migrate && 
             python manage.py runserver 0.0.0.0:${BACKEND_PORT}"
     labels:
-      - "traefik.http.routers.backend.rule=Host(`api.docker.localhost`)"
+      - "traefik.http.routers.backend.rule=Host(`${API_HOST}`)"
       - "traefik.http.services.backend.loadbalancer.server.port=${BACKEND_PORT}"
       - "traefik.http.routers.backend.entrypoints=web"
 
@@ -73,7 +73,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
     labels:
-      - "traefik.http.routers.web.rule=Host(`web.docker.localhost`)"
+      - "traefik.http.routers.web.rule=Host(`${WEB_HOST}`)"
       - "traefik.http.services.web.loadbalancer.server.port=3000"
       - "traefik.http.routers.web.entrypoints=web"
 
@@ -92,7 +92,7 @@ services:
       - /app/node_modules
     command: ["npm", "run", "dev:admin"]
     labels:
-      - "traefik.http.routers.admin.rule=Host(`admin.docker.localhost`)"
+      - "traefik.http.routers.admin.rule=Host(`${ADMIN_HOST}`)"
       - "traefik.http.services.admin.loadbalancer.server.port=3000"
       - "traefik.http.routers.admin.entrypoints=web"
 
@@ -111,6 +111,7 @@ services:
       - /app/node_modules
     command: ["npm", "run", "dev:ecoponto"]
     labels:
+      - "traefik.http.routers.ecoponto.rule=Host(`${ECOPONTO_HOST}`)"
       - "traefik.http.routers.ecoponto.rule=Host(`ecoponto.docker.localhost`)"
       - "traefik.http.services.ecoponto.loadbalancer.server.port=3000"
       - "traefik.http.routers.ecoponto.entrypoints=web"
@@ -130,7 +131,7 @@ services:
       - /app/node_modules
     command: ["npm", "run", "dev:auth"]
     labels:
-      - "traefik.http.routers.auth.rule=Host(`auth.docker.localhost`)"
+      - "traefik.http.routers.auth.rule=Host(`${AUTH_HOST}`)"
       - "traefik.http.services.auth.loadbalancer.server.port=3000"
       - "traefik.http.routers.auth.entrypoints=web"
 

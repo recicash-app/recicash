@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { getAuthUser } from "./auth";
+import { AUTH_URL } from "./constants";
 
 const AuthContext = createContext(null);
 
@@ -25,15 +26,15 @@ export function AuthProvider({ children }) {
   }, []);
 
   function signInRedirect() {
-    window.location.href = `http://auth.docker.localhost/login`;
+    window.location.href = `${AUTH_URL}/login`;
   }
 
   function signUpRedirect() {
-    window.location.href = `http://auth.docker.localhost/cadastro`;
+    window.location.href = `${AUTH_URL}/cadastro`;
   }
 
   function signOutRedirect() {
-    window.location.href = "http://auth.docker.localhost/logout";
+    window.location.href = `${AUTH_URL}/logout`;
   }
 
   return (
