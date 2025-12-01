@@ -7,6 +7,8 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 
+import { API_URL } from '@shared/utils/constants';
+
 // Ícones padrão
 import iconUrl from "leaflet/dist/images/marker-icon.png";
 import iconShadow from "leaflet/dist/images/marker-shadow.png";
@@ -32,12 +34,10 @@ let SearchIcon = L.icon({
         shadowUrl: iconShadow,
 });
 
-L.Marker.prototype.options.icon = DefaultIcon;
-
-const apiPort = import.meta.env.VITE_API_PORT;  
+L.Marker.prototype.options.icon = DefaultIcon; 
 
 /* =====================================================
-   =============== FIT BOUNDS COMPONENT =================
+   =============== FIT BOUNDS COMPONENT ================= 
    ===================================================== */
 function FitBoundsHandler({ searchCoords, results }) {
     const map = useMap();
@@ -76,7 +76,7 @@ function MapPage() {
 
         try {
             const response = await fetch(
-                `http://api.docker.localhost:${apiPort}/api/v1/recycling-points/nearby-address/?address=${encodeURIComponent(location)}`
+                `${API_URL}/recycling-points/nearby-address/?address=${encodeURIComponent(location)}`
             );
 
             if (response.ok) {
@@ -129,7 +129,7 @@ function MapPage() {
 
                 try {
                     const response = await fetch(
-                        `http://api.docker.localhost:${apiPort}/api/v1/recycling-points/nearby/?lat=${lat}&lon=${lon}`
+                        `${API_URL}/recycling-points/nearby/?lat=${lat}&lon=${lon}`
                     );
 
                     if (response.ok) {
