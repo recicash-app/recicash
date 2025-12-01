@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from core.domain.models import User, PostBlog, PostImage, RecyclingPointm Wallet
+from core.domain.models import User, PostBlog, PostImage, RecyclingPoint, Wallet
 import re
 
 class UserSerializer(serializers.ModelSerializer):
