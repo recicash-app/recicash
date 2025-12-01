@@ -27,7 +27,7 @@ A documentação busca:
 
 O **Recicash** adota uma arquitetura **em camadas no backend** e **modular no frontend**, visando **manutenibilidade**, **testabilidade**, **segurança** e **escalabilidade**.
 
-As comunicações externas (como chamadas à **Google Maps API**) são tratadas exclusivamente pelo **backend**, garantindo proteção de chaves e centralização das integrações.
+As comunicações externas (como chamadas à **ORS API**) são tratadas exclusivamente pelo **backend**, garantindo proteção de chaves e centralização das integrações.
 
 ### Backend
 
@@ -93,7 +93,7 @@ Esta seção descreve os **perfis de usuário** e seus acessos ao sistema, servi
 | **Frontend**       | React, Material UI, Axios                              |
 | **Ambiente**       | Docker, Docker Compose                                 |
 | **Prototipação**   | Figma                                                  |
-| **APIs externas**  | Google Maps API                                        |
+| **APIs externas**  | ORS API                                        |
 
 ## Padrões e Boas Práticas
 
