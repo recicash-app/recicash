@@ -6,8 +6,6 @@ import {
   Button,
   Typography,
   Dialog,
-  Snackbar,
-  Alert
 } from "@mui/material";
 
 import {
@@ -23,6 +21,7 @@ import { validateUserForm } from "@shared/utils/userValidators";
 import { useNavigate } from "react-router-dom";
 import InputField from "@shared/ui/InputField";
 import TextBlock from "@shared/ui/TextBlock";
+import AppSnackbar from "@shared/ui/AppSnackbar";
 
 import api from "@shared/utils/api";
 import { useAuth } from "@shared/utils/AuthProvider";
@@ -320,20 +319,12 @@ function UserProfilePage() {
         </Box>
       </Dialog>
 
-      <Snackbar
+      <AppSnackbar
         open={snack.open}
-        autoHideDuration={3000}
-        onClose={() => setSnack({ ...snack, open: false })}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => setSnack({ ...snack, open: false })}
-          severity={snack.severity}
-          sx={{ width: '100%' }}
-        >
-          {snack.message}
-        </Alert>
-      </Snackbar>
+        message={snack.message}
+        severity={snack.severity}
+        onClose={() => setSnack((prev) => ({ ...prev, open: false }))}
+      />
     </Box>
   );
 }

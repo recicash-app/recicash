@@ -11,9 +11,8 @@ import BlogPage from './pages/BlogPage';
 import History from './pages/History';
 import Wallet from './pages/Wallet';
 import ProtectedRoute from "@shared/utils/ProtectedRoute";
-
-const SETTINGS_URL = "http://auth.docker.localhost/dados"
 import { AUTH_URL } from '@shared/utils/constants';
+
 
 function App() {
   
@@ -25,13 +24,14 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/test" element={<Test />} />
           
+          
           {/* Protected Routes */}
           <Route element={<ProtectedRoute roles={['U']} />}>
-            <Route path="/perfil" element={<Navigate to={SETTINGS_URL} />} />
             <Route path="/blog" element={<BlogPage />} />
-            <Route path="/historico" element={<History />} /> 
-            <Route path="/carteira" element={<Wallet />} />
             <Route path="/inicio" element={<Home />} />
+            <Route path="/carteira" element={<Wallet />} />
+            <Route path="/historico" element={<History />} />
+            <Route path="/perfil" element={<Navigate to={`${AUTH_URL}/dados`} />} />
           </Route>
         
         </Routes>

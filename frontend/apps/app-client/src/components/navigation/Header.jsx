@@ -10,10 +10,10 @@ import Logo from '@shared/atoms/Logo';
 import { useAuth } from '@shared/utils/AuthProvider';
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'center',
-  backgroundColor: 'transparent',
-  paddingLeft: theme.spacing(3),  
+	display: 'flex',
+	justifyContent: 'center',
+	backgroundColor: 'transparent',
+	paddingLeft: theme.spacing(3),  
   	paddingRight: theme.spacing(3), 
 }));
 
@@ -93,13 +93,13 @@ function Header() {
 							onLogout={handleLogout}
 							onRegister={handleRegister}
 							
-            />
-          </Box>
+						/>
+					</Box>
 
-        </ToolbarContent>
-      </StyledToolbar>
-    </AppBar>
-  );
+				</ToolbarContent>
+			</StyledToolbar>
+		</AppBar>
+	);
 }
 
 export default Header;

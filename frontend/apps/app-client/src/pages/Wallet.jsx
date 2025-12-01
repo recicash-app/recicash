@@ -79,9 +79,6 @@ function Wallet() {
     } 
     catch (error) {
 
-      console.error("Erro ao cadastrar nota:", error);
-      console.log(error.response);
-      console.log("Detalhes:", error.response.data);
 
       setSnackbar({
         open: true,

@@ -1,11 +1,14 @@
 # Virtual environment
 venv/
+env/
 .env/
 .env.* 
 
 # Python cache
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
 # Django migrations
 */migrations/
@@ -23,6 +26,7 @@ Thumbs.db
 # Coverage reports
 htmlcov/
 .coverage
+.coverage.*
 coverage.xml
 
 # Pytest cache
@@ -32,4 +36,16 @@ coverage.xml
 .mypy_cache/
 
 # Media files
-media
+media/
+
+# SQLite databases (local tests)
+*.sqlite3
+*.sqlite3-journal
+db.sqlite3
+db.sqlite3-journal
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
