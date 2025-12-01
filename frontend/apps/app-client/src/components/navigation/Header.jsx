@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Box, AppBar, Toolbar } from '@mui/material';
 import DesktopToolbar from './DesktopToolbar';
@@ -28,7 +28,8 @@ const ToolbarContent = styled(Box)(({ theme }) => ({
 }));
 
 function Header() {
-	const { isAuth, signInRedirect, signOutRedirect, signUpRedirect } = useAuth();
+  const { isAuth, signInRedirect, signOutRedirect, signUpRedirect } = useAuth();
+  const location = useLocation();
 
   const publicOptions = [];
   const privateOptions = [
@@ -38,25 +39,23 @@ function Header() {
     { name: 'Informações', path: `/blog` }
   ];
 
-	const [activeItem, setActiveItem] = useState(null);
+	const activeItem = isAuth
+    ? privateOptions.findIndex(option => location.pathname.startsWith(option.path))
+    : null;
 	
 	const handleLogoClick = () => {
-    	setActiveItem(isAuth ? 0 : null);
   	};
 
 	const handleLogin = () => {
 		signInRedirect();
-		setActiveItem(0);
 	};
 
 	const handleRegister = () => {
 		signUpRedirect();
-		setActiveItem(0);
 	};
 
 	const handleLogout = () => {
 		signOutRedirect();
-		setActiveItem(null);
 	};
 
   return (
@@ -80,7 +79,7 @@ function Header() {
 							onLogout={handleLogout}
 							onRegister={handleRegister}
 							activeItem={activeItem}
-							onOptionClick={setActiveItem}
+							onOptionClick={() => {}}
 						/>
 					</Box>
 
