@@ -7,10 +7,10 @@ import {
 } from "@mui/material";
 import { AddRounded } from "@mui/icons-material";
 
-import AppSnackbar from "@/components/AppSnackbar";
+import AppSnackbar from "@shared/ui/AppSnackbar";
 import DataGridTable from "@/components/DataGridTable";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import UserFormDialog from "../components/users/UserFormDialog";
+import UserFormDialog from "@/components/users/UserFormDialog";
 
 import { usersColumns, usersActions } from "../data/usersTableConfig";
 
