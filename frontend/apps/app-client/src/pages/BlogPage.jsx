@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Grid, Card, CardContent, CardMedia, Typography, CardActionArea } from "@mui/material";
 import { styled } from '@mui/system';
 import FullScreenOverlay from '@shared/ui/FullScreenOverlay';
-
-const apiPort = import.meta.env.VITE_API_PORT;
+import { API_URL } from '@shared/utils/constants';
 
 const CardComponent = styled(Card)({
   width: '300px',
@@ -101,7 +100,7 @@ function BlogPage() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch(`http://api.docker.localhost:${apiPort}/api/v1/posts/`);
+        const response = await fetch(`${API_URL}/posts/`);
         const data = await response.json();
         setPosts(data);
         setLoading(false);
@@ -122,7 +121,8 @@ function BlogPage() {
       }
 
       try {
-        const response = await fetch(`http://api.docker.localhost:${apiPort}/api/v1/posts/search/?q=${encodeURIComponent(searchTerm)}`);        const data = await response.json();
+        const response = await fetch(`${API_URL}/posts/search/?q=${encodeURIComponent(searchTerm)}`);
+        const data = await response.json();
         setFilteredPosts(data.results);
       } catch (error) {
         console.error('Erro ao buscar posts:', error);

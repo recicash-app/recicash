@@ -42,7 +42,6 @@ function Header() {
 	
 	const handleLogoClick = () => {
     	setActiveItem(isAuth ? 0 : null);
-      //setActiveItem(0);
   	};
 
 	const handleLogin = () => {

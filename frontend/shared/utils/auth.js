@@ -1,4 +1,5 @@
 import api from "./api";
+import { ADMIN_URL, ECOPONTO_URL, WEB_URL, LANDING_PAGE_URL } from "./constants";
 
 export async function getAuthUser() {
   const response = await api.get("/users/me/");
@@ -42,12 +43,12 @@ export async function logout() {
 
 export function handleRedirect(role) {
   if (role === 'A') {
-    window.location.href = 'http://admin.docker.localhost';
+    window.location.href = ADMIN_URL;
   } else if (role === 'U') {
-    window.location.href = 'http://web.docker.localhost';
+    window.location.href = WEB_URL;
   } else if (role === 'M') {
-    window.location.href = 'http://ecoponto.docker.localhost';
+    window.location.href = ECOPONTO_URL;
   } else {
-    window.location.href = 'http://web.docker.localhost';
+    window.location.href = LANDING_PAGE_URL;
   }
 }

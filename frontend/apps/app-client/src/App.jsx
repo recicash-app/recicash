@@ -13,6 +13,7 @@ import Wallet from './pages/Wallet';
 import ProtectedRoute from "@shared/utils/ProtectedRoute";
 
 const SETTINGS_URL = "http://auth.docker.localhost/dados"
+import { AUTH_URL } from '@shared/utils/constants';
 
 function App() {
   
