@@ -12,7 +12,7 @@ import shapeTopLeft from '@shared/assets/shape-top-left.svg';
 import shapeTopRight from '@shared/assets/shape-top-right.svg';
 import RegisterNoteForm from "../components/wallet/RegisterNoteForm";
 
-import api from "../utils/api";
+import api from "@shared/utils/api";
 
 function UserHome() {
   const navigate = useNavigate();
