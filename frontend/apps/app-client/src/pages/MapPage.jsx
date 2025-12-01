@@ -241,10 +241,10 @@ function MapPage() {
             left: 0,
             right: 0,
             bottom: 0,
-            borderRadius: "263.5px 0px",
+            borderRadius: "0px 0px 263.5px 0px",
             boxShadow: "10px 8px 12.3px -4px #C4C4C480",
-            overflow: "hidden",
             border: "5px solid #93B17D",
+            overflow: "hidden",
         },
     };      
 
