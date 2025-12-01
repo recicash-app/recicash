@@ -57,15 +57,13 @@ Em um arquivo `.env`:
 ORS_API_KEY=sua_chave_api_do_ors
 ```
 
-### 2. Obter Chave da API (Google Cloud)
+### 2. Obter Chave da API (OpenRouteService)
 
-1. Acesse [Google Cloud Console](https://console.cloud.google.com/)
-2. Crie um projeto
-3. Ative as APIs:
-   - Geocoding API
-   - Places API (opcional)
-4. Crie uma chave de API
-5. Configure como variável de ambiente
+1. Acesse [OpenRouteService](https://openrouteservice.org/sign-up/) e crie uma conta gratuita.
+2. Após o login, vá até o painel de "API Keys".
+3. Gere uma nova chave de API.
+4. Copie a chave gerada.
+5. Configure como variável de ambiente `ORS_API_KEY` no seu arquivo `.env`:
 
 ---
 
