@@ -3,12 +3,15 @@ import { Box } from '@mui/material';
 
 import Test from './Test';
 import Home from './pages/Home';
+import BlogPage from './pages/BlogPage';  
 import Header from './components/navigation/Header';
 import ProtectedRoute from "@shared/utils/ProtectedRoute";
 import Wallet from './pages/Wallet';
 import History from './pages/History';
+import { AUTH_URL } from '@shared/utils/constants';
 
 const SETTINGS_URL = "http://auth.docker.localhost/dados"
+
 
 function App() {
   return (
@@ -18,12 +21,14 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/test" element={<Test />} />
-          <Route path="/carteira" element={<Wallet />} />
-          <Route path="/historico" element={<History />} />
+          
           
           {/* Protected Routes */}
           <Route element={<ProtectedRoute roles={['U']} />}>
-            <Route path="/perfil" element={<Navigate to={SETTINGS_URL} />} />
+            <Route path="/blog" element={<BlogPage />} />
+             <Route path="/carteira" element={<Wallet />} />
+            <Route path="/historico" element={<History />} />
+            <Route path="/perfil" element={<Navigate to={`${AUTH_URL}/dados`} />} />
           </Route>
         </Routes>
       </Box>

@@ -30,14 +30,14 @@ const ToolbarContent = styled(Box)(({ theme }) => ({
 function Header() {
 	const { isAuth, signInRedirect, signOutRedirect, signUpRedirect } = useAuth();
 
-	const publicOptions = [];
-	const privateOptions = [
-		{ name: 'Início', path: `/inicio` },
-		{ name: 'Mapa', path: `/mapa` },
-		{ name: 'Recompensas', path: `/recompensas` },
-		{ name: 'Carteira', path: `/carteira` },
-		{ name: 'Informações', path: `/blog` }
-	];
+  const publicOptions = [];
+  const privateOptions = [
+    { name: 'Início', path: `/inicio` },
+    { name: 'Mapa', path: `/mapa` },
+    { name: 'Recompensas', path: `/recompensas` },
+    { name: 'Carteira', path: `/carteira` },
+    { name: 'Informações', path: `/blog` }
+  ];
 
 	const [activeItem, setActiveItem] = useState(null);
 	
@@ -60,17 +60,17 @@ function Header() {
 		setActiveItem(null);
 	};
 
-	return (
-		<AppBar sx={{ position: 'static', boxShadow: 0, backgroundColor: 'transparent' }}>
-			<StyledToolbar disableGutters>
-				<ToolbarContent>
+  return (
+    <AppBar sx={{ position: 'static', boxShadow: 0, backgroundColor: 'transparent' }}>
+      <StyledToolbar disableGutters>
+        <ToolbarContent>
 
-					{/* Logo on the left */}
+          {/* Logo on the left */}
 					  <Box sx={{ display: 'flex', alignItems: 'center'}}>
-						<Link to={'/'} style={{ textDecoration: 'none' }} onClick={handleLogoClick}>
-							<Logo asLink={false} sx={{mt:0}}/>
-						</Link>
-					</Box>
+            <Link to={'/'} style={{ textDecoration: 'none' }} onClick={handleLogoClick}>
+              <Logo asLink={false} sx={{mt:0}}/>
+            </Link>
+          </Box>
 
 					{/* Desktop Navigation */}
 					<Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 2, mt:'20px', justifyContent: 'flex-end' }}>

@@ -1,8 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { CircularProgress, Box, Typography, Button } from "@mui/material";
 import { logout } from "@shared/utils/auth";
-
-const LANDING_URL = "http://web.docker.localhost"
+import { LANDING_PAGE_URL } from "@shared/utils/constants";
 
 function LogoutPage() {
   const [status, setStatus] = useState("loading"); // loading | success | error
@@ -18,7 +17,7 @@ function LogoutPage() {
         await logout();
         setStatus("success");
         setTimeout(() => {
-          window.location.href = LANDING_URL;
+          window.location.href = LANDING_PAGE_URL;
         }, 1500);
       } catch (err) {
         setStatus("error");
@@ -60,7 +59,7 @@ function LogoutPage() {
           <Button
             variant="recicashOutlined"
             sx={{ width: "auto" }}
-            onClick={() => (window.location.href = LANDING_URL)}
+            onClick={() => (window.location.href = LANDING_PAGE_URL)}
           >
             Voltar ao início
           </Button>

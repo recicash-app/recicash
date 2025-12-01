@@ -5,6 +5,7 @@ import Sidebar from "./components/sidebar/Sidebar";
 import PostManagementPage from "./pages/PostManagementPage";
 import UserManagementPage from "./pages/UserManagementPage";
 import ProtectedRoute from "@shared/utils/ProtectedRoute";
+import { AUTH_URL } from "@shared/utils/constants";
 
 const drawerWidth = 260;
 const SETTINGS_URL = "http://auth.docker.localhost/dados"
@@ -30,7 +31,7 @@ function App() {
           <Route element={<ProtectedRoute roles={['A']} />}>
             <Route path="/" element={<PostManagementPage />} />
             <Route path="/users" element={<UserManagementPage />} />
-            <Route path="/settings" element={<Navigate to={SETTINGS_URL} />} />
+            <Route path="/settings" element={<Navigate to={`${AUTH_URL}/dados`} />} />
           </Route>
         </Routes>
       </Box>
