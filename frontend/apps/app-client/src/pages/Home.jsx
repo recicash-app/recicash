@@ -1,188 +1,307 @@
-import React, { useState, useMemo, useCallback  } from 'react';
-import { Box, Typography, Button, Grid } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Button, Grid, Stack, CircularProgress, Snackbar, Alert } from '@mui/material';
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '@shared/utils/AuthProvider';
 
-import CardBox from '@shared/ui/CardBox';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
+import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
+import CompostIcon from '@mui/icons-material/Compost';
+
 import shapeTopLeft from '@shared/assets/shape-top-left.svg';
 import shapeTopRight from '@shared/assets/shape-top-right.svg';
-import shapePattern from '@shared/assets/pattern-plus-green-white.svg';
+import RegisterNoteForm from "../components/wallet/RegisterNoteForm";
 
-import iconPlastic from '/icon-plastic.png';
-import iconPaper from '/icon-paper.png';
-import iconGlass from '/icon-glass.png';
-import iconMetal from '/icon-metal.png';
-import PostOverlay from '../components/PostOverlay';
+import api from "../utils/api";
 
-import { 
-  glassInstructions, 
-  paperInstructions, 
-  plasticInstructions, 
-  metalInstructions
-} from '../data/recyclingInstructions';
+function UserHome() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  const [loadingData, setLoadingData] = useState(true);
+  const [totalPoints, setTotalPoints] = useState(0);
+  const [totalRecyclings, setTotalRecyclings] = useState(0);
+  const [noteCode, setNoteCode] = useState("");
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
-const CardBoxStyle = { 
-  width: '200px', 
-  height: '250px', 
-  display: 'flex', 
-  flexDirection: 'column', 
-  alignItems: 'center', 
-  justifyContent: 'center' 
-};
+  const handleCloseSnackbar = () => setSnackbar((prev) => ({ ...prev, open: false }));
 
-const IconImgStyle = { 
-  width: '60px', 
-  height: 'auto', 
-  marginBottom: '16px' 
-};
+  const fetchUserData = async () => {
 
-const MATERIALS = [
-  {
-    id: 'plastic',
-    img: iconPlastic,
-    alt: 'Plástico',
-    description: 'O Plástico que Ganhou Novo Valor',
-    decorated: false,
-  },
-  {
-    id: 'paper',
-    img: iconPaper,
-    alt: 'Papel',
-    description: 'Caixas, jornais e revistas podem virar novos produtos.',
-    decorated: true, 
-  },
-  {
-    id: 'glass',
-    img: iconGlass,
-    alt: 'Vidro',
-    description: 'O Vidro que se Reinventa Sem Perder o Brilho',
-    decorated: false,
-  },
-  {
-    id: 'metal',
-    img: iconMetal,
-    alt: 'Metal',
-    description: 'Latas de alumínio e aço com alto valor reciclável.',
-    decorated: false,
-  },
-];
+    if (!user || !user.user_id) return;
 
-function MaterialCard({ img, alt, description, decorated, onClick }) {
-  return (
-    <CardBox focused={decorated} onClick={onClick} sx={CardBoxStyle}>
-      <img src={img} alt={alt} style={IconImgStyle} />
-      <Typography variant="body2" sx={{ textAlign: 'center' }}>
-        {description}
-      </Typography>
-    </CardBox>
+    try {
+        const response = await api.get(`/recyclings/?user_id=${user.user_id}&status=REDEEMED`);
+        const dataList = Array.isArray(response.data) ? response.data : (response.data.results || []);
+        
+        const points = dataList.reduce((acc, item) => acc + (item.points_value || 0), 0);
+        const count = dataList.length;
+        
+        setTotalPoints(points);
+        setTotalRecyclings(count);
+
+    } 
+    catch (error) {
+        console.error("Erro ao carregar dados da home:", error);
+    } 
+    finally {
+        setLoadingData(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+        fetchUserData();
+    }
+  }, [user]);
+
+  const handleRegisterNote = async () => {
+
+    if (!noteCode) return;
+    if (!user || !user.user_id) return; 
+
+    try {
+      const response = await api.post('/recyclings/record_wallet_history/', {
+        validation_hash: noteCode, 
+        user_id: user.user_id
+      });
+
+      setSnackbar({
+        open: true,
+        message: `Sucesso! Você ganhou ${response.data.points_added} pontos.`,
+        severity: "success"
+      });
+      
+      fetchUserData(); 
+
+    } 
+    catch (error) {
+      console.error("Erro ao cadastrar nota:", error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.error || "Erro ao cadastrar nota.",
+        severity: "error"
+      });
+
+    }
+     setNoteCode(""); 
+  };
+
+  const StatBox = ({ icon, value, label }) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ 
+            bgcolor: 'rgba(58, 91, 34, 0.1)', 
+            p: 1.5, 
+            borderRadius: '12px',
+            color: '#93B17D',
+            justifyContent: 'center'
+        }}>
+            {icon}
+        </Box>
+        <Box>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', lineHeight: 1, color: '#93B17D' }}>
+                {loadingData ? <CircularProgress size={20} color="inherit"/> : value}
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#5E6282' }}>
+                {label}
+            </Typography>
+        </Box>
+    </Box>
   );
-}
-
-function Home() {
-  const [overlayOpen, setOverlayOpen] = useState(false);
-  const [selectedMaterial, setSelectedMaterial] = useState(null);
-
-  const instructions = useMemo(
-    () => ({
-      paper: paperInstructions,
-      glass: glassInstructions,
-      metal: metalInstructions,
-      plastic: plasticInstructions,
-    }),
-    []
-  );
-
-  const handleInstructionRequest = useCallback((materialId) => {
-    setSelectedMaterial(materialId);
-    setOverlayOpen(true);
-  }, []);
-
-  const handleCloseOverlay = useCallback(() => {
-    setOverlayOpen(false);
-    setSelectedMaterial(null);
-  }, []);
 
   return (
     <React.Fragment>
-      <Box sx={{ width: '100%', overflowX: 'hidden' }}>
-        {/* Decorative shapes */}
+      <Box sx={{ width: '100%', overflowX: 'hidden', pb: 10 }}>
         <img 
           src={shapeTopLeft} 
           alt="" 
           style={{ position: 'fixed', top: 0, left: 0, width: '40vw', zIndex: -1, pointerEvents: 'none' }} 
         />
-
         <img
           src={shapeTopRight}
           alt=""
           style={{ position: 'absolute', top: 0, right: 0, width: '50vw', zIndex: -1, pointerEvents: 'none', objectFit: 'scale-down', objectPosition: 'top right' }}
         />
         
-        <Box sx={{ position: 'relative', zIndex: 2 }}>
+        <Box sx={{ position: 'relative', zIndex: 2, maxWidth: '1200px', margin: '0 auto', px: 2 }}>
           
-          {/* Info Section */}
+          {/* SECTION TEXT, INFOS AND ICON */}
           <Grid container spacing={0} alignItems="center" sx={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}>
             <Grid item sx={{ textAlign: 'left', width: '55%' }}>
-              <Typography variant="h1" sx={{ mb: 5 }}>
-                Recicash: descarte consciente que gera benefícios!
+              <Typography variant="h1" sx={{ color: '#5E6282',mb: 3 }}>
+                Olá, {user?.first_name}. <br/> Vamos reciclar hoje?
               </Typography>
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                O Recicash é uma iniciativa que une sustentabilidade e benefícios reais para o cidadão. A ideia é simples: quanto mais você recicla, mais você ganha.
+              <Typography variant="body1" sx={{ mb: 4, maxWidth: '500px' }}>
+                Bora começar o dia fazendo o bem? Separe seus recicláveis e veja como é fácil transformar lixo em desconto!
               </Typography>
-              <Typography variant="body1" sx={{ mb: 2}}>
-                Ao levar materiais recicláveis — como plástico, vidro, papel e metal — até um ecoponto parceiro, o participante acumula pontos no Recicash. Esses pontos podem ser trocados por cupons de desconto, benefícios locais ou até mesmo produtos sustentáveis.
-              </Typography>
+              
+              {/* POINTS AND RECYCLINGS */}
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={5}>
+                  <StatBox 
+                    icon={<PaymentsOutlinedIcon fontSize="large"/>} 
+                    value={totalPoints} 
+                    label="Pontos Acumulados"
+                  />
+                  <StatBox 
+                    icon={<RestoreFromTrashIcon fontSize="large"/>} 
+                    value={totalRecyclings} 
+                    label="Reciclagens Feitas"
+                  />
+              </Stack>
+
             </Grid>
 
+            {/* ICON */}
             <Grid item sx={{ width: '40%', pl: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              <Box
+                <Box
                 component="img"
                 src="/icon-recycle-border.svg"
                 alt="recycle icon"
                 sx={{ width: "30vw", userSelect: "none", pointerEvents: "none", zIndex: 2 }}
-              />
+                />
             </Grid>
           </Grid>
 
-          {/* Materials Section */}
-          <Box sx={{ position: 'relative', mt: 5, pt: 5, pb: 5, justifyContent: 'center' }}>
-            <img src={shapePattern} alt="" style={{ position: 'absolute', top: 0, right: 0, width: '200px', zIndex: 0 }} />
 
-            <Typography variant="h2" sx={{ mb: 3, textAlign: 'center', color: '#14183E', position: 'relative', zIndex: 1 }}>
-              Materiais Recicláveis
-            </Typography>
+          {/* SECTION REGISTER NOTE AND MAP */}
+          <Box 
+            sx={{ 
+                borderRadius: '30px', 
+                p: { xs: 3, md: 6 },
+                position: 'relative'
+            }}
+          >
+            <Grid container spacing={6} alignItems="stretch">
+                
+            <Box 
+              sx={{ 
+                  borderRadius: '30px', 
+                  p: { xs: 3, md: 6 },
+                  position: 'relative',
+                  mt: 4
+              }}
+            >
+            <Grid container spacing={4} alignItems="stretch">
+              {/* CARD REGISTER NOTE */}
+              <Grid size={{ xs: 12, md: 6 }}>
+                  <Box sx={{ 
+                      height: '100%', 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      justifyContent: 'center',
+                      p: 4,
+                      borderRadius: '15px',
+                      background: 'linear-gradient(135deg, #93B17D 0%, #93B17D 100%)', 
+                      color: '#FFF',
+                      boxShadow: '0px 10px 25px rgba(58, 91, 34, 0.25)',
+                      position: 'relative',
+                      overflow: 'hidden'
+                  }}>
+                    
+                    {/* Decorative Circle */}
+                    <Box sx={{ 
+                        position: 'absolute', top: -20, right: -20, width: 150, height: 150, 
+                        bgcolor: 'rgba(255,255,255,0.1)', borderRadius: '50%' 
+                    }} />
 
-            <Grid container spacing={7} justifyContent="center" sx={{ boxShadow: 'none' }}>
-              
-              {MATERIALS.map(material => (
-                <MaterialCard
-                  key={material.id}
-                  img={material.img}
-                  alt={material.alt}
-                  description={material.description}
-                  decorated={material.decorated}
-                  onClick={() => handleInstructionRequest(material.id)}
-                />
-              ))}
+                    <Box sx={{ position: 'relative', zIndex: 1, width: '100%' }}>
+                        
+                        {/* COMPONENT REGISTER NOTE */}
+                        <RegisterNoteForm
+                            noteCode={noteCode}
+                            setNoteCode={setNoteCode}
+                            onSubmit={handleRegisterNote}
+                        />
+                        
+                    </Box>
+                  </Box>
+                </Grid>
 
+
+              {/* CARD MAP */}
+              <Grid size={{ xs: 12, md: 6 }} >
+                <Box sx={{ 
+                    height: '100%', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    justifyContent: 'center', 
+                    alignItems: 'center',
+                    gap: 3,
+                    p: 4,
+                    borderRadius: '15px',
+                    border: '1px solid #E8F5E9',
+                    bgcolor: '#F9FBF8',
+                    transition: 'all 0.3s ease',
+                    
+                }}>
+                  
+                  <Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                      <Box sx={{ p: 0.1, borderRadius: '50%',}}>
+                          <CompostIcon fontSize="large" sx={{ color: '#181E4B' }} />
+                      </Box>
+                        <Typography variant="h2" sx={{ color: '#181E4B', fontWeight: 'bold' }}>
+                            Ecopontos
+                        </Typography>
+                    </Box>
+                            
+                    <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
+                        Não sabe onde descartar? Encontre o ponto de coleta mais perto de você agora mesmo.
+                    </Typography>
+                  </Box>
+                        
+                  <Button 
+                      variant="contained" 
+                      fullWidth
+                      onClick={() => navigate('/mapa')}
+                      sx={{ 
+                          bgcolor: '#FFF', 
+                          color: '#181E4B',
+                          fontWeight: 'bold',
+                          borderRadius: '50px',
+                          py: 1.5,
+                          textTransform: 'none',
+                          width: 'auto',
+                          fontSize: '1rem',
+                          //borderColor: '#93B17D',
+                          border: '1px solid #E8F5E9',
+                          
+                          '&:hover': {
+                            transform: 'translateY(-5px)',
+                            boxShadow: '0px 15px 30px rgba(58, 91, 34, 0.1)',
+                          }
+                      }}>
+                  
+                      <LocationOnIcon fontSize="large" />
+                      Ver no mapa
+                  </Button>
+                </Box>
+              </Grid>
             </Grid>
           </Box>
 
-          {/* Sign Up Button */}
-          <Box sx={{ textAlign: 'center', mt: 5 }}>
-            <Button variant="recicashCTA" onClick={() => navigate('/cadastro')}>
-              Saiba mais
-            </Button>
-          </Box>
-
+        </Grid>
+        </Box>
         </Box>
       </Box>
       
-      <PostOverlay
-        open={overlayOpen} onClose={handleCloseOverlay}
-        data={selectedMaterial ? instructions[selectedMaterial] : null}
-      />
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert 
+            onClose={handleCloseSnackbar} 
+            severity={snackbar.severity}
+            sx={{ width: '100%', borderRadius: 2, boxShadow: 3 }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+      
     </React.Fragment>
   );
 }
 
-export default Home;
+export default UserHome;
