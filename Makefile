@@ -15,3 +15,14 @@ access-data-base:
 
 tests:
 	docker exec -it django_backend sh -c "python manage.py test"
+
+coverage:
+	docker exec -it django_backend sh -c "coverage run --rcfile=.coveragerc manage.py test && coverage report"
+
+coverage-html:
+	docker exec -it django_backend sh -c "coverage run --rcfile=.coveragerc manage.py test && coverage html && coverage report"
+	@echo "HTML coverage report generated at backend/src/htmlcov/index.html"
+
+coverage-clean:
+	docker exec -it django_backend sh -c "coverage erase"
+	docker exec -it django_backend sh -c "rm -rf htmlcov"
