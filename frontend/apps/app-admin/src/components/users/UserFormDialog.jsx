@@ -47,13 +47,6 @@ function UserFormDialog({ open, user = {}, onClose, onSave }) {
     setDirty(false);
   }, [open, user]);
 
-  const passwordValid = (pw) => {
-    if (!pw) return false;
-    if (pw.length < 8) return false;
-    if (!/[A-Z]/.test(pw)) return false;
-    return true;
-  };
-
   const errors = useMemo(() => {
     return validateUserForm(formData, { isEditing });
   }, [formData, isEditing]);

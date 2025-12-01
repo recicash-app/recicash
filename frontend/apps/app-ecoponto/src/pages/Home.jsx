@@ -94,7 +94,7 @@ function Home() {
 
   return (
     <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-      <LeafBox sx={{ mt: 4 }}>
+      <LeafBox sx={{ mt: 4, display: 'block',  }}>
         <Grid container spacing={4} alignItems="center" px={2}>
 
           <Grid item xs={12} md={6}>

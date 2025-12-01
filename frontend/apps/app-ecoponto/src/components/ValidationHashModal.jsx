@@ -7,11 +7,15 @@ import Logo from '@shared/atoms/Logo';
 function ValidationHashModal({ open, onClose, hash }) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(hash);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
+  const handleCopy = async () => {  
+    try {  
+      await navigator.clipboard.writeText(hash);  
+      setCopied(true);  
+      setTimeout(() => setCopied(false), 1500);  
+    } catch (err) {  
+      alert('Falha ao copiar para a área de transferência. Verifique as permissões do navegador.');  
+    }  
+  }
 
   const handleShare = () => {
     if (navigator.share) {
@@ -30,7 +34,7 @@ function ValidationHashModal({ open, onClose, hash }) {
     <Dialog
       open={open}
       onClose={onClose}
-      PaperProps={{
+      slotProps={{ paper: {
         sx: {
           p: 3,
           borderRadius: 2,
@@ -40,7 +44,7 @@ function ValidationHashModal({ open, onClose, hash }) {
           alignItems: 'center',
           gap: 2,
         },
-      }}
+      }}}
     >
       <Logo sx={{ height: 50 }} />
       <Typography variant="h6">Hash de Validação</Typography>

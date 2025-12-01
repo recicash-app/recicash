@@ -37,6 +37,7 @@ function RegisterRecyclingForm({ form, loading, ecopontos, handleChange, handleS
 
       {/* Button */}
       <Button 
+        type="submit"
         variant="recicashPrimary"
         endIcon={<ArrowForward />}
         sx={{ height: '2.5rem' }}
