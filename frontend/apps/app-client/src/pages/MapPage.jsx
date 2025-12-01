@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -34,7 +34,7 @@ let SearchIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
-const apiPort = import.meta.env.VITE_API_PORT;
+const apiPort = import.meta.env.VITE_API_PORT;  
 
 /* =====================================================
    =============== FIT BOUNDS COMPONENT =================
@@ -182,19 +182,19 @@ function MapPage() {
     // =============================
     // ESTILOS
     // =============================
+
     const styles = {
         wrapper: {
             display: "flex",
             height: "80vh",
             width: "100%",
             overflow: "hidden",
-            fontFamily: "Inter, sans-serif",
         },
         leftSide: {
             width: "40%",
             minWidth: "350px",
-            padding: "28px",
-            background: "#f8fafc",
+            paddingLeft: "28px",
+            paddingRight: "28px",
             overflowY: "auto",
             borderRight: "1px solid #e2e8f0",
             display: "flex",
@@ -205,34 +205,35 @@ function MapPage() {
             position: "relative",
         },
         title: {
-            fontSize: "28px",
+            fontSize: "3rem",
             fontWeight: "700",
             marginBottom: "20px",
-            background: "linear-gradient(90deg, #16a34a, #4ade80)",
+            background: "#93B17D",
             WebkitBackgroundClip: "text",
+            fontFamily: '"Volkhov", serif',
             color: "transparent",
         },
         searchButton: {
             height: "48px",
-            borderRadius: "10px",
+            borderRadius: "5px",
             fontSize: "16px",
             fontWeight: "600",
             textTransform: "none",
-            background: "linear-gradient(90deg, #16a34a, #4ade80)",
+            background: "#93B17D",
             marginTop: "10px",
         },
         resultCard: {
             background: "#ffffff",
             padding: "14px 18px",
-            borderRadius: "12px",
+            borderRadius: "5px",
             boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
             marginBottom: "12px",
             cursor: "pointer",
             transition: "0.2s",
         },
         resultCardSelected: {
-            background: "#dcfce7",
-            border: "1px solid #4ade80",
+            background: "rgba(127, 165, 109, 0.3)",
+            border: "1px solid rgba(127, 165, 109)",
         },
         mapContainer: {
             position: "absolute",
@@ -240,8 +241,12 @@ function MapPage() {
             left: 0,
             right: 0,
             bottom: 0,
+            borderRadius: "263.5px 0px",
+            boxShadow: "10px 8px 12.3px -4px #C4C4C480",
+            overflow: "hidden",
+            border: "5px solid #93B17D",
         },
-    };
+    };      
 
     return (
         <div style={styles.wrapper}>
@@ -257,7 +262,13 @@ function MapPage() {
                     variant="outlined"
                     fullWidth
                     disabled={useLocation}
+                    sx={{
+                        "& .MuiOutlinedInput-root": {
+                        borderRadius: "5px",
+                        },
+                    }}
                 />
+
 
                 {/* CHECKBOX USAR LOCALIZAÇÃO ATUAL */}
                 <FormControlLabel
@@ -281,7 +292,7 @@ function MapPage() {
                     {loading ? "Buscando..." : "Buscar"}
                 </Button>
 
-                <h2 style={{ marginTop: "20px", fontWeight: "600" }}>Resultados</h2>
+                <h2 style={{ marginTop: "50px", fontWeight: "600", fontSize: "2.25rem", fontFamily: '"Volkhov", serif', }}>Resultados</h2>
 
                 <div style={{ marginTop: "10px" }}>
                     {results.map((point) => {
