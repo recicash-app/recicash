@@ -41,13 +41,16 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         Define permissions for different actions.
         
         Current behavior:
-        - list, retrieve -> AllowAny (public read)
+        - list -> IsAuthenticated (requires authentication with user_id parameter)
+        - retrieve -> AllowAny (public read)
         - create, update, delete -> AllowAny (for local testing)
         
         To require authentication in production, replace with:
             return [IsAuthenticated()]
         """
-        if self.action in ['list', 'retrieve']:
+        if self.action == 'list':
+            permission_classes = [IsAuthenticated]
+        elif self.action == 'retrieve':
             permission_classes = [AllowAny]
         else:
             permission_classes = [AllowAny]  # Change to [IsAuthenticated] in production
@@ -400,7 +403,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         """
         instance.delete()
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['post'])
     def register_disposal(self, request):
         """
         Register a disposal by a recycling point (ecoponto).
@@ -429,6 +432,13 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             "recycling_point_id": <integer>
         }
         """
+        # Check if user is authenticated
+        if not request.user or not request.user.is_authenticated:
+            return Response(
+                {"error": "Authentication required."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
         serializer = EcopontoDisposalSerializer(data=request.data)
         
         if not serializer.is_valid():
@@ -450,7 +460,8 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         
         user = request.user
         is_representative = recycling_point.user_id == user
-        is_manager = user.access_level == 'M'
+        # Safe access to access_level - only check if user has the attribute
+        is_manager = hasattr(user, 'access_level') and user.access_level == 'M'
         
         if not is_representative and not is_manager:
             return Response(
