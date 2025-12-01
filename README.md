@@ -43,7 +43,7 @@ Antes de rodar o projeto, é necessário preencher o arquivo `.env` com as vari�
 
     ```bash
     make coverage
-    make coverage-htm
+    make coverage-html
     ```
 
     O relatório HTML será gerado em `backend/src/htmlcov/index.html`
