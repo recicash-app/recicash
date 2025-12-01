@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from core.presentation.api import PostBlogViewSet
 from core.presentation.api import RecyclingViewSet
+from core.presentation.api.recycling_point_view import RecyclingPointViewSet
 from core.presentation.api import UserViewSet, AuthViewSet
 
 
@@ -14,6 +15,7 @@ router = DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'posts', PostBlogViewSet)
 router.register(r'recyclings', RecyclingViewSet)
+router.register(r'recycling-points', RecyclingPointViewSet)
 
 # The URL pattern is /api/v1/[feat]/ and /api/v1/[feat]/{pk}/
 urlpatterns = [

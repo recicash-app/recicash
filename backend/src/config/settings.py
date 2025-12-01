@@ -235,3 +235,6 @@ LOGGING = {
         },
     },
 }
+
+# ORS API Configuration
+ORS_API_KEY = os.environ.get('ORS_API_KEY')

@@ -36,7 +36,7 @@
 | Tecnologia          | Motivo                                                                                   |
 | ------------------- | ---------------------------------------------------------------------------------------- |
 | **Figma**           | Ferramenta colaborativa para design responsivo e prototipação rápida.                    |
-| **Google Maps API** | Permite exibir ecopontos próximos, rotas e coordenadas geográficas.                      |
+| **ORS API** | Permite exibir ecopontos próximos, rotas e coordenadas geográficas.                      |
 
 ## Ferramentas de Suporte
 

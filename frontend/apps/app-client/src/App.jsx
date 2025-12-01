@@ -10,6 +10,7 @@ import Header from './components/navigation/Header';
 import BlogPage from './pages/BlogPage';
 import History from './pages/History';
 import Wallet from './pages/Wallet';
+import MapPage from './pages/MapPage';
 import ProtectedRoute from "@shared/utils/ProtectedRoute";
 import { AUTH_URL } from '@shared/utils/constants';
 
@@ -30,6 +31,7 @@ function App() {
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/inicio" element={<UserHome />} />
             <Route path="/carteira" element={<Wallet />} />
+            <Route path="/mapa" element={<MapPage />} />
             <Route path="/historico" element={<History />} />
             <Route path="/perfil" element={<Navigate to={`${AUTH_URL}/dados`} />} />
           </Route>

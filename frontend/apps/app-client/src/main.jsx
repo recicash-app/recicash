@@ -4,6 +4,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { AuthProvider } from "@shared/utils/AuthProvider";
 
+import 'leaflet/dist/leaflet.css';
+
 import theme from "@shared/styles/recicashTheme.js";
 import App from './App.jsx';
 

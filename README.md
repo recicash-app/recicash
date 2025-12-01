@@ -8,7 +8,7 @@ O Recicash é uma plataforma que promove a conscientização ambiental e incenti
 - **Frontend:** Construído com React JSX, garantindo uma interface dinâmica e responsiva.
 - **Banco de Dados:** PostgreSQL, utilizado para armazenamento eficiente de dados relacionais.
 - **Containerização:** Docker e Docker Compose para padronização e isolamento do ambiente.
-- **API:** Integração com Google Maps API para exibição de mapas e localização de ecopontos.
+- **API:** Integração com ORA API para exibição de mapas e localização de ecopontos.
 
 
 ## Como Rodar o Projeto
