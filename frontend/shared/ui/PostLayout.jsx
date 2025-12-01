@@ -16,7 +16,7 @@ function PostLayout({ data, isEditing, onChange }) {
         display: "grid",
         gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
         gap: "8px",
-        p: 3,
+        padding: "32px",
         minHeight: "60vh",
         width: "100%",
         alignItems: "start",

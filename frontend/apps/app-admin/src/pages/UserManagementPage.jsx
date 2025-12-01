@@ -50,39 +50,41 @@ function UsersManagementPage() {
 
   const handleSave = async (payload) => {
     try {
+      let response = null;
+
       if (selectedUser) {
         await updateUser(selectedUser.id ?? selectedUser.user_id, payload);
-        // If changed access level as admin, call setPermission separately (UI should be used by admins).
+
         if (payload.access_level && payload.access_level !== selectedUser.access_level) {
           await setPermission(selectedUser.id ?? selectedUser.user_id, payload.access_level);
         }
+
       } else {
-        // Creating: if access_level is admin/manager call specific endpoints
         if (payload.access_level === 'A') {
-          await createAdmin({ ...payload, password: payload.password });
+          response = await createAdmin({ ...payload });
         } else if (payload.access_level === 'M') {
-          await createManager({ ...payload, password: payload.password });
-        } else {
-          await createUser({ ...payload, password: payload.password });
+          response = await createManager({ ...payload });
         }
       }
 
-      // Optionally assign recycling point if provided (admin action)
-      if (payload.recycling_point_id) {
-        const userId = selectedUser ? (selectedUser.id ?? selectedUser.user_id) : payload.username;
-        // assignRecyclingPoint expects numeric id; only do when we have numeric user id
-        if (typeof userId === "number") {
-          await assignRecyclingPoint(userId, payload.recycling_point_id);
-        }
+      const userId = selectedUser
+        ? selectedUser.user_id
+        : response.user.user_id;
+
+      if (payload.recycling_point_id && userId) {
+        await assignRecyclingPoint(userId, payload.recycling_point_id);
       }
 
       setRefreshKey((k) => k + 1);
+
       setSnackbar({
         open: true,
-        message: selectedUser ? "Usuário atualizado com sucesso!" : "Usuário criado com sucesso!",
+        message: selectedUser
+          ? "Usuário atualizado com sucesso!"
+          : "Usuário criado com sucesso!",
         severity: "success",
       });
-      setOpenForm(false);
+
     } catch (err) {
       setSnackbar({
         open: true,
@@ -91,6 +93,7 @@ function UsersManagementPage() {
       });
     }
   };
+
 
   const handleDelete = async () => {
     try {
@@ -130,8 +133,11 @@ function UsersManagementPage() {
       <UserFormDialog
         open={openForm}
         user={selectedUser}
-        onSave={handleSave}
         onClose={() => setOpenForm(false)}
+        onSave={async (payload) => {
+          await handleSave(payload);
+          setOpenForm(false);
+        }}
       />
 
       {/* Confirm Delete */}

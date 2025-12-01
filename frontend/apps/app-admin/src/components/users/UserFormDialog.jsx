@@ -24,7 +24,7 @@ function UserFormDialog({ open, user = {}, onClose, onSave }) {
     email: user?.email || "",
     cpf: user?.cpf || "",
     access_level: user?.access_level || 'A',
-    recycling_point_id: user?.fav_recycling_point_id || "",
+    recycling_point_id: user?.recycling_point_id || "",
     zip_code: user?.zip_code || "", 
     // password fields
     password: "",
@@ -38,6 +38,7 @@ function UserFormDialog({ open, user = {}, onClose, onSave }) {
   const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
+    if (!open) return;
     setFormData({
       ...initial,
       password: "",
@@ -210,7 +211,7 @@ function UserFormDialog({ open, user = {}, onClose, onSave }) {
 
                 {formData.access_level === 'M' && (
                   <InputField
-                    label="ID do Ecoponto"
+                    label={isEditing ? "ID Novo Ecoponto" : "ID do Ecoponto"}
                     sx={{ width: 'inherit' }}
                     type="number"
                     value={formData.recycling_point_id}
