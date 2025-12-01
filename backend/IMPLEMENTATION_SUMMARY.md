@@ -136,7 +136,7 @@ findPointsNearAddress("Rua Augusta 1000, São Paulo, SP");
 ```
 GoogleMapsService
 ├── geocode_address()
-│   └── Converte endereço em coordenadas (Google Geocoding API)
+│   └── Converte endereço em coordenadas (ORS Geocoding API)
 ├── search_nearby_recycling_points()
 │   └── Busca pontos próximos usando latitude/longitude
 ├── search_nearby_recycling_points_by_address()
