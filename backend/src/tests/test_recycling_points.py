@@ -1,5 +1,5 @@
 """
-Tests for Google Maps integration endpoints.
+Tests for Open Route Service (ORS) integration endpoints.
 
 Tests the RecyclingPoint viewset including:
 - Finding nearby recycling points
