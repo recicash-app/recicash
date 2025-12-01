@@ -8,7 +8,6 @@ import ProtectedRoute from "@shared/utils/ProtectedRoute";
 import { AUTH_URL } from "@shared/utils/constants";
 
 const drawerWidth = 260;
-const SETTINGS_URL = "http://auth.docker.localhost/dados"
 
 function App() {
   return (
