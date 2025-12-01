@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback  } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Box, Typography, Button, Grid } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 
@@ -12,6 +12,8 @@ import iconPaper from '/icon-paper.png';
 import iconGlass from '/icon-glass.png';
 import iconMetal from '/icon-metal.png';
 import PostOverlay from '../components/PostOverlay';
+
+import { useAuth } from '@shared/utils/AuthProvider';
 
 import { 
   glassInstructions, 
@@ -77,7 +79,10 @@ function MaterialCard({ img, alt, description, decorated, onClick }) {
   );
 }
 
-function Home() {
+function Landing() {
+
+  const navigate = useNavigate();
+  const { isAuth, signUpRedirect } = useAuth();
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
 
@@ -100,6 +105,14 @@ function Home() {
     setOverlayOpen(false);
     setSelectedMaterial(null);
   }, []);
+
+  const handleSaibaMais = () => {
+    if (!isAuth) {
+      signUpRedirect();
+    }
+    navigate('/blog');
+  }
+
 
   return (
     <React.Fragment>
@@ -169,7 +182,7 @@ function Home() {
 
           {/* Sign Up Button */}
           <Box sx={{ textAlign: 'center', mt: 5 }}>
-            <Button variant="recicashCTA" onClick={() => navigate('/cadastro')}>
+            <Button variant="recicashCTA" onClick={handleSaibaMais}>
               Saiba mais
             </Button>
           </Box>
@@ -185,4 +198,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Landing;

@@ -3,12 +3,13 @@ API Integration tests for Blog Search functionality.
 Tests the complete flow: HTTP Request → View → Service → Database
 """
 
-from django.test import TestCase, Client
-from core.domain.models import User, PostBlog
 import json
+from django.test import Client
+from core.domain.models import User, PostBlog
+from .clean_db_per_class import CleanDBPerClassTestCase as CleanDBTestCase
 
 
-class BlogSearchAPIIntegrationTestCase(TestCase):
+class BlogSearchAPIIntegrationTestCase(CleanDBTestCase):
     """Integration tests for Blog Search API endpoints."""
 
     def setUp(self):

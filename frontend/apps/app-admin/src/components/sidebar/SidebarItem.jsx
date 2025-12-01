@@ -2,7 +2,9 @@ import React from 'react';
 import { alpha, styled } from '@mui/material/styles';
 import { Icon, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 
-const StyledListItem = styled(ListItem)(({ theme, active }) => ({
+const StyledListItem = styled(ListItem, {
+  shouldForwardProp: (prop) => prop !== 'active',
+})(({ theme, active }) => ({
   maxWidth: '100%',
   boxSizing: 'border-box',
   padding: theme.spacing(1, 2),
@@ -28,12 +30,12 @@ function SidebarItem({ icon, name, active, onClick }) {
 
       <ListItemText
         primary={name}
-        primaryTypographyProps={{
+        sx={{ userSelect: 'none' }}
+        slotProps={{ primary: {
           variant: "body2",
           color: '#212832',
           fontWeight: active ? 600 : 400,
-        }}
-        sx={{ userSelect: 'none' }}
+        }}}
       />
     </StyledListItem>
   );

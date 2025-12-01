@@ -1,10 +1,13 @@
+from datetime import datetime
+
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import action
 
-from core.domain.models import Recycling, WalletHistory, Wallet
-from core.infrastructure.serializers import RecyclingSerializer
+from core.domain.models import Recycling, RecyclingPoint, RecyclingValue, User, WalletHistory, Wallet
+from core.infrastructure.serializers import RecyclingSerializer, EcopontoDisposalSerializer
+from core.application.use_cases.ecoponto_disposal_service import EcopontoDisposalService
 
 
 class RecyclingViewSet(viewsets.ModelViewSet):
@@ -18,11 +21,16 @@ class RecyclingViewSet(viewsets.ModelViewSet):
     - PATCH /{id}/    -> partial update (only specific fields)
     - DELETE /{id}/   -> delete a recycling record
 
+    Custom Actions:
+    - POST /record_wallet_history/ -> update wallet after recycling validation
+    - POST /register_disposal/ -> register disposal by recycling point without user
+
     Notes:
-    - POST requires: user_id, recycling_point_id, recycling_value_id, weight, validation_hash
+    - Standard POST requires: user_id, recycling_point_id, recycling_value_id, weight, validation_hash
+    - register_disposal requires: recycling_point_id, weight (recycling_value_id optional)
     - points_value is automatically calculated from recycling_value_id
     - date is automatically set on creation
-    - A WalletHistory record is created with operation='RECYCLING' and value=points_value
+    - A WalletHistory record is created with operation='RECYCLING' and value=points_value only for recycling records associated with a user (i.e., when user_id is not NULL). For ecoponto disposals (registered via the register_disposal endpoint), no WalletHistory record is created.
     """
 
     queryset = Recycling.objects.all().order_by('-date')
@@ -33,81 +41,279 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         Define permissions for different actions.
         
         Current behavior:
-        - list, retrieve -> AllowAny (public read)
+        - list -> IsAuthenticated (requires authentication with user_id parameter)
+        - retrieve -> AllowAny (public read)
         - create, update, delete -> AllowAny (for local testing)
         
         To require authentication in production, replace with:
             return [IsAuthenticated()]
         """
-        if self.action in ['list', 'retrieve']:
+        if self.action == 'list':
+            permission_classes = [IsAuthenticated]
+        elif self.action == 'retrieve':
             permission_classes = [AllowAny]
         else:
-            permission_classes = [IsAuthenticated]  # Change to [IsAuthenticated] in production
+            permission_classes = [IsAuthenticated] 
 
         return [permission() for permission in permission_classes]
+    
 
+    def get_queryset(self):
+        """
+        Filter recycling records to only show the authenticated user's records.
+        Prevents users from seeing recycling records of other users.
 
-    def perform_create(self, serializer):
+        API Usage: 
+        - GET /api/v1/recyclings/?user_id={user_id}
+        - GET /api/v1/recyclings/?start_date={start_date}
+        - GET /api/v1/recyclings/?end_date={end_date}
+        - GET /api/v1/recyclings/?min_points={min_points}
+        - GET /api/v1/recyclings/?max_points={max_points}
+        - Optional filters:
+            - start_date: ISO format (YYYY-MM-DDTHH:MM:SS) date string to filter records from this date onwards
+            - end_date: ISO format (YYYY-MM-DDTHH:MM:SS) date string to filter records up to this date
+            - min_points: integer to filter records with points_value >= min_points
+            - max_points: integer to filter records with points_value <= max_points
         """
-        Save the recycling record to the database.
-        """
-        serializer.save()
+        queryset = super().get_queryset()
+        user_id = self.request.query_params.get('user_id', None)
+        
+        # Validate that the user_id provided matches the authenticated user
+        if not user_id:
+            return queryset.none()
+        
+        try:
+            requested_user_id = int(user_id)
+        except (ValueError, TypeError):
+            return queryset.none()
+        
+        # Get the authenticated user's ID from the request
+        if self.request.user and self.request.user.is_authenticated:
+            # Assuming the user object has a user_id attribute
+            authenticated_user_id = self.request.user.user_id
+            
+            # Only allow users to see their own recycling records
+            if authenticated_user_id != requested_user_id:
+                return queryset.none()
+        else:
+            return queryset.none()
+        
+        queryset = queryset.filter(user_id__user_id=requested_user_id)
 
-    def perform_update(self, serializer):
-        """
-        Update a recycling record.
-        """
-        serializer.save()
+        # Filter by status if provided
+        status_param = self.request.query_params.get('status', None)
+        if status_param:
+            queryset = queryset.filter(status=status_param)
+        
+        # Filter by date if provided
+        start_date = self.request.query_params.get('start_date', None)
+        end_date = self.request.query_params.get('end_date', None)
+        
+        if start_date:
+            try:
+                start_date_obj = datetime.fromisoformat(start_date)
+                queryset = queryset.filter(date__gte=start_date_obj)
+            except (ValueError, TypeError):
+                pass  # Ignore invalid date format
+        
+        if end_date:
+            try:
+                end_date_obj = datetime.fromisoformat(end_date)
+                queryset = queryset.filter(date__lte=end_date_obj)
+            except (ValueError, TypeError):
+                pass  # Ignore invalid date format
+        
+        # Filter by points if provided
+        min_points = self.request.query_params.get('min_points', None)
+        max_points = self.request.query_params.get('max_points', None)
+        
+        if min_points:
+            try:
+                min_points_value = int(min_points)
+                queryset = queryset.filter(points_value__gte=min_points_value)
+            except (ValueError, TypeError):
+                pass  # Ignore invalid points format
+        
+        if max_points:
+            try:
+                max_points_value = int(max_points)
+                queryset = queryset.filter(points_value__lte=max_points_value)
+            except (ValueError, TypeError):
+                pass  # Ignore invalid points format
+        
+        return queryset
+    
 
-    def perform_destroy(self, instance):
+    def retrieve(self, request, *args, **kwargs):
         """
-        Delete a recycling record.
+        Retrieve a single recycling record.
+        Only allow users to see their own recycling records.
         """
-        instance.delete()
+        instance = self.get_object()
+        user_id = request.query_params.get('user_id', None)
+        
+        # Validate that the user_id provided matches the authenticated user
+        if not user_id:
+            return Response(
+                {"error": "user_id parameter is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            requested_user_id = int(user_id)
+        except (ValueError, TypeError):
+            return Response(
+                {"error": "Invalid user_id format."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get the authenticated user's ID from the request
+        if request.user and request.user.is_authenticated:
+            authenticated_user_id = request.user.user_id
+            
+            # Only allow users to see their own recycling records
+            if authenticated_user_id != requested_user_id or instance.user_id.user_id != requested_user_id:
+                return Response(
+                    {"error": "Unauthorized: You cannot access this recycling record."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        else:
+            return Response(
+                {"error": "Authentication required."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+    
 
-    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def create(self, request, *args, **kwargs):
+        """
+        Create a new recycling record.
+        
+        Expected POST data:
+        {
+            "user_id": <integer>,
+            "recycling_point_id": <integer>,
+            "recycling_value_id": <integer>,
+            "weight": <float>,
+            "validation_hash": "<string>"
+        }
+        
+        Note: points_value is automatically calculated from recycling_value.points_value * weight
+        """
+        # Validate that user, recycling_point, and recycling_value exist
+        user_id = request.data.get('user_id')
+        recycling_point_id = request.data.get('recycling_point_id')
+        recycling_value_id = request.data.get('recycling_value_id')
+        weight = request.data.get('weight')
+        validation_hash = request.data.get('validation_hash')
+        
+        try:
+            user = User.objects.get(user_id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        try:
+            recycling_point = RecyclingPoint.objects.get(recycling_point_id=recycling_point_id)
+        except RecyclingPoint.DoesNotExist:
+            return Response(
+                {"error": "RecyclingPoint not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        try:
+            recycling_value = RecyclingValue.objects.get(recycling_value_id=recycling_value_id)
+        except RecyclingValue.DoesNotExist:
+            return Response(
+                {"error": "RecyclingValue not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        if not weight:
+            return Response(
+                {"error": "Weight is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not validation_hash:
+            return Response(
+                {"error": "Validation hash is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if validation_hash already exists
+        if Recycling.objects.filter(validation_hash=validation_hash).exists():
+            return Response(
+                {"error": "Validation hash already exists. Cannot create duplicate recycling record."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Calculate points_value: recycling_value.points_value * weight
+        points_value = int(recycling_value.points_value * float(weight))
+        
+        # Prepare data for serializer
+        data = request.data.copy()
+        data['points_value'] = points_value
+        
+        serializer = self.get_serializer(data=data)
+        
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            
+            # Create a WalletHistory record
+            WalletHistory.objects.create(
+                user_id=user,
+                operation='RECYCLING',
+                value=points_value
+            )
+            
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def record_wallet_history(self, request):
         """
         Custom action to find a Recycling record and update WalletHistory and Wallet.
         
         Expected POST data:
         {
-            "recycling_id": <integer>
-            "user_id": <integer>
+            "validation_hash": "<string>",
+            "user_id": <integer> (optional - if not provided, uses authenticated user)
         }
         
         This endpoint:
-        1. Finds the Recycling record by recycling_id
-        2. Creates a WalletHistory record with operation='RECYCLING'
-        3. Updates the user's wallet points_balance
+        1. Finds the Recycling record by validation_hash
+        2. Verifies the validation_hash matches
+        3. Creates a WalletHistory record with operation='RECYCLING'
+        4. Updates the user's wallet points_balance
         """
-        recycling_id = request.data.get('recycling_id')
+        code = request.data.get('validation_hash')
         user_id = request.data.get('user_id')
-        
-        if not recycling_id:
+
+        if not code:
             return Response(
-                {"error": "recycling_id is required."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        if not user_id:
-            return Response(
-                {"error": "user_id is required."},
+                {"error": "validation_hash is required."},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         try:
-            recycling = Recycling.objects.get(recycling_id=recycling_id)
+            recycling = Recycling.objects.get(validation_hash=code)
         except Recycling.DoesNotExist:
             return Response(
                 {"error": "Recycling record not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        # Verify if the user_id from request matches the recycling user_id
-        if recycling.user_id.user_id != user_id:
+        # Verify if the validation_hash matches
+        if recycling.validation_hash != code:
             return Response(
-                {"error": "Unauthorized: user_id does not match the recycling owner."},
+                {"error": "Unauthorized: validation_hash does not match."},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -118,15 +324,23 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Get the user from the recycling record
-        user = recycling.user_id
-        
-        if not user:
-            return Response(
-                {"error": "User not found for this recycling record."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
+        # Get the user: from request if provided, otherwise use the authenticated user
+        if user_id:
+            try:
+                user = User.objects.get(user_id=user_id)
+            except User.DoesNotExist:
+                return Response(
+                    {"error": "User not found."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        else:
+            # Use the authenticated user from the request
+            user = request.user
+            if not user or not user.is_authenticated:
+                return Response(
+                    {"error": "Authentication required."},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
         
         # Update user's wallet points balance
         try:
@@ -141,6 +355,8 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             wallet.points_balance += recycling.points_value
             wallet.save()
             
+            # Update the recycling record with the user_id
+            recycling.user_id = user
             # Update recycling status to REDEEMED
             recycling.status = 'REDEEMED'
             recycling.save()
@@ -166,3 +382,206 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_201_CREATED
         )
+
+    def perform_create(self, serializer):
+        """
+        Save the recycling record to the database.
+        """
+        serializer.save()
+
+    def perform_update(self, serializer):
+        """
+        Update a recycling record.
+        """
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        """
+        Delete a recycling record.
+        """
+        instance.delete()
+
+    @action(detail=False, methods=['post'])
+    def register_disposal(self, request):
+        """
+        Register a disposal by a recycling point (ecoponto).
+        
+        This endpoint allows recycling points to register disposals
+        without associating them to specific users.
+        
+        Requires authentication. The authenticated user must be either:
+        - The representative user of the recycling point (user_id matches), or
+        - A user with 'M' (Recycling Point Manager) access level
+        
+        Expected POST data:
+        {
+            "recycling_point_id": <integer>,
+            "weight": <float>,
+            "recycling_value_id": <integer> (optional)
+        }
+        
+        Returns:
+        {
+            "recycling_id": <integer>,
+            "validation_hash": <string>,
+            "points_value": <integer>,
+            "weight": <float>,
+            "date": <datetime>,
+            "recycling_point_id": <integer>
+        }
+        """
+        # Check if user is authenticated
+        if not request.user or not request.user.is_authenticated:
+            return Response(
+                {"error": "Authentication required."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        serializer = EcopontoDisposalSerializer(data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(
+                {"error": "Invalid data", "details": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        recycling_point_id = serializer.validated_data['recycling_point_id']
+        
+        # Verify the authenticated user is authorized to register disposals for this recycling point
+        try:
+            recycling_point = RecyclingPoint.objects.get(recycling_point_id=recycling_point_id)
+        except RecyclingPoint.DoesNotExist:
+            return Response(
+                {"error": f"Recycling point with ID {recycling_point_id} not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        user = request.user
+        is_representative = recycling_point.user_id == user
+        # Safe access to access_level - only check if user has the attribute
+        is_manager = hasattr(user, 'access_level') and user.access_level == 'M'
+        
+        if not is_representative and not is_manager:
+            return Response(
+                {"error": "You are not authorized to register disposals for this recycling point."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        try:
+            disposal_data = EcopontoDisposalService.register_disposal(
+                recycling_point_id=serializer.validated_data['recycling_point_id'],
+                weight=serializer.validated_data['weight'],
+                recycling_value_id=serializer.validated_data.get('recycling_value_id')
+            )
+            
+            return Response(disposal_data, status=status.HTTP_201_CREATED)
+            
+        except ValueError as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"An unexpected error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated], url_path="ecopontos_by_manager")
+    def ecopontos_by_manager(self, request):
+        """
+        GET /api/v1/recyclings/ecopontos_by_manager/?manager_id=<id>
+        Returns all RecyclingPoint records assigned to the given manager_id.
+
+        Permission:
+          - admin users (access_level == 'A' or is_superuser) can query any manager
+          - a manager can query their own ecopontos (manager_id == request.user.user_id)
+
+        Responses:
+          200: list of ecopontos
+          400: missing/invalid manager_id
+          403: forbidden
+          404: manager not found
+        """
+        manager_id = request.query_params.get("manager_id")
+        if not manager_id:
+            return Response({"error": "manager_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            manager_id_int = int(manager_id.strip())
+        except (ValueError, TypeError):
+            return Response({"error": "Invalid manager_id."}, status=status.HTTP_400_BAD_REQUEST)
+
+        manager = User.objects.filter(user_id=manager_id_int).first()
+        if not manager:
+            return Response({"error": "Manager not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # permission check: admin or the manager himself
+        requester = request.user
+        is_admin = getattr(requester, "access_level", None) == "A" or getattr(requester, "is_superuser", False)
+        is_self = getattr(requester, "user_id", None) == manager_id_int
+
+        if not (is_admin or is_self):
+            return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+        rps = RecyclingPoint.objects.filter(user_id=manager)
+        result = []
+        for rp in rps:
+            result.append({
+                "recycling_point_id": getattr(rp, "recycling_point_id", None),
+                "name": getattr(rp, "name", None),
+                "cnpj": getattr(rp, "cnpj", None),
+                "zip_code": getattr(rp, "zip_code", None),
+            })
+
+        return Response(result, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated], url_path="last_disposal")
+    def last_disposal(self, request):
+        """
+        GET /api/v1/recyclings/last_disposal/?manager_id=<id>
+        Returns the most recent Recycling record for any recycling point owned by the manager.
+
+        Permissions:
+          - admin users (access_level == 'A' or is_superuser) can query any manager
+          - a manager can query their own last disposal (manager_id == request.user.user_id)
+
+        Responses:
+          200: recycling serializer data for the most recent disposal
+          400: missing/invalid manager_id
+          403: forbidden
+          404: manager not found or no disposals
+        """
+        manager_id = request.query_params.get("manager_id")
+        if not manager_id:
+            return Response({"error": "manager_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            manager_id_int = int(str(manager_id).strip())
+        except (ValueError, TypeError):
+            return Response({"error": "Invalid manager_id."}, status=status.HTTP_400_BAD_REQUEST)
+
+        manager = User.objects.filter(user_id=manager_id_int).first()
+        if not manager:
+            return Response({"error": "Manager not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # permission check: admin or the manager himself
+        requester = request.user
+        is_admin = getattr(requester, "access_level", None) == "A" or getattr(requester, "is_superuser", False)
+        is_self = getattr(requester, "user_id", None) == manager_id_int
+
+        if not (is_admin or is_self):
+            return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+        # find recycling points for manager, then latest Recycling record
+        rp_qs = RecyclingPoint.objects.filter(user_id=manager)
+        if not rp_qs.exists():
+            return Response({"error": "No recycling points found for this manager."}, status=status.HTTP_404_NOT_FOUND)
+
+        last_recycling = Recycling.objects.filter(recycling_point_id__in=rp_qs).order_by("-date").first()
+        if not last_recycling:
+            return Response({"error": "No disposal records found for this manager."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(last_recycling)
+        return Response(serializer.data, status=status.HTTP_200_OK)

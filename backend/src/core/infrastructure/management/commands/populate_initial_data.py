@@ -387,7 +387,15 @@ def create_data(number_of_users=10):
             "Como Separar Corretamente Seus Resíduos",
             "Materiais Recicláveis que Você Pode Não Conhecer",
             "O Impacto do Plástico nos Oceanos",
-            "Economia Circular: O Futuro da Sustentabilidade"
+            "Economia Circular: O Futuro da Sustentabilidade",
+            "Dicas para Reduzir o Lixo no Dia a Dia",
+            "Como Funciona a Logística Reversa no Brasil",
+            "Reciclagem de Eletrônicos: O Que Você Precisa Saber",
+            "Os Benefícios da Compostagem Doméstica",
+            "Reciclagem e Geração de Empregos: Uma Relação Sustentável",
+            "A Importância da Educação Ambiental nas Escolas",
+            "Como a Tecnologia Está Transformando a Reciclagem",
+            "Reciclagem de Vidro: Mitos e Verdades",
         ]
         
         created_posts = []
@@ -401,13 +409,13 @@ def create_data(number_of_users=10):
                 last_edition_date=timezone.now()
             )
 
-            image_url = "https://placehold.co/800x400/22c55e/ffffff?text=Recicash+Blog"
+            image_url = "https://placehold.co/800x400/22c55e/ffffff.png?text=Recicash+Blog"
     
             # Download image and attach to PostImage
             response = requests.get(image_url)
-            
+
             image_name = f"blog_image_{i}.png"
-            image_file = ContentFile(response.content)
+            image_file = ContentFile(response.content, name=image_name)
 
             image_instance = PostImage(post=post)
             image_instance.image.save(image_name, image_file, save=True)

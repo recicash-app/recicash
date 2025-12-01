@@ -1,11 +1,13 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import { Box, AppBar, Toolbar } from '@mui/material';
-import Logo from '../../../../../shared/atoms/Logo';
 import DesktopToolbar from './DesktopToolbar';
 import MobileToolbar from './MobileToolbar';
+
+import Logo from '@shared/atoms/Logo';
+import { useAuth } from '@shared/utils/AuthProvider';
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 	display: 'flex',
@@ -26,43 +28,47 @@ const ToolbarContent = styled(Box)(({ theme }) => ({
 }));
 
 function Header() {
+  const { isAuth, signInRedirect, signOutRedirect, signUpRedirect } = useAuth();
+  const location = useLocation();
 
-	const [isAuth, setIsAuth] = useState(true);
-	//const user = { username: 'usuario' };
+  const publicOptions = [];
+  const privateOptions = [
+    { name: 'Início', path: `/inicio` },
+    { name: 'Mapa', path: `/mapa` },
+    { name: 'Carteira', path: `/carteira` },
+    { name: 'Informações', path: `/blog` }
+  ];
 
-	const publicOptions = [];
-	const privateOptions = [
-		{ name: 'Início', path: `/inicio` },
-		{ name: 'Mapa', path: `/mapa` },
-		{ name: 'Recompensas', path: `/recompensas` },
-		{ name: 'Carteira', path: `/carteira` },
-		{ name: 'Informações', path: `/blog` }
-	];
-
-	const [activeItem, setActiveItem] = useState(null);
-	const handleLogin = () => {
-		setIsAuth(true);
-		setActiveItem(0);
-	};
-	const handleLogout = () => {
-		setIsAuth(false);
-		setActiveItem(null);
-	};
+	const activeItem = isAuth
+    ? privateOptions.findIndex(option => location.pathname.startsWith(option.path))
+    : null;
+	
 	const handleLogoClick = () => {
-		setActiveItem(isAuth ? 0 : null);
+  	};
+
+	const handleLogin = () => {
+		signInRedirect();
 	};
 
-	return (
-		<AppBar sx={{ position: 'static', boxShadow: 0, backgroundColor: 'transparent' }}>
-			<StyledToolbar disableGutters>
-				<ToolbarContent>
+	const handleRegister = () => {
+		signUpRedirect();
+	};
 
-					{/* Logo on the left */}
+	const handleLogout = () => {
+		signOutRedirect();
+	};
+
+  return (
+    <AppBar sx={{ position: 'static', boxShadow: 0, backgroundColor: 'transparent' }}>
+      <StyledToolbar disableGutters>
+        <ToolbarContent>
+
+          {/* Logo on the left */}
 					  <Box sx={{ display: 'flex', alignItems: 'center'}}>
-						<Link to={'/'} style={{ textDecoration: 'none' }} onClick={handleLogoClick}>
-							<Logo asLink={false} sx={{mt:0}}/>
-						</Link>
-					</Box>
+            <Link to={'/'} style={{ textDecoration: 'none' }} onClick={handleLogoClick}>
+              <Logo asLink={false} sx={{mt:0}}/>
+            </Link>
+          </Box>
 
 					{/* Desktop Navigation */}
 					<Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 2, mt:'20px', justifyContent: 'flex-end' }}>
@@ -71,8 +77,9 @@ function Header() {
 							isAuth={isAuth}
 							onLogin={handleLogin}
 							onLogout={handleLogout}
+							onRegister={handleRegister}
 							activeItem={activeItem}
-							onOptionClick={setActiveItem}
+							onOptionClick={() => {}}
 						/>
 					</Box>
 
@@ -83,6 +90,7 @@ function Header() {
 							isAuth={isAuth}
 							onLogin={handleLogin}
 							onLogout={handleLogout}
+							onRegister={handleRegister}
 							
 						/>
 					</Box>

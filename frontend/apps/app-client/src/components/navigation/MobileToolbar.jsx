@@ -8,13 +8,13 @@ import ListIcon from '@mui/icons-material/List';
 import CloseIcon from '@mui/icons-material/Close';
 import LogoutIcon from '@mui/icons-material/Logout';
 
-import Logo from '../../../../../shared/atoms/Logo';
+import Logo from '@shared/atoms/Logo';
 
 const StyledMenuItem = styled(MenuItem)(({
 	padding: '6px 3px',
 }));
 
-function MobileToolbar({ options, isAuth, onLogin, onLogout }) {
+function MobileToolbar({ options, isAuth, onLogin, onRegister, onLogout }) {
 
 	const [open, setOpen] = useState(false);
 
@@ -50,7 +50,7 @@ function MobileToolbar({ options, isAuth, onLogin, onLogout }) {
 					{!isAuth && (
 						<React.Fragment>
 							<StyledMenuItem onClick={onLogin}> Login </StyledMenuItem>
-							<StyledMenuItem onClick={onLogin}> Cadastro </StyledMenuItem>
+							<StyledMenuItem onClick={onRegister}> Cadastro </StyledMenuItem>
 						</React.Fragment>
 					)}
 					

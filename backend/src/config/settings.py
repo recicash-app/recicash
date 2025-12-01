@@ -16,13 +16,7 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Paths for media storage
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
+# Secret Key
 try:
     SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 except KeyError:
@@ -31,14 +25,76 @@ except KeyError:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Default HTTP port (80 = no need to append “:80”)
+HTTP_PORT = os.getenv("HTTP_PORT", "80")
+
+# Hosts defined in .env (Traefik/Frontend/Backend routing)
+ENV_HOSTS = {
+    "WEB_HOST": os.getenv("WEB_HOST"),
+    "ADMIN_HOST": os.getenv("ADMIN_HOST"),
+    "ECOPONTO_HOST": os.getenv("ECOPONTO_HOST"),
+    "API_HOST": os.getenv("API_HOST"),
+    "AUTH_HOST": os.getenv("AUTH_HOST"),
+}
+
+def make_origin(host: str | None):
+    """
+    Converts a hostname into a full origin URL.
+    Handles ports automatically:
+    - If the HTTP_PORT is 80 → no port is appended
+    - Otherwise → :<port> is added 
+    """
+    if not host:
+        return None
+
+    if HTTP_PORT == "80":
+        return f"http://{host}"
+    
+    return f"http://{host}:{HTTP_PORT}"
+
+# Build Docker-based origins (only existing hosts)
+DOCKER_ORIGINS = [make_origin(h) for h in ENV_HOSTS.values() if make_origin(h)]
+
+# Allowed Hosts
 ALLOWED_HOSTS = [
-    'api.localhost',
-    'api.docker.localhost', 
-    'localhost',           
+    "localhost",
+    "127.0.0.1",
+] + [h for h in ENV_HOSTS.values() if h]
+
+# ------------------------------
+# CORS Configuration
+# ------------------------------
+
+# Local development origins
+LOCAL_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 
-# Application definition
+CORS_ALLOWED_ORIGINS = LOCAL_ORIGINS + DOCKER_ORIGINS
+CORS_ALLOW_CREDENTIALS = True
 
+# ------------------------------
+# CSRF Configuration
+# ------------------------------
+
+# Trusted origins must match the frontend origins exactly
+CSRF_TRUSTED_ORIGINS = LOCAL_ORIGINS + DOCKER_ORIGINS
+
+# Allow frontend to read CSRF cookies
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SECURE = False        # Disabled for HTTP development
+CSRF_COOKIE_SAMESITE = "Lax"
+
+# ------------------------------
+# Media Files
+# ------------------------------
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+# ------------------------------
+# Applications
+# ------------------------------
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -53,9 +109,12 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'core.infrastructure',
-    'core.domain'
+    'core.domain',
 ]
 
+# ------------------------------
+# Middleware
+# ------------------------------
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
@@ -67,41 +126,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# CORS configs
-
-# List of sources that can make requests.
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React app door
-    "http://127.0.0.1:3000",
-    "http://web.docker.localhost",
-    "http://ecoponto.docker.localhost",
-    "http://admin.docker.localhost"
-]
-
-# Allow browser to send cookies
-CORS_ALLOW_CREDENTIALS = True
-
-# CSRF configs
-
-# guarantees that CSRF cookie is sent
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://web.docker.localhost",
-    "http://ecoponto.docker.localhost",
-    "http://admin.docker.localhost",
-    "http://api.docker.localhost"
-]
-
-# Allow React to read CSRF cookie
-CSRF_COOKIE_HTTPONLY = False 
-
-# Cookie configs
-CSRF_COOKIE_SECURE = False  # It is False because we are testing in HTTP
-CSRF_COOKIE_SAMESITE = 'Lax'
-
 ROOT_URLCONF = 'config.urls'
 
+# ------------------------------
+# Templates
+# ------------------------------
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -119,10 +148,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
+# ------------------------------
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# ------------------------------
 MIGRATION_MODULES = {
     "domain": "core.infrastructure.migrations",
     "infrastructure": None,
@@ -141,90 +169,69 @@ DATABASES = {
 
 AUTH_USER_MODEL = 'domain.User'
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-CORS_ALLOW_ALL_ORIGINS = True
-
+# ------------------------------
+# REST Framework & JWT
+# ------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
-    "DEFAULT_AUTHENTICATION_CLASSES": ["core.domain.entities.authentication.CustomJWTAuthentication",
-                                       "rest_framework_simplejwt.authentication.JWTAuthentication",
-                                       "rest_framework.authentication.TokenAuthentication"]
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "core.domain.entities.authentication.CustomJWTAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
+    ]
 }
 
 SIMPLE_JWT = {
     "USER_ID_FIELD": "user_id"
 }
 
-
+# ------------------------------
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
+# ------------------------------
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# ------------------------------
+# Static Files
+# ------------------------------
 STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Logging definitions
+# ------------------------------
+# Logging
+# ------------------------------
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    # Formatter definition
+
     'formatters': {
         'custom_simple': {
-            'format': '[%(levelname)s] %(message)s' 
+            'format': '[%(levelname)s] %(message)s'
         },
     },
-    
-    # Handler definition
+
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'custom_simple',
         },
     },
+
     'loggers': {
-        # Root logger config
+        # Root logger
         '': {
             'handlers': ['console'],
-            'level': 'INFO',  # INFO or superior level messages must be processed
+            'level': 'INFO',
         },
-        # Specific loggers
-        'core.infrastructure.management.commands.populate_initial_data': { 
+        # Specific logger example
+        'core.infrastructure.management.commands.populate_initial_data': {
             'handlers': ['console'],
             'level': 'INFO',
-            'propagate': False, # Prevent duplication with root logger
+            'propagate': False,
         },
     },
 }

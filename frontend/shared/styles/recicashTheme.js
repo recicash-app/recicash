@@ -191,7 +191,7 @@ const recicashTheme = createTheme({
             "&:hover": {
               backgroundColor: "rgba(217, 217, 217, 0.1)",
             },
-            ...(state.active && {
+            ...(state?.active && {
               border: "1px solid #D9D9D9",
               boxShadow: "0px 4px 4px 0px #00000040",
             }),

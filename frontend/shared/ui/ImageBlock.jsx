@@ -28,8 +28,6 @@ function ImageBlock({ content, isEditing, onChange, sx }) {
         justifyContent: "center",
         overflow: "hidden",
         boxSizing: "border-box",
-        pointerEvents: "none",
-        userSelect: "none",
         ...sx
       }}
     >

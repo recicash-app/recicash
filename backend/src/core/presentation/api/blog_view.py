@@ -5,7 +5,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from core.infrastructure.permissions import IsAppAdminUser
-from core.domain.models import User, PostBlog, PostImage
+from core.domain.models import PostBlog, PostImage
 from core.infrastructure.serializers import PostBlogSerializer, PostImageSerializer
 from core.application.use_cases import BlogSearchService, PaginatorService
 
@@ -48,8 +48,8 @@ class PostBlogViewSet(viewsets.ModelViewSet):
         """
         if self.action in ["list", "retrieve", "search", "search_suggestions"]:
             return [AllowAny()]
-        return [AllowAny()]
-        # production: return [IsAuthenticated(), IsAppAdminUser()]
+        # development: return [AllowAny()]
+        return [IsAuthenticated(), IsAppAdminUser()]
 
     def perform_create(self, serializer):
         """
@@ -63,7 +63,8 @@ class PostBlogViewSet(viewsets.ModelViewSet):
         - Expects a single uploaded file under the form field name "image".
         - Renames the uploaded file to "<post.post_id>.<ext>" before saving.
         """
-        author = User.objects.get(pk=1)
+        # development: author = User.objects.get(pk=1)
+        author = self.request.user
         post = serializer.save(author_id=author)
 
         image_file = self.request.FILES.get("image")
@@ -178,15 +179,6 @@ class PostBlogViewSet(viewsets.ModelViewSet):
                 {
                     'error': 'Query parameter "q" is required',
                     'message': 'Please provide a search term using the "q" parameter'
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        if len(search_query) < 2:
-            return Response(
-                {
-                    'error': 'Search query too short',
-                    'message': 'Please provide at least 2 characters for search'
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
