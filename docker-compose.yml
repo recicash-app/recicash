@@ -112,7 +112,6 @@ services:
     command: ["npm", "run", "dev:ecoponto"]
     labels:
       - "traefik.http.routers.ecoponto.rule=Host(`${ECOPONTO_HOST}`)"
-      - "traefik.http.routers.ecoponto.rule=Host(`ecoponto.docker.localhost`)"
       - "traefik.http.services.ecoponto.loadbalancer.server.port=3000"
       - "traefik.http.routers.ecoponto.entrypoints=web"
 
