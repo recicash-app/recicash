@@ -1,10 +1,11 @@
 """
-Service for integrating with Open Route Service API.
+Service for integrating with the Open Route Service (ORS) API.
 
 Provides functionality to:
-- Retrieve RecyclingPoint locations using Google Maps
-- Search for nearby recycling points in the database
-- Geocode addresses to coordinates using Google Geocoding API
+- Retrieve RecyclingPoint locations from the database
+- Search for nearby recycling points using ORS geocoding and search
+- Geocode addresses to coordinates using ORS geocoding API
+- Generate Google Maps URLs for viewing RecyclingPoint locations (for display only)
 """
 
 import logging
