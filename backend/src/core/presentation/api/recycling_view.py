@@ -53,7 +53,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         elif self.action == 'retrieve':
             permission_classes = [AllowAny]
         else:
-            permission_classes = [AllowAny]  # Change to [IsAuthenticated] in production
+            permission_classes = [IsAuthenticated] 
 
         return [permission() for permission in permission_classes]
     
@@ -87,7 +87,6 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         except (ValueError, TypeError):
             return queryset.none()
         
-        # [CHANGE] Temporarily comment out security for local testing purposes
         # Get the authenticated user's ID from the request
         if self.request.user and self.request.user.is_authenticated:
             # Assuming the user object has a user_id attribute
@@ -98,7 +97,6 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                 return queryset.none()
         else:
             return queryset.none()
-        # [/CHANGE]
         
         queryset = queryset.filter(user_id__user_id=requested_user_id)
 
