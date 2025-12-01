@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Stack, Checkbox, Box, Typography, Alert } from '@mui/material';
 import Policy from './Policy';
 import { register } from '@shared/utils/auth';
+import { processBackendErrors } from '@shared/utils/errorHandler';
 import InputField from '@shared/ui/InputField';
 import SendFormButton from '@shared/ui/SendFormButton';
 
@@ -18,36 +19,53 @@ function Form() {
     policy: false
   });
 
-  const [formError, setFormError] = useState({});
-  const [errorMessage, setErrorMessage] = useState('');
+  const [formErrors, setFormErrors] = useState({});
+  const [generalError, setGeneralError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, checked, value } = e.target;
+    
     setFormData((prev) => ({
       ...prev,
       [name]: name === 'policy' ? checked : value
     }));
+
+    if (formErrors[name]) {
+      setFormErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+
+    if (generalError) {
+      setGeneralError('');
+    }
   };
 
   const validateForm = () => {
     const errors = {};
     let isValid = true;
 
-    const requireField = (field, label) => {
+    // Validação de campos obrigatórios
+    const requiredFields = [
+      { field: 'first_name', label: 'Nome' },
+      { field: 'last_name', label: 'Sobrenome' },
+      { field: 'username', label: 'Nome de usuário' },
+      { field: 'email', label: 'Email' },
+      { field: 'password', label: 'Senha' },
+      { field: 'cpf', label: 'CPF' },
+      { field: 'zip_code', label: 'Código postal' }
+    ];
+
+    requiredFields.forEach(({ field, label }) => {
       if (!formData[field].trim()) {
         errors[field] = `${label} é obrigatório`;
         isValid = false;
       }
-    };
-
-    requireField('first_name', 'Nome');
-    requireField('last_name', 'Sobrenome');
-    requireField('username', 'Nome de usuário');
-    requireField('email', 'Email');
-    requireField('password', 'Senha');
-    requireField('cpf', 'CPF');
-    requireField('zip_code', 'Código postal');
+    });
 
     if (formData.email.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -57,9 +75,25 @@ function Form() {
       }
     }
 
-    if (formData.password.trim() && (formData.password.length < 8 || !/[A-Z]/.test(formData.password))) {
-      errors.password = 'A senha deve conter no mínimo 8 caracteres e pelo menos uma letra maiúscula';
-      isValid = false;
+    if (formData.password.trim()) {
+      const passwordErrors = [];
+      
+      if (formData.password.length < 8) {
+        passwordErrors.push('pelo menos 8 caracteres');
+      }
+      
+      if (!/[A-Z]/.test(formData.password)) {
+        passwordErrors.push('pelo menos uma letra maiúscula');
+      }
+      
+      if (!/\d/.test(formData.password)) {
+        passwordErrors.push('pelo menos um número');
+      }
+      
+      if (passwordErrors.length > 0) {
+        errors.password = `A senha deve ter: ${passwordErrors.join(', ')}`;
+        isValid = false;
+      }
     }
 
     if (formData.password !== formData.passwordConfirmation) {
@@ -88,17 +122,23 @@ function Form() {
       isValid = false;
     }
 
-    setFormError(errors);
+    setFormErrors(errors);
     return isValid;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
+    
+    // Reset states
+    setGeneralError('');
     setSuccess(false);
+    setIsSubmitting(true);
 
     const isValid = validateForm();
-    if (!isValid) return;
+    if (!isValid) {
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       await register({
@@ -112,6 +152,7 @@ function Form() {
       });
 
       setSuccess(true);
+      
       setFormData({
         first_name: '',
         last_name: '',
@@ -123,25 +164,26 @@ function Form() {
         zip_code: '',
         policy: false
       });
+      setFormErrors({});
 
-      setFormError({
-        first_name: '',
-        last_name: '',
-        username: '',
-        email: '',
-        password: '',
-        passwordConfirmation: '',
-        cpf: '',
-        zip_code: ''
-      });
+      // Redirect after success
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
 
-      // microfrontend-friendly redirect
-      window.location.href = '/login';
-
-    } catch (err) {
-      setErrorMessage(
-        err.message || 'Erro inesperado. Tente novamente mais tarde.'
-      );
+    } catch (error) {
+      const { fieldErrors, generalError: backendError } = processBackendErrors(error);
+      
+      if (Object.keys(fieldErrors).length > 0) {
+        setFormErrors(fieldErrors);
+      }
+      
+      if (backendError) {
+        setGeneralError(backendError);
+      }
+      
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -151,76 +193,101 @@ function Form() {
       <InputField required label="Nome" name="first_name"
         value={formData.first_name}
         onChange={handleChange}
-        error={!!formError.first_name}
-        errorText={formError.first_name}
+        error={!!formErrors.first_name}
+        errorText={formErrors.first_name}
+        disabled={isSubmitting}
       />
 
       <InputField required label="Sobrenome" name="last_name"
         value={formData.last_name}
         onChange={handleChange}
-        error={!!formError.last_name}
-        errorText={formError.last_name}
+        error={!!formErrors.last_name}
+        errorText={formErrors.last_name}
+        disabled={isSubmitting}
       />
 
       <InputField required label="CPF" name="cpf"
         value={formData.cpf}
         onChange={handleChange}
-        error={!!formError.cpf}
-        errorText={formError.cpf}
+        error={!!formErrors.cpf}
+        errorText={formErrors.cpf}
+        disabled={isSubmitting}
       />
 
       <InputField required label="Código postal" name="zip_code"
         value={formData.zip_code}
         onChange={handleChange}
-        error={!!formError.zip_code}
-        errorText={formError.zip_code}
+        error={!!formErrors.zip_code}
+        errorText={formErrors.zip_code}
+        disabled={isSubmitting}
       />
 
       <InputField required label="Nome de usuário" name="username"
         value={formData.username}
         onChange={handleChange}
-        error={!!formError.username}
-        errorText={formError.username}
+        error={!!formErrors.username}
+        errorText={formErrors.username}
+        disabled={isSubmitting}
       />
 
       <InputField required label="Email" name="email" type="email"
         value={formData.email}
         onChange={handleChange}
-        error={!!formError.email}
-        errorText={formError.email}
+        error={!!formErrors.email}
+        errorText={formErrors.email}
+        disabled={isSubmitting}
       />
 
       <InputField required label="Senha" name="password" type="password"
         value={formData.password}
         onChange={handleChange}
-        error={!!formError.password}
-        errorText={formError.password}
+        error={!!formErrors.password}
+        errorText={formErrors.password}
+        disabled={isSubmitting}
       />
 
       <InputField required label="Repetir senha" name="passwordConfirmation" type="password"
         value={formData.passwordConfirmation}
         onChange={handleChange}
-        error={!!formError.passwordConfirmation}
-        errorText={formError.passwordConfirmation}
+        error={!!formErrors.passwordConfirmation}
+        errorText={formErrors.passwordConfirmation}
+        disabled={isSubmitting}
       />
 
       <Box display="flex" alignItems="center">
-        <Checkbox name="policy" checked={formData.policy} onChange={handleChange} />
+        <Checkbox 
+          name="policy" 
+          checked={formData.policy} 
+          onChange={handleChange}
+          disabled={isSubmitting}
+        />
         <Typography fontSize="14px">Eu concordo com a</Typography>
         <Policy />
       </Box>
 
-      {formError.policy && (
+      {formErrors.policy && (
         <Typography color="error" fontSize="12px">
-          {formError.policy}
+          {formErrors.policy}
         </Typography>
       )}
 
-      <SendFormButton text="Criar conta" onClick={handleSubmit} />
+      <SendFormButton 
+        text={isSubmitting ? "Criando conta..." : "Criar conta"} 
+        onClick={handleSubmit}
+        disabled={isSubmitting}
+      />
 
-      {success && <Alert severity="success">Conta criada com sucesso!</Alert>}
+      {success && (
+        <Alert severity="success">
+          Conta criada com sucesso! Redirecionando para login...
+        </Alert>
+      )}
 
-      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+      {generalError && (
+        <Alert severity="error">
+          {generalError}
+        </Alert>
+      )}
 
       <Box height="32px" />
     </Stack>
