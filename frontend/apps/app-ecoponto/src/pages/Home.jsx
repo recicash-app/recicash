@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, Grid, Button, Link } from '@mui/material';
+import { Box, Typography, Grid } from '@mui/material';
 
 import LeafBox from '@shared/ui/LeafBox';
 import { useAuth } from '@shared/utils/AuthProvider';

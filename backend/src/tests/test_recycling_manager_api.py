@@ -17,7 +17,7 @@ class RecyclingViewTests(CleanDBTestCase):
             cpf="11111111111",
             zip_code="11111-111",
         )
-        self.manager.access_level = "E"
+        self.manager.access_level = "M"
         self.manager.save()
 
         # another regular user
@@ -107,7 +107,7 @@ class RecyclingViewTests(CleanDBTestCase):
 
     def test_manager_can_get_last_disposal_for_their_points(self):
         # create two disposals; second should be the last
-        d1 = self.create_disposal_via_api(self.manager, self.rp1.recycling_point_id, weight=1.5)
+        self.create_disposal_via_api(self.manager, self.rp1.recycling_point_id, weight=1.5)
         d2 = self.create_disposal_via_api(self.manager, self.rp1.recycling_point_id, weight=2.0)
 
         # authenticated as manager, fetch last_disposal

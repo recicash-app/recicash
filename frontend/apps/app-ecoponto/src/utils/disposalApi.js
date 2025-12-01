@@ -1,7 +1,7 @@
 import api from "@shared/utils/api";
 
 export async function fetchEcopontos(managerId) {
-  const res = await api.get(`recyclings/ecopontos_by_manager/?manager_id=${managerId}`);
+  const res = await api.get(`/recyclings/ecopontos_by_manager/?manager_id=${managerId}`);
   return res.data;
 }
 
