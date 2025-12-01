@@ -50,7 +50,7 @@ def load_recycling_points_from_csv_with_managers(manager_users):
             
             for row in reader:
                 try:
-                    maps_id = row.get('recycling_point_id', '').strip('"')
+                    maps_id = row.get('maps_id', '').strip('"')
                     name = row.get('name', '').strip('"')
                     cnpj = row.get('cnpj', '').strip('"')
                     zip_code = row.get('zip_code', '').strip('"')
@@ -99,12 +99,216 @@ def load_recycling_points_from_csv_with_managers(manager_users):
         # Bulk create all RecyclingPoints
         if recycling_points_to_create:
             RecyclingPoint.objects.bulk_create(recycling_points_to_create, ignore_conflicts=True)
-            logger.info(f"RecyclingPoints created successfully: {len(recycling_points_to_create)} points associated with managers")
         
         logger.info(f"CSV Import Summary: Created={created_count}, Skipped={skipped_count}")
         
     except Exception as e:
         logger.error(f"An error occurred while loading RecyclingPoints from CSV: {e}")
+
+def load_users_from_csv():
+    """
+    Load users from USER.csv and create Wallet for each user.
+    The CSV should have columns: username, first_name, last_name, email, cpf, zip_code, password, ACCESS_LEVEL
+    """
+    logger.info("Loading Users from CSV...")
+    
+    # Get the path to the CSV file (same directory as manage.py)
+    csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), 'USER.csv')
+    
+    if not os.path.exists(csv_path):
+        logger.error(f"CSV file not found at {csv_path}")
+        return []
+    
+    try:
+        users_to_create = []
+        wallets_to_create = []
+        created_count = 0
+        skipped_count = 0
+        
+        with open(csv_path, 'r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            
+            for row in reader:
+                try:
+                    username = row.get('username', '').strip('"').strip()
+                    first_name = row.get('first_name', '').strip('"').strip()
+                    last_name = row.get('last_name', '').strip('"').strip()
+                    email = row.get('email', '').strip('"').strip()
+                    cpf = row.get('cpf', '').strip('"').strip()
+                    zip_code = row.get('zip_code', '').strip('"').strip()
+                    password = row.get('password', '').strip('"').strip()
+                    access_level = row.get('ACCESS_LEVEL', 'U').strip('"').strip()
+                    
+                    # Validate required fields
+                    if not username:
+                        logger.warning(f"Skipping row with missing username: {row}")
+                        skipped_count += 1
+                        continue
+                    
+                    # Check if already exists by username
+                    if User.objects.filter(username=username).exists():
+                        logger.info(f"User already exists: {username}")
+                        skipped_count += 1
+                        continue
+                    
+                    # Create User object
+                    user = User(
+                        username=username,
+                        first_name=first_name,
+                        last_name=last_name,
+                        email=email,
+                        cpf=cpf,
+                        zip_code=zip_code,
+                        password=password,  # Use hashed password from CSV
+                        access_level=access_level,
+                        is_active=True
+                    )
+                    
+                    users_to_create.append(user)
+                    created_count += 1
+                    
+                except Exception as e:
+                    logger.error(f"Error parsing row: {row}. Error: {str(e)}")
+                    skipped_count += 1
+                    continue
+        
+        # Bulk create all Users
+        if users_to_create:
+            created_users = User.objects.bulk_create(users_to_create)
+            
+            # Create Wallet for each created user
+            for user in created_users:
+                wallets_to_create.append(
+                    Wallet(user_id=user, points_balance=0)
+                )
+            
+            if wallets_to_create:
+                created_wallets = Wallet.objects.bulk_create(wallets_to_create)
+        
+        logger.info(f"CSV Import Summary: Created Users={created_count}, Skipped={skipped_count}")
+        return created_users if users_to_create else []
+        
+    except Exception as e:
+        logger.error(f"An error occurred while loading Users from CSV: {e}")
+        return []
+
+def load_recyclings_from_csv():
+    """
+    Load recyclings from RECYCLING.csv and create them in the database.
+    If user_id is a number, associate with that User; if NULL, don't associate with any user.
+    """
+    logger.info("Loading Recyclings from CSV...")
+    
+    # Get the path to the CSV file (same directory as manage.py)
+    csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), 'RECYCLING.csv')
+    
+    if not os.path.exists(csv_path):
+        logger.error(f"CSV file not found at {csv_path}")
+        return []
+    
+    try:
+        recyclings_to_create = []
+        created_count = 0
+        skipped_count = 0
+        
+        with open(csv_path, 'r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            
+            for row in reader:
+                try:
+                    points_value = int(row.get('points_value', '0').strip('"'))
+                    weight = float(row.get('weight', '0').strip('"'))
+                    date_str = row.get('date', '').strip('"')
+                    validation_hash = row.get('validation_hash', '').strip('"')
+                    status = row.get('STATUS', 'ACTIVE').strip('"')
+                    user_id_str = row.get('user_id', '').strip('"').strip()
+                    recycling_point_id_str = row.get('RECYCLING_POINT_ID', '').strip('"')
+                    recycling_value_id_str = row.get('RECYCLING_VALUE_ID', '').strip('"')
+                    
+                    # Validate required fields
+                    if not all([points_value, weight, validation_hash, recycling_point_id_str, recycling_value_id_str]):
+                        logger.warning(f"Skipping row with missing required fields: {row}")
+                        skipped_count += 1
+                        continue
+                    
+                    # Parse user_id: if it's a number, associate; if NULL or empty, don't associate
+                    user_id = None
+                    if user_id_str and user_id_str.upper() != 'NULL':
+                        try:
+                            user_id_int = int(user_id_str)
+                            # Check if user exists
+                            try:
+                                user_id = User.objects.get(user_id=user_id_int)
+                            except User.DoesNotExist:
+                                logger.warning(f"User with id {user_id_int} not found, skipping recycling")
+                                skipped_count += 1
+                                continue
+                        except ValueError:
+                            logger.warning(f"Invalid user_id format: {user_id_str}, skipping recycling")
+                            skipped_count += 1
+                            continue
+                    
+                    # Get RecyclingPoint
+                    try:
+                        recycling_point_id = RecyclingPoint.objects.get(recycling_point_id=int(recycling_point_id_str))
+                    except RecyclingPoint.DoesNotExist:
+                        logger.warning(f"RecyclingPoint with id {recycling_point_id_str} not found, skipping recycling")
+                        skipped_count += 1
+                        continue
+                    
+                    # Get RecyclingValue
+                    try:
+                        recycling_value_id = RecyclingValue.objects.get(recycling_value_id=int(recycling_value_id_str))
+                    except RecyclingValue.DoesNotExist:
+                        logger.warning(f"RecyclingValue with id {recycling_value_id_str} not found, skipping recycling")
+                        skipped_count += 1
+                        continue
+                    
+                    # Parse date if provided
+                    date = None
+                    if date_str:
+                        try:
+                            # Try to parse ISO format date
+                            from django.utils.dateparse import parse_datetime
+                            date = parse_datetime(date_str)
+                            if date is None:
+                                date = timezone.now()
+                        except Exception as e:
+                            logger.warning(f"Could not parse date {date_str}, using current time: {e}")
+                            date = timezone.now()
+                    else:
+                        date = timezone.now()
+                    
+                    # Create Recycling object
+                    recycling = Recycling(
+                        user_id=user_id,
+                        recycling_point_id=recycling_point_id,
+                        recycling_value_id=recycling_value_id,
+                        points_value=points_value,
+                        weight=weight,
+                        date=date,
+                        validation_hash=validation_hash,
+                        status=status
+                    )
+                    
+                    recyclings_to_create.append(recycling)
+                    created_count += 1
+                    
+                except Exception as e:
+                    logger.error(f"Error parsing row: {row}. Error: {str(e)}")
+                    skipped_count += 1
+                    continue
+        
+        # Bulk create all Recyclings
+        if recyclings_to_create:
+            created_recyclings = Recycling.objects.bulk_create(recyclings_to_create, ignore_conflicts=True)
+        
+        logger.info(f"CSV Import Summary: Created Recyclings={created_count}, Skipped={skipped_count}")
+        return recyclings_to_create if recyclings_to_create else []
+        
+    except Exception as e:
+        logger.error(f"An error occurred while loading Recyclings from CSV: {e}")
+        return []
 
 def create_data(number_of_users=10):
     
@@ -115,41 +319,10 @@ def create_data(number_of_users=10):
 
     wallet_history_to_create = []
 
-    # Create Users
-    logger.info('Creating users...')
-    try:
-        users_to_insert = []
-
-        for i in range(1, number_of_users + 1):
-            full_name = fake.name()
-            name_parts = full_name.split()
-            first_name = name_parts[0]
-            last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
-            
-            cpf = fake.cpf()
-            username = f'{first_name.lower()}{i}'
-            email = f'{username}@recicash.fake'
-            zip_code = fake.postcode()
-            access_level = 'U'
-
-            user = User(
-                username=username,
-                first_name=first_name,
-                last_name=last_name,
-                email=email,
-                cpf=cpf,
-                zip_code=zip_code,
-                access_level=access_level
-            )
-            user.set_password('senha123')  # Sets password securely
-            users_to_insert.append(user)
-
-        created_users = User.objects.bulk_create(users_to_insert)
-        logger.info(f"Users created successfully: {len(created_users)} users")
-
-    except Exception as e:
-        logger.error(f"An unexpected error occurred while creating users: {e}")
-        return
+    # Load Users from CSV
+    logger.info("Loading users from USER.csv...")
+    csv_users = load_users_from_csv()
+    logger.info(f"Loaded {len(csv_users)} users from CSV")
 
     # Create Recycling Point Managers
     logger.info('Creating Recycling Point Managers...')
@@ -196,53 +369,26 @@ def create_data(number_of_users=10):
     # Create Recycling Value
     logger.info(f"Creating Recycling value...")
     try:
-        recycling_value = RecyclingValue.objects.create(
+        recycling_value, created = RecyclingValue.objects.get_or_create(
             points_value=500.0,
-            date=timezone.now() - timedelta(days=366)
+            defaults={'date': timezone.now() - timedelta(days=366)}
         )
-        logger.info(f"Recycling value created successfully")
+        if created:
+            logger.info(f"Recycling value created successfully")
+        else:
+            logger.info(f"Recycling value already exists")
     except Exception as e:
         logger.error(f"An unexpected error occurred while creating Recycling Value: {e}")
         return
     
-    # Create Recycling
-    logger.info(f"Creating Recycling records...")
-    try:
-        all_users = list(User.objects.filter(access_level='U'))
-        all_recycling_points = list(RecyclingPoint.objects.all())
-
-        if not all_users:
-            logger.error("No users found to link up with recyclings. Aborting.")
-            return
-        if not all_recycling_points:
-            logger.error("No recycling points found to link up with recyclings. Aborting.")
-            return
-        
-        recyclings_to_create = []
-
-        for i in range(1, 201):
-            random_user = random.choice(all_users)
-            random_point = random.choice(all_recycling_points)
-
-            weight_value = round(random.uniform(0.5, 5.0), 2)
-            points = int(weight_value * recycling_value.points_value)
-
-            recyclings_to_create.append(
-                Recycling(
-                    user_id=random_user,
-                    recycling_point_id=random_point,
-                    recycling_value_id=recycling_value,
-                    points_value=points,
-                    weight=weight_value,
-                    date=fake.past_datetime(start_date="-1y", tzinfo=tz),
-                    validation_hash=fake.sha256()
-                )
-            )
-        
-        recyclings_created = Recycling.objects.bulk_create(recyclings_to_create)
-        logger.info(f"Recycling records created successfully: {len(recyclings_created)} records")
-
-        for recycling in recyclings_created:
+    # Load Recyclings from CSV
+    logger.info("Loading recyclings from RECYCLING.csv...")
+    csv_recyclings = load_recyclings_from_csv()
+    logger.info(f"Loaded {len(csv_recyclings)} recyclings from CSV")
+    
+    # Add WalletHistory for recyclings with associated users
+    for recycling in csv_recyclings:
+        if recycling.user_id:  # Only if recycling has an associated user
             wallet_history_to_create.append(
                 WalletHistory(
                     user_id=recycling.user_id,
@@ -251,103 +397,6 @@ def create_data(number_of_users=10):
                     date=recycling.date
                 )
             )
-    except Exception as e:
-        logger.error(f"An unexpected error occurred while creating Recycling records: {e}")
-
-    # Create Partner Companies
-    logger.info(f"Creating Partner Companies...")
-    try:
-        partners_to_create = []
-        for i in range(1, 21):
-            partners_to_create.append(
-                PartnerCompany(
-                    name=fake.company(),
-                    cnpj=fake.cnpj()
-                )
-            )
-        
-        created_partners = PartnerCompany.objects.bulk_create(partners_to_create)
-        logger.info(f"Partner Companies created successfully: {len(created_partners)} companies")
-    except Exception as e:
-        logger.error(f"An unexpected error occurred while creating Partner Companies: {e}")
-    
-    # Create Coupons
-    logger.info(f"Creating coupons...")
-    try:
-        all_partners = list(PartnerCompany.objects.all())
-        coupon_types = ['PERCENTAGE_DISCOUNT', 'DIRECT_DISCOUNT', 'GIFT']
-
-        if not all_partners:
-            logger.warning("No partner companies found. Skipping coupon creation.")
-        else:
-            coupons_to_create = []
-            for i in range(1, 301):
-                random_partner = random.choice(all_partners)
-                coupon_type = random.choice(coupon_types)
-
-                start_date = fake.past_datetime(start_date='-1y', tzinfo=tz)
-                expiring_date = start_date + timedelta(days=random.randint(30, 120))
-                
-                # Adjust value based on coupon type
-                if coupon_type == 'PERCENTAGE_DISCOUNT':
-                    value = random.randint(5, 50)  # 5% to 50%
-                elif coupon_type == 'DIRECT_DISCOUNT':
-                    value = random.randint(10, 100)  # R$ 10 to R$ 100
-                else:  # GIFT
-                    value = 1  # Quantity or boolean indicator
-                
-                coupons_to_create.append(
-                    Coupon(
-                        partner_company_id=random_partner,
-                        coupon_type=coupon_type,
-                        value=value,
-                        points_cost=random.randint(100, 2500),
-                        validation_hash=fake.sha256(),
-                        start_date=start_date,
-                        expiring_date=expiring_date
-                    )
-                )
-            created_coupons = Coupon.objects.bulk_create(coupons_to_create)
-            logger.info(f"Coupons created successfully: {len(created_coupons)} coupons")
-    except Exception as e:
-        logger.error(f"An unexpected error occurred while creating coupons: {e}")
-    
-    # Create Coupon Transactions
-    logger.info(f"Creating coupon transactions...")
-    try:
-        all_users = list(User.objects.filter(access_level='U'))
-        all_coupons = list(Coupon.objects.all())
-
-        if not all_users or not all_coupons:
-            logger.warning("No users or coupons found. Skipping coupon transaction creation.")
-        else:
-            transactions_to_create = []
-            for i in range(1, 101):
-                random_user = random.choice(all_users)
-                random_coupon = random.choice(all_coupons)
-                
-                transactions_to_create.append(
-                    CouponsTransactions(
-                        user_id=random_user,
-                        coupon_id=random_coupon,
-                        points_value=random_coupon.points_cost,
-                        date=fake.past_datetime(start_date="-1y", tzinfo=tz)
-                    )
-                )
-            transactions_created = CouponsTransactions.objects.bulk_create(transactions_to_create)
-            logger.info(f"Coupon transactions created successfully: {len(transactions_created)} transactions")
-
-            for transaction in transactions_created:
-                wallet_history_to_create.append(
-                    WalletHistory(
-                        user_id=transaction.user_id,
-                        operation='COUPON_TRANSACTION',
-                        value=-transaction.points_value,
-                        date=transaction.date
-                    )
-                )
-    except Exception as e:
-        logger.error(f"An unexpected error occurred while creating coupon transactions: {e}")
 
     # Create WalletHistory
     logger.info("Creating Wallet History records...")
@@ -439,6 +488,11 @@ def create_data(number_of_users=10):
 
         for user in all_system_users:
             balance = user_balances.get(user, 0)
+            # Ensure balance is never negative
+            if balance < 0:
+                balance = 0
+                logger.warning(f"User {user.username} had negative balance, setting to 0")
+            
             wallets_to_create.append(
                 Wallet(user_id=user, points_balance=balance)
             )
