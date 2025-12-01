@@ -13,6 +13,8 @@ import iconGlass from '/icon-glass.png';
 import iconMetal from '/icon-metal.png';
 import PostOverlay from '../components/PostOverlay';
 
+import { useAuth } from '@shared/utils/AuthProvider';
+
 import { 
   glassInstructions, 
   paperInstructions, 
@@ -80,6 +82,7 @@ function MaterialCard({ img, alt, description, decorated, onClick }) {
 function Landing() {
 
   const navigate = useNavigate();
+  const { isAuth, signUpRedirect } = useAuth();
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
 
@@ -102,6 +105,13 @@ function Landing() {
     setOverlayOpen(false);
     setSelectedMaterial(null);
   }, []);
+
+  const handleSaibaMais = () => {
+    if (!isAuth) {
+      signUpRedirect();
+    }
+    navigate('/blog');
+  }
 
 
   return (
@@ -172,7 +182,7 @@ function Landing() {
 
           {/* Sign Up Button */}
           <Box sx={{ textAlign: 'center', mt: 5 }}>
-            <Button variant="recicashCTA" onClick={() => navigate('/cadastro')}>
+            <Button variant="recicashCTA" onClick={handleSaibaMais}>
               Saiba mais
             </Button>
           </Box>
