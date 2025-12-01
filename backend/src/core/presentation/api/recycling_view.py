@@ -483,3 +483,52 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                 {"error": f"An unexpected error occurred: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated], url_path="ecopontos_by_manager")
+    def ecopontos_by_manager(self, request):
+        """
+        Returns all RecyclingPoint records assigned to the given manager_id.
+
+        Permission:
+          - admin users (access_level == 'A' or is_superuser) can query any manager
+          - a manager can query their own ecopontos (manager_id == request.user.user_id)
+
+        Responses:
+          200: list of ecopontos
+          400: missing/invalid manager_id
+          403: forbidden
+          404: manager not found
+        """
+        manager_id = request.query_params.get("manager_id")
+        if not manager_id:
+            return Response({"error": "manager_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            manager_id_int = int(manager_id.strip())
+        except (ValueError, TypeError):
+            return Response({"error": "Invalid manager_id."}, status=status.HTTP_400_BAD_REQUEST)
+
+        manager = User.objects.filter(user_id=manager_id_int).first()
+        if not manager:
+            return Response({"error": "Manager not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # permission check: admin or the manager himself
+        requester = request.user
+        is_admin = getattr(requester, "access_level", None) == "A" or getattr(requester, "is_superuser", False)
+        is_self = getattr(requester, "user_id", None) == manager_id_int
+
+        if not (is_admin or is_self):
+            return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+        rps = RecyclingPoint.objects.filter(user_id=manager)
+        result = []
+        for rp in rps:
+            result.append({
+                "recycling_point_id": getattr(rp, "recycling_point_id", None),
+                "name": getattr(rp, "name", None),
+                "cnpj": getattr(rp, "cnpj", None),
+                "zip_code": getattr(rp, "zip_code", None),
+            })
+
+        return Response(result, status=status.HTTP_200_OK)

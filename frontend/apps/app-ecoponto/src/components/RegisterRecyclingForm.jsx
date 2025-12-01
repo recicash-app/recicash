@@ -17,7 +17,7 @@ function RegisterRecyclingForm({ form, loading, ecopontos, handleChange, handleS
         {!loading && ecopontos.length > 0 ? (
           ecopontos.map((ep) => (
             <option key={ep.recycling_point_id} value={ep.recycling_point_id}>
-              {ep.name}
+              {ep.name} - {ep.cnpj}
             </option>
           ))
         ) : (

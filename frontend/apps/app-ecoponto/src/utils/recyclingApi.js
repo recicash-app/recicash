@@ -1,16 +1,7 @@
 import api from "@shared/utils/api";
 
 export async function fetchEcopontos(managerId) {
-  const url = managerId
-    ? `/recycling_points/?manager_id=${managerId}`
-    : "/recycling_points/";
-
-  const res = await api.get(url);
-  return res.data;
-}
-
-export async function fetchEcoponto(id) {
-  const res = await api.get(`/recycling_points/${id}/`);
+  const res = await api.get(`recyclings/ecopontos_by_manager/?manager_id=${managerId}`);
   return res.data;
 }
 

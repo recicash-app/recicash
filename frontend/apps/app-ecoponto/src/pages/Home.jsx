@@ -28,8 +28,8 @@ function Home() {
   useEffect(() => {
     async function load() {
       try {
-        //const list = await fetchEcopontos(user?.user_id);
-        setEcopontos([]);
+        const list = await fetchEcopontos(user?.user_id);
+        setEcopontos(list);
       } catch (e) {
         console.error(e);
         setSnackbar({ open: true, message: "Erro ao carregar ecopontos.", severity: "error" });
