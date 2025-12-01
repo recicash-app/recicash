@@ -82,7 +82,7 @@ function MaterialCard({ img, alt, description, decorated, onClick }) {
 function Landing() {
 
   const navigate = useNavigate();
-  const { isAuth, signUpRedirect } = useAuth();
+  const { isAuth, signInRedirect } = useAuth();
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
 
@@ -108,9 +108,12 @@ function Landing() {
 
   const handleSaibaMais = () => {
     if (!isAuth) {
-      signUpRedirect();
+      signInRedirect();
     }
-    navigate('/blog');
+    else {
+      navigate('/blog');
+    }
+    
   }
 
 
