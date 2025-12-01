@@ -1,5 +1,9 @@
 from .user_serializers import UserSerializer, LoginSerializer
 from .blog_serializers import PostImageSerializer, PostBlogSerializer
-from .recycling_serializers import RecyclingSerializer, EcopontoDisposalSerializer
+from .recycling_serializers import RecyclingSerializer, RecyclingPointSerializer, EcopontoDisposalSerializer
 
-__all__ = ["UserSerializer", "LoginSerializer", "PostImageSerializer", "PostBlogSerializer", "RecyclingSerializer", "EcopontoDisposalSerializer"]
+__all__ = [
+            "UserSerializer", "LoginSerializer", "PostImageSerializer", 
+            "PostBlogSerializer", "RecyclingSerializer", "EcopontoDisposalSerializer",
+            "RecyclingPointSerializer"  
+          ]

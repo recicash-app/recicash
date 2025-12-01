@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from core.domain.models import User, PostBlog, PostImage, RecyclingPoint, Wallet
+from core.domain.models import User, Wallet
 import re
 
 class UserSerializer(serializers.ModelSerializer):
@@ -39,25 +39,16 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-        """
-        Update an User, hashing password if it is known.
-        """
-        
-        instance.username = validated_data.get('username', instance.username)
-        instance.first_name = validated_data.get('first_name', instance.first_name)
-        instance.last_name = validated_data.get('last_name', instance.last_name)
-        instance.email = validated_data.get('email', instance.email)
-        instance.cpf = validated_data.get('cpf', instance.cpf)
-        instance.zip_code = validated_data.get('zip_code', instance.zip_code)
-        
-        # Hash password
-        password = validated_data.get('password', None)
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
         if password:
             instance.set_password(password)
-            
+
         instance.save()
         return instance
-    
+ 
     def validate_cpf(self, cpf):
         """
         Verify CPF format: XXX.XXX.XXX-XX.
@@ -138,77 +129,3 @@ class LoginSerializer(TokenObtainPairSerializer):
         }
 
         return data
-
-
-class PostImageSerializer(serializers.ModelSerializer):
-    """
-    Serializer for PostImage.
-
-    Fields:
-    - id: DB id
-    - image_url: absolute URL built from request context
-
-    Validation:
-    - Accepts files sent as multipart/form-data under field 'image'.
-    - Add validate_image() here if you want size / mime checks.
-    """
-    image_url = serializers.SerializerMethodField()
-
-    class Meta:
-        model = PostImage
-        fields = ['id', 'image_url']
-
-    def get_image_url(self, obj):
-        request = self.context.get('request')
-        if request:
-            return request.build_absolute_uri(obj.image.url)
-        return obj.image.url
-
-
-class PostBlogSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source='post_id', read_only=True)
-    images = PostImageSerializer(many=True, read_only=True)
-    
-    class Meta:
-        model = PostBlog
-        fields = (
-            'id',
-            'title',
-            'text',
-            'images',
-            'created_at',
-            'last_edition_date'
-        )
-        read_only_fields = (
-            'id',
-            'created_at',
-            'last_edition_date'
-        )
-
-
-class RecyclingPointSerializer(serializers.ModelSerializer):
-    """
-    Serializer for RecyclingPoint basic information.
-    
-    Fields:
-    - recycling_point_id: Unique auto-incrementing identifier
-    - maps_id: Google Maps identifier (unique)
-    - name: Name of the recycling point
-    - latitude: Geographic latitude
-    - longitude: Geographic longitude
-    - cnpj: Business registration number
-    - zip_code: Postal code
-    """
-    class Meta:
-        model = RecyclingPoint
-        fields = (
-            'recycling_point_id',
-            'maps_id',
-            'name',
-            'latitude',
-            'longitude',
-            'cnpj',
-            'zip_code'
-        )
-        read_only_fields = fields
-

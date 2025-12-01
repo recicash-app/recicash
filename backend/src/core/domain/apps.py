@@ -7,4 +7,4 @@ class EntitiesConfig(AppConfig):
     verbose_name = "Data Entity"
 
     def ready(self):
-        import core.infrastructure.signals
+        import core.infrastructure.signals.delete_image_file_signal
