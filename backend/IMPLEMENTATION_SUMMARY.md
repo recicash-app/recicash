@@ -1,8 +1,8 @@
-# Integração com Google Maps
+# Integração com Open Route Service
 
 ## Visão Geral
 
-Foi implementada uma integração completa com a API do Google Maps para recuperar e gerenciar a localização dos RecyclingPoints. A solução inclui endpoints para:
+Foi implementada uma integração completa com a API do Open Route Service (ORS) para recuperar e gerenciar a localização dos RecyclingPoints. A solução inclui endpoints para:
 
 - Listar todos os RecyclingPoints
 - Encontrar pontos próximos a uma localização (com cálculo de distância Haversine)
