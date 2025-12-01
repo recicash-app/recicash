@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, Grid } from '@mui/material';
+import { Box, Typography, Grid, Button, Link } from '@mui/material';
 
 import LeafBox from '@shared/ui/LeafBox';
 import { useAuth } from '@shared/utils/AuthProvider';
-import { fetchEcopontos, createDisposalRecord } from '../utils/recyclingApi';
+import { fetchEcopontos, createDisposalRecord, fetchLastDisposalRecord } from '../utils/disposalApi';
 
 import RegisterRecyclingForm from '../components/RegisterRecyclingForm';
+import ValidationHashModal from '../components/ValidationHashModal';
 import AppSnackbar from '@shared/ui/AppSnackbar';
 
 function Home() {
   const { user } = useAuth();
 
+  const [validationHash, setValidationHash] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
   const [ecopontos, setEcopontos] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -59,12 +62,29 @@ function Home() {
       };
 
       const res = await createDisposalRecord(payload);
-
-      setSnackbar({ open: true, message: `Registro criado! Hash: ${res.validation_hash}`, severity: "success" });
+      setValidationHash(res.validation_hash);
+      setModalOpen(true);
+      setSnackbar({ open: true, message: `Registro criado!`, severity: "success" });
       setForm({ recycling_point_id: "", weight: "" });
     } catch (err) {
       console.error(err);
       setSnackbar({ open: true, message: "Erro ao registrar reciclagem.", severity: "error" });
+    }
+  }
+
+  async function handleShowLastHash() {
+    try {
+      const res = await fetchLastDisposalRecord(user?.user_id);
+      if (res?.validation_hash) {
+        setValidationHash(res.validation_hash);
+        setModalOpen(true);
+        setSnackbar({ open: true, message: "Último hash carregado.", severity: "info" });
+      } else {
+        setSnackbar({ open: true, message: "Nenhum registro encontrado.", severity: "warning" });
+      }
+    } catch (err) {
+      console.error(err);
+      setSnackbar({ open: true, message: "Erro ao buscar último registro.", severity: "error" });
     }
   }
 
@@ -101,6 +121,21 @@ function Home() {
               handleChange={handleChange}
               handleSubmit={handleSubmit}
             />
+
+            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+              <Typography
+                variant="body2"
+                color="text.primary"
+                sx={{
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  display: 'inline-block',
+                }}
+                onClick={handleShowLastHash}
+              >
+                Mostrar último registro
+              </Typography>
+            </Box>
           </Grid>
         </Grid>
       </LeafBox>
@@ -110,6 +145,12 @@ function Home() {
         message={snackbar.message}
         severity={snackbar.severity}
         onClose={handleSnackbarClose}
+      />
+
+      <ValidationHashModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        hash={validationHash}
       />
     </Box>
   );

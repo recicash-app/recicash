@@ -488,6 +488,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated], url_path="ecopontos_by_manager")
     def ecopontos_by_manager(self, request):
         """
+        GET /api/v1/recyclings/ecopontos_by_manager/?manager_id=<id>
         Returns all RecyclingPoint records assigned to the given manager_id.
 
         Permission:
@@ -532,3 +533,52 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             })
 
         return Response(result, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated], url_path="last_disposal")
+    def last_disposal(self, request):
+        """
+        GET /api/v1/recyclings/last_disposal/?manager_id=<id>
+        Returns the most recent Recycling record for any recycling point owned by the manager.
+
+        Permissions:
+          - admin users (access_level == 'A' or is_superuser) can query any manager
+          - a manager can query their own last disposal (manager_id == request.user.user_id)
+
+        Responses:
+          200: recycling serializer data for the most recent disposal
+          400: missing/invalid manager_id
+          403: forbidden
+          404: manager not found or no disposals
+        """
+        manager_id = request.query_params.get("manager_id")
+        if not manager_id:
+            return Response({"error": "manager_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            manager_id_int = int(str(manager_id).strip())
+        except (ValueError, TypeError):
+            return Response({"error": "Invalid manager_id."}, status=status.HTTP_400_BAD_REQUEST)
+
+        manager = User.objects.filter(user_id=manager_id_int).first()
+        if not manager:
+            return Response({"error": "Manager not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # permission check: admin or the manager himself
+        requester = request.user
+        is_admin = getattr(requester, "access_level", None) == "A" or getattr(requester, "is_superuser", False)
+        is_self = getattr(requester, "user_id", None) == manager_id_int
+
+        if not (is_admin or is_self):
+            return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+
+        # find recycling points for manager, then latest Recycling record
+        rp_qs = RecyclingPoint.objects.filter(user_id=manager)
+        if not rp_qs.exists():
+            return Response({"error": "No recycling points found for this manager."}, status=status.HTTP_404_NOT_FOUND)
+
+        last_recycling = Recycling.objects.filter(recycling_point_id__in=rp_qs).order_by("-date").first()
+        if not last_recycling:
+            return Response({"error": "No disposal records found for this manager."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(last_recycling)
+        return Response(serializer.data, status=status.HTTP_200_OK)
