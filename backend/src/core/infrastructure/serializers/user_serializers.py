@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from core.domain.models import User
+from core.domain.models import User, Wallet 
 import re
 
 class UserSerializer(serializers.ModelSerializer):
@@ -33,6 +33,9 @@ class UserSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(password)  # Hashes the password
         user.save()
+
+        Wallet.objects.create(user_id=user, points_balance=0)
+        
         return user
 
     def update(self, instance, validated_data):
