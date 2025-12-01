@@ -12,7 +12,7 @@ import shapeTopLeft from '@shared/assets/shape-top-left.svg';
 import shapeTopRight from '@shared/assets/shape-top-right.svg';
 import RegisterNoteForm from "../components/wallet/RegisterNoteForm";
 
-import api from "@shared/utils/api";
+import { getRecyclings, postNote} from "../services/recyclings.js"
 import AppSnackbar from '@shared/ui/AppSnackbar';
 
 function UserHome() {
@@ -32,7 +32,7 @@ function UserHome() {
     if (!user || !user.user_id) return;
 
     try {
-        const response = await api.get(`/recyclings/?user_id=${user.user_id}&status=REDEEMED`);
+        const response = await getRecyclings({ userId: user.user_id });
         const dataList = Array.isArray(response.data) ? response.data : (response.data.results || []);
         
         const points = dataList.reduce((acc, item) => acc + (item.points_value || 0), 0);
@@ -62,10 +62,7 @@ function UserHome() {
     if (!user || !user.user_id) return; 
 
     try {
-      const response = await api.post('/recyclings/record_wallet_history/', {
-        validation_hash: noteCode, 
-        user_id: user.user_id
-      });
+      const response = await postNote({ noteCode, userId: user.user_id });
 
       setSnackbar({
         open: true,
