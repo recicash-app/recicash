@@ -4,8 +4,8 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 import Test from './Test';
-import Home from './pages/Home';
-import Landing from './pages/Landing.jsx';
+import UserHome from './pages/UserHome';
+import Landing from './pages/Landing';
 import Header from './components/navigation/Header';
 import BlogPage from './pages/BlogPage';
 import History from './pages/History';
@@ -28,7 +28,7 @@ function App() {
           {/* Protected Routes */}
           <Route element={<ProtectedRoute roles={['U']} />}>
             <Route path="/blog" element={<BlogPage />} />
-            <Route path="/inicio" element={<Home />} />
+            <Route path="/inicio" element={<UserHome />} />
             <Route path="/carteira" element={<Wallet />} />
             <Route path="/historico" element={<History />} />
             <Route path="/perfil" element={<Navigate to={`${AUTH_URL}/dados`} />} />

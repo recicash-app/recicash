@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Grid, Stack, CircularProgress, Snackbar, Alert } from '@mui/material';
+import { Box, Typography, Button, Grid, Stack, CircularProgress } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '@shared/utils/AuthProvider';
 
@@ -13,6 +13,7 @@ import shapeTopRight from '@shared/assets/shape-top-right.svg';
 import RegisterNoteForm from "../components/wallet/RegisterNoteForm";
 
 import api from "@shared/utils/api";
+import AppSnackbar from '@shared/ui/AppSnackbar';
 
 function UserHome() {
   const navigate = useNavigate();
@@ -283,21 +284,13 @@ function UserHome() {
         </Box>
         </Box>
       </Box>
-      
-      <Snackbar
+
+      <AppSnackbar
         open={snackbar.open}
-        autoHideDuration={3000}
+        message={snackbar.message}
+        severity={snackbar.severity}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert 
-            onClose={handleCloseSnackbar} 
-            severity={snackbar.severity}
-            sx={{ width: '100%', borderRadius: 2, boxShadow: 3 }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+      />
       
     </React.Fragment>
   );
