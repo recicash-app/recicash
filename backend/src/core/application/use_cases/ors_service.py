@@ -65,7 +65,7 @@ class ORSService:
     
     def geocode_address(self, address: str) -> Optional[Tuple[float, float]]:
         """
-        Convert an address string to latitude and longitude using Google Geocoding API.
+        Convert an address string to latitude and longitude using Open Route Service (ORS) Geocoding API.
         
         Args:
             address: Address string to geocode (e.g., "Rua Augusta, São Paulo, SP")
