@@ -39,6 +39,14 @@ function Header() {
     { name: 'Informações', path: `/blog` }
   ];
 
+  const mobileOptions = isAuth
+  ? [
+      ...privateOptions,
+      { name: 'Editar dados', path: '/perfil' }
+    ]
+  : publicOptions;
+
+
 	const activeItem = isAuth
     ? privateOptions.findIndex(option => location.pathname.startsWith(option.path))
     : null;
@@ -86,7 +94,7 @@ function Header() {
 					{/* Mobile Navigation */}
 					<Box sx={{  display: { xs: 'flex', md: 'none' }, alignItems: 'center', gap: 1 }}>
 						<MobileToolbar
-							options={isAuth ? privateOptions : publicOptions}
+							options={mobileOptions}
 							isAuth={isAuth}
 							onLogin={handleLogin}
 							onLogout={handleLogout}
