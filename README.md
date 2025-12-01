@@ -39,6 +39,15 @@ Antes de rodar o projeto, é necessário preencher o arquivo `.env` com as vari�
     make tests
     ```
 
+5. Para gerar relatório de cobertura de testes:
+
+    ```bash
+    make coverage
+    make coverage-html
+    ```
+
+    O relatório HTML será gerado em `backend/src/htmlcov/index.html`
+
 ## Acessando a Aplicação
 
 Após subir os containers, acesse cada serviço pelos seguintes endereços:
