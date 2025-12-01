@@ -263,7 +263,6 @@ function UserHome() {
                           textTransform: 'none',
                           width: 'auto',
                           fontSize: '1rem',
-                          //borderColor: '#93B17D',
                           border: '1px solid #E8F5E9',
                           
                           '&:hover': {
