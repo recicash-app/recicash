@@ -79,7 +79,7 @@ function UserHome() {
       console.error("Erro ao cadastrar nota:", error);
       setSnackbar({
         open: true,
-        message: error.response?.data?.error || "Erro ao cadastrar nota.",
+        message: "Erro ao cadastrar nota.",
         severity: "error"
       });
 
