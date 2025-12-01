@@ -2,16 +2,24 @@ import { Box, TextField, Typography, FormControl, Select } from "@mui/material";
 import { styled } from "@mui/system";
 
 const DataField = styled(TextField)({
-  width: "404px", 
-  height: "32px",
+  width: "404px",
   borderRadius: "10px",
-  border: "1px solid #D9D9D9",
-  '& .MuiInputBase-root': {
-    height: '32px',
+  '& .MuiOutlinedInput-root': {
     borderRadius: '10px',
+    height: '32px',
+    padding: 0,
+    '& input': {
+      height: '32px',
+      padding: '0 12px',
+      boxSizing: 'border-box',
+    },
   },
   '& .MuiOutlinedInput-notchedOutline': {
-    border: 'none',
+    border: '1px solid #D9D9D9',
+  },
+  '& .MuiFormHelperText-root': {
+    marginLeft: '12px',
+    marginTop: '4px',
   },
 });
 

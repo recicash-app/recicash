@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import { AddRounded } from "@mui/icons-material";
 
-import AppSnackbar from "@/components/AppSnackbar";
+import AppSnackbar from "@shared/ui/AppSnackbar";
 import DataGridTable from "@/components/DataGridTable";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import PostFormOverlay from "@/components/posts/PostFormOverlay";

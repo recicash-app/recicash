@@ -4,7 +4,7 @@ function LeafBox({ sx, children, ...props }) {
   return (
     <Box
       sx={(theme) => ({
-        borderRadius: "263.5px 0px",
+        borderRadius: "195px 0px",
         backgroundColor: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,
         opacity: 1,
@@ -15,6 +15,7 @@ function LeafBox({ sx, children, ...props }) {
         alignItems: "center",
         justifyContent: "center",
         padding: "48px 96px",
+        boxSizing: "border-box",
         overflow: "hidden",
         ...sx,
       })}
