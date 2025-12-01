@@ -41,16 +41,19 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         Define permissions for different actions.
         
         Current behavior:
-        - list, retrieve -> AllowAny (public read)
+        - list -> IsAuthenticated (requires authentication with user_id parameter)
+        - retrieve -> AllowAny (public read)
         - create, update, delete -> AllowAny (for local testing)
         
         To require authentication in production, replace with:
             return [IsAuthenticated()]
         """
-        if self.action in ['list', 'retrieve']:
+        if self.action == 'list':
             permission_classes = [IsAuthenticated]
+        elif self.action == 'retrieve':
+            permission_classes = [AllowAny]
         else:
-            permission_classes = [IsAuthenticated]  # Change to [IsAuthenticated] in production
+            permission_classes = [IsAuthenticated] 
 
         return [permission() for permission in permission_classes]
     
@@ -96,6 +99,11 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             return queryset.none()
         
         queryset = queryset.filter(user_id__user_id=requested_user_id)
+
+        # Filter by status if provided
+        status_param = self.request.query_params.get('status', None)
+        if status_param:
+            queryset = queryset.filter(status=status_param)
         
         # Filter by date if provided
         start_date = self.request.query_params.get('start_date', None)
@@ -268,48 +276,34 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def record_wallet_history(self, request):
         """
         Custom action to find a Recycling record and update WalletHistory and Wallet.
         
         Expected POST data:
         {
-            "recycling_id": <string>,
             "validation_hash": "<string>",
-            "user_id": <integer>
+            "user_id": <integer> (optional - if not provided, uses authenticated user)
         }
         
         This endpoint:
-        1. Finds the Recycling record by recycling_id
+        1. Finds the Recycling record by validation_hash
         2. Verifies the validation_hash matches
         3. Creates a WalletHistory record with operation='RECYCLING'
         4. Updates the user's wallet points_balance
         """
-        recycling_id = request.data.get('recycling_id')
-        validation_hash = request.data.get('validation_hash')
+        code = request.data.get('validation_hash')
         user_id = request.data.get('user_id')
-        
-        if not recycling_id:
-            return Response(
-                {"error": "recycling_id is required."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        if not user_id:
-            return Response(
-                {"error": "user_id is required."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        if not validation_hash:
+
+        if not code:
             return Response(
                 {"error": "validation_hash is required."},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         try:
-            recycling = Recycling.objects.get(recycling_id=recycling_id)
+            recycling = Recycling.objects.get(validation_hash=code)
         except Recycling.DoesNotExist:
             return Response(
                 {"error": "Recycling record not found."},
@@ -317,7 +311,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             )
         
         # Verify if the validation_hash matches
-        if recycling.validation_hash != validation_hash:
+        if recycling.validation_hash != code:
             return Response(
                 {"error": "Unauthorized: validation_hash does not match."},
                 status=status.HTTP_403_FORBIDDEN
@@ -330,24 +324,23 @@ class RecyclingViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Get the user from the request and update the recycling record
-        try:
-            user = User.objects.get(user_id=user_id)
-        except User.DoesNotExist:
-            return Response(
-                {"error": "User not found."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        
-        # Update the recycling record with the user_id from the request
-        recycling.user_id = user
-        
-        if not user:
-            return Response(
-                {"error": "User not found for this recycling record."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
+        # Get the user: from request if provided, otherwise use the authenticated user
+        if user_id:
+            try:
+                user = User.objects.get(user_id=user_id)
+            except User.DoesNotExist:
+                return Response(
+                    {"error": "User not found."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        else:
+            # Use the authenticated user from the request
+            user = request.user
+            if not user or not user.is_authenticated:
+                return Response(
+                    {"error": "Authentication required."},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
         
         # Update user's wallet points balance
         try:
@@ -362,6 +355,8 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             wallet.points_balance += recycling.points_value
             wallet.save()
             
+            # Update the recycling record with the user_id
+            recycling.user_id = user
             # Update recycling status to REDEEMED
             recycling.status = 'REDEEMED'
             recycling.save()
@@ -406,7 +401,7 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         """
         instance.delete()
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['post'])
     def register_disposal(self, request):
         """
         Register a disposal by a recycling point (ecoponto).
@@ -435,6 +430,13 @@ class RecyclingViewSet(viewsets.ModelViewSet):
             "recycling_point_id": <integer>
         }
         """
+        # Check if user is authenticated
+        if not request.user or not request.user.is_authenticated:
+            return Response(
+                {"error": "Authentication required."},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
         serializer = EcopontoDisposalSerializer(data=request.data)
         
         if not serializer.is_valid():
@@ -456,7 +458,8 @@ class RecyclingViewSet(viewsets.ModelViewSet):
         
         user = request.user
         is_representative = recycling_point.user_id == user
-        is_manager = user.access_level == 'M'
+        # Safe access to access_level - only check if user has the attribute
+        is_manager = hasattr(user, 'access_level') and user.access_level == 'M'
         
         if not is_representative and not is_manager:
             return Response(
