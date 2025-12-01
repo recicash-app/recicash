@@ -10,7 +10,7 @@ import {
   HistoryTable,
   ALL_MONTHS,
 } from "../components/history";
-import { getRecyclings } from "../services/history.js"
+import { getRecyclings } from "../services/recyclings.js"
 
 function History() {
 

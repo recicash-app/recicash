@@ -10,7 +10,7 @@ import WalletPointsDisplay from "../components/wallet/WalletPointsDisplay";
 import RegisterNoteForm from "../components/wallet/RegisterNoteForm";
 import HistoryButton from "../components/wallet/HistoryButton";
 
-import { getPoints, postNote} from "../services/wallet.js"
+import { getRecyclings, postNote} from "../services/recyclings.js"
 
 const walletContainer = {
   width: "100%",
@@ -43,7 +43,7 @@ function Wallet() {
     }
 
     try {
-        const response = await getPoints({ userId: user.user_id });
+        const response = await getRecyclings({ userId: user.user_id });
         const dataList = Array.isArray(response.data) ? response.data : (response.data.results || []);
       
         const points = dataList.reduce((acc, item) => acc + (item.points_value || 0), 0);
@@ -62,11 +62,10 @@ function Wallet() {
   const handleRegisterNote = async () => {
 
     if (!noteCode) return;
-    
-    const userId = parseInt(localStorage.getItem('user_id'), 10);
+    if (!user || !user.user_id) return;
 
     try {
-      const response = await postNote({ noteCode, userId });
+      const response = await postNote({ noteCode, userId: user.user_id });
 
       setSnackbar({
         open: true,
@@ -124,7 +123,7 @@ function Wallet() {
 
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
+        autoHideDuration={3000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
