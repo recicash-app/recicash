@@ -34,7 +34,6 @@ function Header() {
   const privateOptions = [
     { name: 'Início', path: `/inicio` },
     { name: 'Mapa', path: `/mapa` },
-    { name: 'Recompensas', path: `/recompensas` },
     { name: 'Carteira', path: `/carteira` },
     { name: 'Informações', path: `/blog` }
   ];
@@ -43,6 +42,7 @@ function Header() {
 	
 	const handleLogoClick = () => {
     	setActiveItem(isAuth ? 0 : null);
+      //setActiveItem(0);
   	};
 
 	const handleLogin = () => {

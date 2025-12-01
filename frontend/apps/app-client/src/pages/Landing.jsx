@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback  } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Box, Typography, Button, Grid } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 
@@ -78,8 +78,8 @@ function MaterialCard({ img, alt, description, decorated, onClick }) {
 }
 
 function Landing() {
+
   const navigate = useNavigate();
-  //const { isAuth, signUpRedirect } = useAuth();
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
 
