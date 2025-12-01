@@ -195,7 +195,7 @@ class RecyclingPointViewSet(viewsets.ReadOnlyModelViewSet):
         """
         Search for nearby recycling points using an address string.
         
-        Uses Google Geocoding API to convert address to coordinates,
+        Uses ORS (Open Route Service) Geocoding API to convert address to coordinates,
         then searches for registered recycling points nearby.
         
         Query Parameters:
