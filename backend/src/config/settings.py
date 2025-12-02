@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 import os
 
@@ -183,7 +184,10 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "USER_ID_FIELD": "user_id"
+    "USER_ID_FIELD": "user_id",
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=24),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
 }
 
 # ------------------------------
