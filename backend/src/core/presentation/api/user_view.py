@@ -241,8 +241,14 @@ class UserViewSet(viewsets.ModelViewSet):
         if new != confirm:
             return Response({"error": "New password and confirmation do not match."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not new or len(new) < 6:
-            return Response({"error": "New password must be at least 6 characters long."}, status=status.HTTP_400_BAD_REQUEST)
+        if not new or len(new) < 8:
+            return Response({"error": "Password must have at least 8 characters."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not any(char.isdigit() for char in new):
+            return Response({"error": "Password must contains at least one number"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not any(char.isupper() for char in new):
+            return Response({"error": "Password must have at least one capitalized letter"}, status=status.HTTP_400_BAD_REQUEST)
 
         user.set_password(new)
         user.save()
