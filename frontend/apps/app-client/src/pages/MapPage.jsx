@@ -64,6 +64,7 @@ function MapPage() {
     const [useLocation, setUseLocation] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
     const [searchCoords, setSearchCoords] = useState(null);
+    const [hasSearched, setHasSearched] = useState(false);
 
     const handleLocationChange = (event) => setLocation(event.target.value);
 
@@ -73,6 +74,7 @@ function MapPage() {
     const handleSearch = async () => {
         setLoading(true);
         setSelectedId(null);
+        setHasSearched(true);
 
         try {
             const response = await fetch(
@@ -118,6 +120,7 @@ function MapPage() {
 
         setLoading(true);
         setSelectedId(null);
+        setHasSearched(true);
 
         navigator.geolocation.getCurrentPosition(
             async (pos) => {
@@ -174,6 +177,7 @@ function MapPage() {
         } else {
             setSearchCoords(null);
             setResults([]);
+            setHasSearched(false);
         }
     };
 
@@ -295,7 +299,19 @@ function MapPage() {
                 <h2 style={{ marginTop: "50px", fontWeight: "600", fontSize: "2.25rem", fontFamily: '"Volkhov", serif', }}>Resultados</h2>
 
                 <div style={{ marginTop: "10px" }}>
-                    {results.map((point) => {
+                    {loading && (
+                        <div style={{ textAlign: "center", padding: "20px", color: "#93B17D", fontWeight: "600" }}>
+                            Buscando ecopontos...
+                        </div>
+                    )}
+                    
+                    {!loading && hasSearched && results.length === 0 && (
+                        <div style={{ textAlign: "center", padding: "20px", color: "#666", fontStyle: "italic" }}>
+                            Nenhum ecoponto encontrado em um raio de 5km.
+                        </div>
+                    )}
+
+                    {!loading && results.map((point) => {
                         const isSelected = selectedId === point.recycling_point_id;
                         return (
                             <div
