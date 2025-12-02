@@ -24,12 +24,35 @@ function Form() {
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const formatCPF = (value) => {
+    return value
+      .replace(/\D/g, '') // Remove tudo que não for dígito
+      .slice(0, 11) // Limita a 11 dígitos
+      .replace(/(\d{3})(\d)/, '$1.$2') // Adiciona o primeiro ponto
+      .replace(/(\d{3})(\d)/, '$1.$2') // Adiciona o segundo ponto
+      .replace(/(\d{3})(\d{2})$/, '$1-$2'); // Adiciona o traço
+  };
+
+  const formatZipCode = (value) => {
+    return value
+      .replace(/\D/g, '') // Remove tudo que não for dígito
+      .slice(0, 8) // Limita a 8 dígitos
+      .replace(/(\d{5})(\d)/, '$1-$2'); // Adiciona o traço
+  };
+
   const handleChange = (e) => {
     const { name, checked, value } = e.target;
-    
+
+    let formattedValue = value;
+    if (name === 'cpf') {
+      formattedValue = formatCPF(value);
+    } else if (name === 'zip_code') {
+      formattedValue = formatZipCode(value);
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'policy' ? checked : value
+      [name]: name === 'policy' ? checked : formattedValue
     }));
 
     if (formErrors[name]) {

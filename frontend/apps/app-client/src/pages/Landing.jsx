@@ -28,7 +28,12 @@ const CardBoxStyle = {
   display: 'flex', 
   flexDirection: 'column', 
   alignItems: 'center', 
-  justifyContent: 'center' 
+  justifyContent: 'center', 
+  cursor: 'pointer', 
+  '&:hover': {
+    transform: 'scale(1.05)',
+    transition: 'transform 0.2s ease-in-out', 
+  },
 };
 
 const IconImgStyle = { 
