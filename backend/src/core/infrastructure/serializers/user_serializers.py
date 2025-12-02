@@ -53,8 +53,14 @@ class UserSerializer(serializers.ModelSerializer):
         """
         Verify that email is unique.
         """
-        # Check if email already exists (case-insensitive)
-        if User.objects.filter(email__iexact=email).exists():
+        ## Check if email already exists (case-insensitive)
+        queryset = User.objects.filter(email__iexact=email)
+        
+        # Exclude current instance during updates
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        
+        if queryset.exists():
             raise serializers.ValidationError("Email already exists.")
         
         return email
