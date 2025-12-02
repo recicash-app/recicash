@@ -310,6 +310,239 @@ def load_recyclings_from_csv():
         logger.error(f"An error occurred while loading Recyclings from CSV: {e}")
         return []
 
+def load_blog_posts_from_csv():
+    """
+    Load blog posts from POST_BLOG.csv and create them in the database.
+    For each post, also create a PostImage with a placeholder image.
+    """
+    logger.info("Loading Blog Posts from CSV...")
+    
+    csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), 'POST_BLOG.csv')
+    
+    if not os.path.exists(csv_path):
+        logger.error(f"CSV file not found at {csv_path}")
+        return {}
+    
+    try:
+        posts_to_create = []
+        created_posts = {}
+        created_count = 0
+        skipped_count = 0
+        
+        with open(csv_path, 'r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            
+            for row in reader:
+                try:
+                    post_id = row.get('post_id', '').strip('"')
+                    title = row.get('title', '').strip('"')
+                    text = row.get('text', '').strip('"')
+                    created_at_str = row.get('created_at', '').strip('"')
+                    last_edition_date_str = row.get('last_edition_date', '').strip('"')
+                    author_id_str = row.get('AUTHOR_ID', '').strip('"')
+                    
+                    # Validate required fields
+                    if not all([post_id, title, text, author_id_str]):
+                        logger.warning(f"Skipping row with missing required fields: {row}")
+                        skipped_count += 1
+                        continue
+                    
+                    # Check if post already exists
+                    if PostBlog.objects.filter(post_id=int(post_id)).exists():
+                        logger.info(f"PostBlog already exists: {title}")
+                        skipped_count += 1
+                        continue
+                    
+                    # Get author user
+                    try:
+                        author = User.objects.get(user_id=int(author_id_str))
+                    except User.DoesNotExist:
+                        logger.warning(f"Author with id {author_id_str} not found, skipping post")
+                        skipped_count += 1
+                        continue
+                    
+                    # Parse dates if provided
+                    created_at = None
+                    if created_at_str:
+                        try:
+                            from django.utils.dateparse import parse_datetime
+                            created_at = parse_datetime(created_at_str)
+                            if created_at is None:
+                                created_at = timezone.now()
+                        except Exception as e:
+                            logger.warning(f"Could not parse created_at {created_at_str}: {e}")
+                            created_at = timezone.now()
+                    else:
+                        created_at = timezone.now()
+                    
+                    last_edition_date = None
+                    if last_edition_date_str:
+                        try:
+                            from django.utils.dateparse import parse_datetime
+                            last_edition_date = parse_datetime(last_edition_date_str)
+                            if last_edition_date is None:
+                                last_edition_date = timezone.now()
+                        except Exception as e:
+                            logger.warning(f"Could not parse last_edition_date {last_edition_date_str}: {e}")
+                            last_edition_date = timezone.now()
+                    else:
+                        last_edition_date = timezone.now()
+                    
+                    # Create PostBlog object
+                    post = PostBlog(
+                        post_id=int(post_id),
+                        author_id=author,
+                        title=title,
+                        text=text,
+                        created_at=created_at,
+                        last_edition_date=last_edition_date
+                    )
+                    
+                    posts_to_create.append(post)
+                    created_posts[int(post_id)] = post
+                    created_count += 1
+                    
+                except Exception as e:
+                    logger.error(f"Error parsing row: {row}. Error: {str(e)}")
+                    skipped_count += 1
+                    continue
+        
+        # Bulk create all PostBlogs
+        if posts_to_create:
+            PostBlog.objects.bulk_create(posts_to_create)
+            
+            # Create PostImage for each post with placeholder image
+            logger.info("Creating PostImages with placeholder image...")
+            image_url = "https://placehold.co/800x400/22c55e/ffffff.png?text=Recicash+Blog"
+            images_to_create = []
+            
+            try:
+                response = requests.get(image_url, timeout=10)
+                if response.status_code == 200:
+                    for post in posts_to_create:
+                        try:
+                            image_name = f"blog_post_{post.post_id}.png"
+                            image_file = ContentFile(response.content, name=image_name)
+                            
+                            image = PostImage(post=post)
+                            image.image.save(image_name, image_file, save=False)
+                            images_to_create.append(image)
+                        except Exception as e:
+                            logger.error(f"Error creating image for post {post.post_id}: {e}")
+                    
+                    if images_to_create:
+                        PostImage.objects.bulk_create(images_to_create)
+                        logger.info(f"PostImages created successfully: {len(images_to_create)} images")
+                else:
+                    logger.warning(f"Failed to download placeholder image. Status code: {response.status_code}")
+            except Exception as e:
+                logger.error(f"Error downloading or creating placeholder images: {e}")
+        
+        logger.info(f"CSV Import Summary: Created PostBlogs={created_count}, Skipped={skipped_count}")
+        return created_posts
+        
+    except Exception as e:
+        logger.error(f"An error occurred while loading PostBlogs from CSV: {e}")
+        return {}
+
+def load_post_images_from_csv(posts_dict):
+    """
+    Load post images from POST_IMAGE.csv and create them in the database.
+    posts_dict should be a mapping of post_id to PostBlog objects.
+    Images are loaded from the media/blog_images folder.
+    """
+    logger.info("Loading Post Images from CSV...")
+    
+    csv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), 'POST_IMAGE.csv')
+    media_base_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), 'media')
+    
+    if not os.path.exists(csv_path):
+        logger.error(f"CSV file not found at {csv_path}")
+        return []
+    
+    try:
+        images_to_create = []
+        created_count = 0
+        skipped_count = 0
+        
+        with open(csv_path, 'r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            
+            for row in reader:
+                try:
+                    image_id = row.get('id', '').strip('"')
+                    image_path = row.get('image', '').strip('"')
+                    post_id_str = row.get('post_id', '').strip('"')
+                    
+                    # Validate required fields
+                    if not all([image_id, image_path, post_id_str]):
+                        logger.warning(f"Skipping row with missing required fields: {row}")
+                        skipped_count += 1
+                        continue
+                    
+                    # Get the post
+                    post_id = int(post_id_str)
+                    if post_id not in posts_dict:
+                        # Try to fetch from database
+                        try:
+                            post = PostBlog.objects.get(post_id=post_id)
+                        except PostBlog.DoesNotExist:
+                            logger.warning(f"PostBlog with id {post_id} not found, skipping image")
+                            skipped_count += 1
+                            continue
+                    else:
+                        post = posts_dict[post_id]
+                    
+                    # Check if image already exists
+                    if PostImage.objects.filter(id=int(image_id)).exists():
+                        logger.info(f"PostImage already exists: {image_path}")
+                        skipped_count += 1
+                        continue
+                    
+                    # Construct full path to image file
+                    full_image_path = os.path.join(media_base_path, image_path)
+                    
+                    # Check if image file exists
+                    if not os.path.exists(full_image_path):
+                        logger.warning(f"Image file not found at {full_image_path}, skipping image")
+                        skipped_count += 1
+                        continue
+                    
+                    # Read image file and create PostImage with actual file
+                    try:
+                        with open(full_image_path, 'rb') as img_file:
+                            image_content = img_file.read()
+                            image_name = os.path.basename(image_path)
+                            image_file = ContentFile(image_content, name=image_name)
+                            
+                            image = PostImage(
+                                id=int(image_id),
+                                post=post
+                            )
+                            image.image.save(image_name, image_file, save=False)
+                            images_to_create.append(image)
+                            created_count += 1
+                    except Exception as e:
+                        logger.error(f"Error reading/saving image file {full_image_path}: {e}")
+                        skipped_count += 1
+                        continue
+                    
+                except Exception as e:
+                    logger.error(f"Error parsing row: {row}. Error: {str(e)}")
+                    skipped_count += 1
+                    continue
+        
+        # Bulk create all PostImages
+        if images_to_create:
+            PostImage.objects.bulk_create(images_to_create)
+        
+        logger.info(f"CSV Import Summary: Created PostImages={created_count}, Skipped={skipped_count}")
+        return images_to_create
+        
+    except Exception as e:
+        logger.error(f"An error occurred while loading PostImages from CSV: {e}")
+        return []
+
 def create_data(number_of_users=10):
     
     logger.info("Starting initial data creation")
@@ -398,6 +631,11 @@ def create_data(number_of_users=10):
                 )
             )
 
+    # Load Blog Posts from CSV
+    logger.info("Loading blog posts from POST_BLOG.csv...")
+    csv_posts = load_blog_posts_from_csv()
+    logger.info(f"Loaded {len(csv_posts)} blog posts from CSV")
+
     # Create WalletHistory
     logger.info("Creating Wallet History records...")
     if not wallet_history_to_create:
@@ -408,73 +646,6 @@ def create_data(number_of_users=10):
             logger.info(f"Wallet history records created successfully: {len(created_history)} records")
         except Exception as e:
             logger.error(f"An unexpected error occurred while creating wallet history: {e}")
-    
-    # Create Blog Posts
-    logger.info(f"Creating blog posts...")
-    try:
-        admin_user, admin_created = User.objects.get_or_create(
-            username='admin',
-            defaults={
-                'first_name': 'Admin',
-                'last_name': 'Recicash',
-                'email': 'admin@recicash.fake',
-                'cpf': fake.cpf(),
-                'zip_code': fake.postcode(),
-                'access_level': 'A'
-            }
-        )
-        
-        if admin_created:
-            admin_user.set_password('admin123')
-            admin_user.save()
-            logger.info("Admin user created.")
-        else:
-            logger.info("Admin user already exists.")
-
-        blog_titles = [
-            "A Importância da Reciclagem para o Meio Ambiente",
-            "Como Separar Corretamente Seus Resíduos",
-            "Materiais Recicláveis que Você Pode Não Conhecer",
-            "O Impacto do Plástico nos Oceanos",
-            "Economia Circular: O Futuro da Sustentabilidade",
-            "Dicas para Reduzir o Lixo no Dia a Dia",
-            "Como Funciona a Logística Reversa no Brasil",
-            "Reciclagem de Eletrônicos: O Que Você Precisa Saber",
-            "Os Benefícios da Compostagem Doméstica",
-            "Reciclagem e Geração de Empregos: Uma Relação Sustentável",
-            "A Importância da Educação Ambiental nas Escolas",
-            "Como a Tecnologia Está Transformando a Reciclagem",
-            "Reciclagem de Vidro: Mitos e Verdades",
-        ]
-        
-        created_posts = []
-
-        for i, title in enumerate(blog_titles, 1):
-            post = PostBlog.objects.create(
-                author_id=admin_user,
-                title=title,
-                text=fake.text(max_nb_chars=1500),
-                created_at=timezone.now() - timedelta(days=random.randint(1, 180)),
-                last_edition_date=timezone.now()
-            )
-
-            image_url = "https://placehold.co/800x400/22c55e/ffffff.png?text=Recicash+Blog"
-    
-            # Download image and attach to PostImage
-            response = requests.get(image_url)
-
-            image_name = f"blog_image_{i}.png"
-            image_file = ContentFile(response.content, name=image_name)
-
-            image_instance = PostImage(post=post)
-            image_instance.image.save(image_name, image_file, save=True)
-            
-            created_posts.append(post)
-
-        logger.info(f"Blog posts created successfully: {len(created_posts)} posts")
-
-    except Exception as e:
-        logger.error(f"An unexpected error occurred while creating blog posts: {e}")
 
     # Create Wallets
     logger.info("Calculating final balances and creating wallets for all users...")
