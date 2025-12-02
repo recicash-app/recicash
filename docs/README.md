@@ -43,11 +43,12 @@ Backend (Django)
 
 ### Frontend
 
-O frontend segue uma **abordagem modular inspirada em microfrontends** (ADR 004), separando os diferentes contextos de uso do sistema — **Cliente**, **Ecoponto** e **Administrativo** — em aplicações independentes, mas que compartilham bibliotecas comuns para manter consistência visual e lógica.
+O frontend segue uma **abordagem modular inspirada em microfrontends** (ADR 004), separando os diferentes contextos de uso do sistema — **Autenticação**, **Cliente**, **Ecoponto** e **Administrativo** — em aplicações independentes, mas que compartilham bibliotecas comuns para manter consistência visual e lógica.
 
 ```text
 Frontend (React)
 ├── apps/
+│   ├── auth/
 │   ├── cliente/
 │   ├── ecoponto/
 │   └── admin/
