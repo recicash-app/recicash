@@ -49,6 +49,16 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
  
+    def validate_email(self, email):
+        """
+        Verify that email is unique.
+        """
+        # Check if email already exists (case-insensitive)
+        if User.objects.filter(email__iexact=email).exists():
+            raise serializers.ValidationError("Email already exists.")
+        
+        return email
+
     def validate_cpf(self, cpf):
         """
         Verify CPF format: XXX.XXX.XXX-XX.
