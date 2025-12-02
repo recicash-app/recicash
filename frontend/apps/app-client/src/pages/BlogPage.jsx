@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Grid, Card, CardContent, CardMedia, Typography, CardActionArea } from "@mui/material";
+import { Grid, Card, CardContent, CardMedia, Typography, CardActionArea, Box } from "@mui/material";
 import { styled } from '@mui/system';
 import FullScreenOverlay from '@shared/ui/FullScreenOverlay';
 import { API_URL } from '@shared/utils/constants';
@@ -47,7 +47,7 @@ function PostCard({ post }) {
   };
 
   const postContent = (
-    <div>
+    <Box sx={{ padding: '32px' }}>
       <Typography variant="h4" gutterBottom>
         {post.title}
       </Typography>
@@ -60,7 +60,7 @@ function PostCard({ post }) {
         {post.images.map((image, index) => (
           <img
             key={index}
-            src={image.image_url}
+            src={image?.image_url}
             alt={`${post.title} - ${index + 1}`}
             style={{ width: '40%', height: 'auto' }}
           />
@@ -69,14 +69,14 @@ function PostCard({ post }) {
       <Typography variant="body1" gutterBottom>
         {post.text}
       </Typography>
-    </div>
+    </Box>
   );
 
   return (
     <>
       <CardComponent>
         <InteractiveArea onClick={handleOpenPost}>
-          <CardImage component="img" height="10vh" image={post.images[0].image_url} />
+          <CardImage component="img" height="10vh" image={post.images[0]?.image_url} />
           <CardText>
             <Typography gutterBottom component="div">
               {post.title.length > 50 ? `${post.title.substring(0, 50)}...` : post.title}
@@ -151,13 +151,16 @@ function BlogPage() {
           style={{ padding: '10px', width: '30vw', borderRadius: '5px', border: '1px solid #ccc' }}
         />
       </div>
-      <Grid container spacing={3} justifyContent="center">
-        {(filteredPosts.length > 0 ? filteredPosts : posts).map((post) => (
-          <Grid item key={post.id}>
-            <PostCard post={post} />
-          </Grid>
-        ))}
-      </Grid>
+      <Box sx={{ width: '90%', }}>
+        <Grid container spacing={2} justifyContent="flex-start">
+          {(filteredPosts.length > 0 ? filteredPosts : posts).map((post) => (
+            // adicionar breakpoints para responsividade
+            <Grid item key={post.id} xs={12} sm={6} md={4} lg={3}>
+              <PostCard post={post} />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
     </div>
   );
 }

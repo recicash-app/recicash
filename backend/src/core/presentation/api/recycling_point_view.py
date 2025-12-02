@@ -14,7 +14,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.parsers import JSONParser
 
 from core.domain.models import RecyclingPoint
-from core.infrastructure.serializers.user_serializers import RecyclingPointSerializer
+from core.infrastructure.serializers import RecyclingPointSerializer
 from core.application.use_cases.ors_service import ORSService
 
 import logging
