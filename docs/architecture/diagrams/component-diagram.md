@@ -25,40 +25,48 @@ C4Component
 
 ```mermaid
 C4Component
-
     System_Boundary(frontend, "Frontend (Microfrontends)") {
-
         Container_Boundary(proxy, "Orchestration Layer (Docker + Traefik)") {
-            Component(traefik, "Traefik Reverse Proxy", "Proxy Layer", "Roteia requisições entre apps e resolve subdomínios locais.")
+            Component(traefik, "Traefik Reverse Proxy", "Proxy Layer", "Roteia requisições entre microfrontends e backend.")
         }
-
-        Container_Boundary(web, "Web App (Client)") {
-            Component(web_ui, "UI Components", "React + MUI", "Interface principal para o cliente final.")
-            Component(web_logic, "Hooks / State Management", "", "Gerencia estado, autenticação e lógica de uso do cliente.")
+        Container_Boundary(web, "Web App") {
+            Component(web_ui, "UI Components", "React + MUI", "Interface principal do cliente final.")
+            Component(web_logic, "Hooks / State Management", "", "Gerencia estado, rotas e consumo de APIs.")
         }
-
         Container_Boundary(admin, "Admin App") {
             Component(admin_ui, "Admin UI", "React + MUI", "Painel administrativo.")
-            Component(admin_logic, "Hooks / State Management", "", "Gerencia estado e operações administrativas.")
+            Component(admin_logic, "Admin State / Hooks", "", "Gerencia estado e regras administrativas.")
         }
-
         Container_Boundary(ecoponto, "Ecoponto App") {
-            Component(ecoponto_ui, "Ecoponto UI", "React + MUI", "Interface para ecopontos cadastrarem e visualizarem cupons.")
-            Component(ecoponto_logic, "Hooks / State Management", "", "Gerencia dados e interações específicas do ecoponto.")
+            Component(ecoponto_ui, "Ecoponto UI", "React + MUI", "Interface para operação de ecopontos.")
+            Component(ecoponto_logic, "Ecoponto Logic / Hooks", "", "Gerencia dados e operações de ecoponto.")
         }
-
-        Component(shared_libs, "Shared Libraries", "shared/ (UI, Hooks, Styles, API)", "Bibliotecas compartilhadas entre apps para consistência visual e lógica comum.")
+        Container_Boundary(auth, "Auth App") {
+            Component(auth_ui, "Auth UI (Login/Logout)", "React + MUI", "Formulários de login/logout e feedback de autenticação.")
+            Component(auth_logic, "Auth Logic / Session Handler", "", "Executa login/logout usando backend e redireciona usuários autenticados.")
+        }
+        Component(shared_libs, "Shared Libraries", "shared/ (UI, Hooks, Auth, Utils)", 
+                 "Bibliotecas compartilhadas entre todos os microfrontends (componentes, hooks, API, validações).")
     }
 
     Rel(traefik, web_ui, "Roteia requisições para")
     Rel(traefik, admin_ui, "Roteia requisições para")
     Rel(traefik, ecoponto_ui, "Roteia requisições para")
+    Rel(traefik, auth_ui, "Roteia requisições para")
 
     Rel(web_ui, web_logic, "Interage com")
     Rel(admin_ui, admin_logic, "Interage com")
     Rel(ecoponto_ui, ecoponto_logic, "Interage com")
+    Rel(auth_ui, auth_logic, "Interage com")
 
-    Rel(web_logic, shared_libs, "Reutiliza hooks e APIs")
-    Rel(admin_logic, shared_libs, "Reutiliza componentes e estilos")
-    Rel(ecoponto_logic, shared_libs, "Reutiliza bibliotecas compartilhadas")
+    Rel(web_logic, shared_libs, "Usa componentes e hooks")
+    Rel(admin_logic, shared_libs, "Usa bibliotecas compartilhadas")
+    Rel(ecoponto_logic, shared_libs, "Usa bibliotecas compartilhadas")
+    Rel(auth_logic, shared_libs, "Usa APIs e helpers compartilhados")
+
+    Rel(web_logic, auth_ui, "Redireciona usuário não autenticado para login")
+    Rel(auth_logic, web_logic, "Após login, redireciona")
+    Rel(auth_logic, admin_logic, "Redireciona administradores")
+    Rel(auth_logic, ecoponto_logic, "Redireciona ecopontos")
+}
 ```
